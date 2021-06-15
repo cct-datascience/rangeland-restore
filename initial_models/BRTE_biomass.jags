@@ -1,0 +1,46 @@
+model{
+  for(i in 1:N){
+    # Likelihood, y is log-transformed
+    y[i] ~ dnorm(mu[i], tau)
+    # replicated data
+    y.rep[i] ~ dnorm(mu[i], tau)
+    
+    # ANOVA model
+    mu[i] = alpha[grazing[i]] + eps[pad[i]] + gam[block[pad[i]]]
+    
+    Sqdiff[i] <- pow(y.rep[i] - y[i], 2)
+  }
+  
+  # random effects of paddocks within block
+  for(p in 1:(Np-1)){ # number of paddocks
+    eps[p] ~ dnorm(0, tau.eps)
+  }
+  eps[Np] <- -1*sum(eps[1:(Np-1)])
+  
+  # random effects of block
+  for(b in 1:Nb){ # number of paddocks
+    gam[b] ~ dnorm(0, tau.gam)
+  }
+  
+  # priors
+  for(g in 1:Ng){ # number of grazing levels
+    alpha[g] ~ dnorm(0, 0.0001)
+  }
+  
+  tau ~ dgamma(0.01, 0.01)
+  tau.eps ~ dgamma(0.01, 0.01)
+  tau.gam ~ dgamma(0.01, 0.01)
+  
+  # sigs to monitor
+  sigs[1] <- pow(tau, -0.5)
+  sigs[2] <- pow(tau.eps, -0.5)
+  sigs[3] <- pow(tau.gam, -0.5)
+  
+  # differences to monitor
+  diff[1] <- alpha[1] - alpha[2]
+  diff[2] <- alpha[1] - alpha[3]
+  diff[3] <- alpha[2] - alpha[3]
+  
+  # posterior predictive loss
+  Dsum <- sum(Sqdiff)
+}
