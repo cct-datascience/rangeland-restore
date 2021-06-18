@@ -1,0 +1,25 @@
+model{
+  for(i in 1:N){
+    # Likelihood
+    counts[i] ~ dpois(mu[i])
+    # replicated data
+    counts.rep[i] ~ dpois(mu[i])
+    
+    # Mean model of zero-inflated Poisson
+    mu[i] <- theta[grazing[i]]*p[i] + 0.00001
+    p[i] ~ dbern(psi)
+    
+    # Part of Dsum calculation
+    Sqdiff[i] <- pow(counts.rep[i] - counts[i], 2)
+  }
+  
+  # Relatively non-informative priors
+  for(g in 1:Ng){ # grazing treatments
+    theta[g] ~ dgamma(0.001, 0.001)
+  }
+  
+  psi ~ dbeta(2, 2) # proportion of non-zero values
+  
+  # Dsum: posterior predictive loss
+  Dsum <- sum(Sqdiff)
+}
