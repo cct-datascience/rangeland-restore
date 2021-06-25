@@ -59,15 +59,15 @@ model{
   Bb <- 1/(Ab*Ab)
   
   # Intercept
-  alpha ~ dnorm(0, 0.01)
+  alpha ~ dnorm(0, 0.0001)
   
   # Coefficients
-  for(l in 1:nL){ # grazing treatments
-    beta[l] ~ dnorm(0, 0.01)
+  for(l in 1:nL){ # Number of treatment offsets
+    beta[l] ~ dnorm(0, 0.0001)
   }
   
   # Probability of BRTE presence
-  psi ~ dbeta(2, 2) # proportion of non-zero values
+  psi ~ dbeta(2, 2) # Proportion of non-zero values
   
   
   # Derived quantities

@@ -12,6 +12,17 @@ load("../../../cleaned_data/count_all.Rdata") # count_all
 dat <- count_all
 str(dat)
 
+# Plot
+dat %>%
+  ggplot(aes(x = fuelbreak, y = BRTE/quadrat)) +
+  geom_jitter(aes(color = block)) +
+  facet_wrap(~grazing, ncol = 3)
+
+dat %>%
+  filter(grazing == "fall") %>%
+  ggplot(aes(x = fuelbreak, y = BRTE/quadrat)) +
+  geom_jitter(aes(color = block))
+
 # model matrix
 X <- model.matrix( ~ grazing + fuelbreak, data = dat) 
 
@@ -26,7 +37,7 @@ sd(tapply(dat$BRTE, dat$block, FUN = mean))
 
 # Assemble model inputs
 datlist <- list(counts = dat$BRTE,
-                area = dat$quadrat,
+                area = dat$quadrat/100, # convert to square decimeters
                 N = nrow(dat),
                 spring = X[,2],
                 fall = X[,3],
@@ -52,7 +63,7 @@ initslist <- list(inits(), inits(), inits())
 
 # model
 jm <- jags.model(file = "BRTE_counts.jags",
-                 inits = initslist,
+                 inits = saved.state[[2]],
                  n.chains = 3,
                  data = datlist)
 update(jm, 100000)
@@ -65,7 +76,7 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha.star", "eps.star", "gam.star") #identifiable intercept and random effects
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 5000, thin = 1)
+                         n.iter = 50000, thin = 10)
 
 # plot chains
 mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", "psi",
@@ -85,19 +96,15 @@ gel
 newinits <-  initfind(coda.out) 
 newinits[[1]]
 saved.state <- removevars(newinits, variables = c(1, 3, 5:8, 10:11))
-its <- list(saved.state[[2]][[1]],
-            saved.state[[2]][[3]],
-            saved.state[[2]][[3]])
+# its <- list(saved.state[[2]][[3]],
+#             saved.state[[2]][[1]],
+#             saved.state[[2]][[3]])
 
 coda.out[[1]][5000,1]
 coda.out[[2]][5000,1]
 coda.out[[3]][5000,1]
-mc <- coda.out[[1]]
-means <- round(colMeans(mc),2)
-
-# summarize
-sum.out <- coda.fast(mcmc.list(mc), OpenBUGS = FALSE)
-sum.out$var <- row.names(sum.out)
+# mc <- coda.out[[3]]
+# means <- round(colMeans(mc),2)
 
 # do random effects add up correctly?
 grep("eps.star", colnames(mc))
@@ -107,8 +114,20 @@ head(rowSums(mc[,19:21])) # paddocks within block 3
 grep("gam.star", colnames(mc))
 head(rowSums(mc[,22:24])) # blocks
 
-# plot
-traplot(mc, parms = "alpha.star")
+# plot trace plots
+traplot(coda.out, parms = "alpha.star")
+traplot(coda.out, parms = "eps.star")
+traplot(coda.out, parms = "gam.star")
+traplot(coda.out, parms = "prob")
+
+
+# summarize
+sum.out <- coda.fast(mcmc.list(mc), OpenBUGS = FALSE)
+sum.out$var <- row.names(sum.out)
+
+
+
+
 beta.ind <- grep("beta", row.names(sum.out))
 ggplot(sum.out[beta.ind,], aes(x = var, y = mean)) +
   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
@@ -121,3 +140,4 @@ prob.ind <- grep("prob", row.names(sum.out))
 ggplot(sum.out[prob.ind,], aes(x = var, y = mean)) +
   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
 
+which(dat$quadrat > 100)
