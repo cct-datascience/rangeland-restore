@@ -9,7 +9,7 @@ model{
     mu[i] <- theta[i]*area[i]*p[i] + 0.00001 
     
     # Regression model for theta (proportion) with random effects
-    theta[i] <- exp(alpha + beta[1]*spring[i] + beta[2]*fall[i] + beta[3]*herbicide[i] + beta[4]*greenstrip[i] + eps[pad[i]] + gam[block[pad[i]]])
+    theta[i] <- exp(alpha + beta[1]*fall[i] + beta[2]*spring[i] + beta[3]*mix[i] + beta[4]*high[i] + beta[5]*coated[i] + eps[pad[i]] + gam[block[pad[i]]])
     
     p[i] ~ dbern(psi)
     
@@ -71,22 +71,13 @@ model{
   
   
   # Derived quantities
-  # Probability of BRTE frequency if present
-  prob[1] <- exp(alpha) # ungrazed, control
-  prob[2] <- exp(alpha + beta[1]) # fall grazing, control
-  prob[3] <- exp(alpha + beta[2]) # spring grazing, control
-  prob[4] <- exp(alpha + beta[3]) # ungrazed, herbicide
-  prob[5] <- exp(alpha + beta[4]) # ungrazed, greenstrip
-  prob[6] <- exp(alpha + beta[1] + beta[3]) # fall grazing, herbicide
-  prob[7] <- exp(alpha + beta[1] + beta[4]) # fall grazing, greenstrip
-  prob[8] <- exp(alpha + beta[2] + beta[3]) # spring grazing, herbicide
-  prob[9] <- exp(alpha + beta[2] + beta[4]) # spring grazing, greenstrip
-  
+
   # Differences in BRTE frequency if present
   diff[1] <- exp(alpha + beta[1]) - exp(alpha) # effect of fall grazing
   diff[2] <- exp(alpha + beta[2]) - exp(alpha) # effect of spring grazing
-  diff[3] <- exp(alpha + beta[3]) - exp(alpha) # effect of herbicide
-  diff[4] <- exp(alpha + beta[4]) - exp(alpha) # effect of greenstrip
+  diff[3] <- exp(alpha + beta[3]) - exp(alpha) # effect of mixture
+  diff[4] <- exp(alpha + beta[4]) - exp(alpha) # effect of high seed rate
+  diff[5] <- exp(alpha + beta[5]) - exp(alpha) # effect of coated seeds
   
   
   # Dsum: posterior predictive loss
