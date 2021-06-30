@@ -9,7 +9,7 @@ model{
     mu[i] <- theta[i]*area[i]*p[i] + 0.00001 
     
     # Regression model for theta (proportion) with random effects
-    theta[i] <- exp(alpha + beta[1]*spring[i] + beta[2]*fall[i] + beta[3]*herbicide[i] + beta[4]*greenstrip[i] + eps[pad[i]] + gam[block[pad[i]]])
+    theta[i] <- exp(alpha + beta[1]*fall[i] + beta[2]*spring[i] + beta[3]*herbicide[i] + beta[4]*greenstrip[i] + eps[pad[i]] + gam[block[pad[i]]])
     
        p[i] ~ dbern(psi)
     

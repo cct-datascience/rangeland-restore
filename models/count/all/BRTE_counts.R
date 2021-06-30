@@ -12,42 +12,47 @@ load("../../../cleaned_data/count_all.Rdata") # count_all
 dat <- count_all
 str(dat)
 
+# Remove 2 rows with largest quadrat size
+dat2 <- dat %>%
+  filter(quadrat < 10000)
+
 # Plot
-dat %>%
+dat2 %>%
   ggplot(aes(x = fuelbreak, y = BRTE/quadrat)) +
   geom_jitter(aes(color = block)) +
   facet_wrap(~grazing, ncol = 3)
 
-dat %>%
+dat2 %>%
   filter(grazing == "fall") %>%
   ggplot(aes(x = fuelbreak, y = BRTE/quadrat)) +
   geom_jitter(aes(color = block))
 
+
 # model matrix
-X <- model.matrix( ~ grazing + fuelbreak, data = dat) 
+X <- model.matrix( ~ grazing + fuelbreak, data = dat2) 
 
 # link paddocks to block
-link <- dat %>%
+link <- dat2 %>%
   group_by(block) %>%
   summarize(paddock = unique(paddock))
 
 # standard deviation among paddocks and blocks
-sd(tapply(dat$BRTE, dat$paddock, FUN = mean))
-sd(tapply(dat$BRTE, dat$block, FUN = mean))
+sd(tapply(dat2$BRTE, dat2$paddock, FUN = mean))
+sd(tapply(dat2$BRTE, dat2$block, FUN = mean))
 
 # Assemble model inputs
-datlist <- list(counts = dat$BRTE,
-                area = dat$quadrat/100, # convert to square decimeters
-                N = nrow(dat),
-                spring = X[,2],
-                fall = X[,3],
+datlist <- list(counts = dat2$BRTE,
+                area = dat2$quadrat/100, # convert to square decimeters
+                N = nrow(dat2),
+                fall = X[,2],
+                spring = X[,3],
                 herbicide = X[,4],
                 greenstrip = X[,5],
                 nL = ncol(X) - 1, # number of levels
-                pad = as.numeric(dat$paddock),
-                Np = length(unique(dat$paddock)),
+                pad = as.numeric(dat2$paddock),
+                Np = length(unique(dat2$paddock)),
                 block = as.numeric(link$block),
-                Nb = length(unique(dat$block)),
+                Nb = length(unique(dat2$block)),
                 Ab = 10) # stand deviation among paddocks and blocks
 
 
@@ -63,10 +68,10 @@ initslist <- list(inits(), inits(), inits())
 
 # model
 jm <- jags.model(file = "BRTE_counts.jags",
-                 inits = saved.state[[2]],
+                 inits = its,
                  n.chains = 3,
                  data = datlist)
-update(jm, 100000)
+update(jm, 10000)
 
 # params to monitor
 params <- c("deviance", "Dsum", # evaluate fit
@@ -76,7 +81,7 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha.star", "eps.star", "gam.star") #identifiable intercept and random effects
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 50000, thin = 10)
+                         n.iter = 5000, thin = 1)
 
 # plot chains
 mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", "psi",
@@ -96,13 +101,18 @@ gel
 newinits <-  initfind(coda.out) 
 newinits[[1]]
 saved.state <- removevars(newinits, variables = c(1, 3, 5:8, 10:11))
-# its <- list(saved.state[[2]][[3]],
-#             saved.state[[2]][[1]],
-#             saved.state[[2]][[3]])
+save(saved.state, file = "inits/inits.Rdata")
+
+its <- list(saved.state[[2]][[2]],
+            saved.state[[2]][[2]],
+            saved.state[[2]][[2]])
 
 coda.out[[1]][5000,1]
 coda.out[[2]][5000,1]
 coda.out[[3]][5000,1]
+coda.out[[1]][5000,8]
+coda.out[[2]][5000,8]
+coda.out[[3]][5000,8]
 # mc <- coda.out[[3]]
 # means <- round(colMeans(mc),2)
 
