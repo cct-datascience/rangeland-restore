@@ -5,11 +5,13 @@ model{
     # replicated data
     counts.rep[i] ~ dpois(mu[i])
     
-    # Mean model of zero-inflated Poisson
+    # Mean model of Poisson
     mu[i] <- theta[i]*area[i]*p[i] + 0.00001 
     
     # Regression model for theta (proportion) with random effects
-    theta[i] <- exp(alpha + beta[1]*fall[i] + beta[2]*spring[i] + beta[3]*mix[i] + beta[4]*high[i] + beta[5]*coated[i] + eps[pad[i]] + gam[block[pad[i]]])
+    theta[i] <- exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] + eps[pad[i]] + gam[block[pad[i]]]) 
+    #+ beta[4]*fall[i] + beta[5]*spring[i]) 
+    
     
     p[i] ~ dbern(psi)
     
@@ -73,11 +75,11 @@ model{
   # Derived quantities
 
   # Differences in BRTE frequency if present
-  diff[1] <- exp(alpha + beta[1]) - exp(alpha) # effect of fall grazing
-  diff[2] <- exp(alpha + beta[2]) - exp(alpha) # effect of spring grazing
-  diff[3] <- exp(alpha + beta[3]) - exp(alpha) # effect of mixture
-  diff[4] <- exp(alpha + beta[4]) - exp(alpha) # effect of high seed rate
-  diff[5] <- exp(alpha + beta[5]) - exp(alpha) # effect of coated seeds
+  diff[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # effect of mixture
+  diff[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # effect of high seed rate
+  diff[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # effect of coated seeds
+  #diff[4] <- exp(alpha.star + beta[4]) - exp(alpha.star) # effect of fall grazing
+  #diff[5] <- exp(alpha.star + beta[5]) - exp(alpha.star) # effect of spring grazing
   
   
   # Dsum: posterior predictive loss

@@ -40,7 +40,7 @@ dat %>%
 
 
 # model matrix
-X <- model.matrix( ~ grazing + spatial + seed_rate + seed_coat, data = dat) 
+X <- model.matrix( ~ spatial + seed_rate + seed_coat, data = dat) 
 
 # link paddocks to block
 link <- dat %>%
@@ -55,11 +55,11 @@ sd(tapply(dat$BRTE, dat$block, FUN = mean))
 datlist <- list(counts = dat$BRTE,
                 area = dat$quadrat/100, # convert to square decimeters
                 N = nrow(dat),
-                fall = as.numeric(X[,2]),
-                spring = as.numeric(X[,3]),
-                mix = as.numeric(X[,4]),
-                high = as.numeric(X[,5]),
-                coated = as.numeric(X[,6]),
+                mix = as.numeric(X[,2]),
+                high = as.numeric(X[,3]),
+                coated = as.numeric(X[,4]),
+                # fall = as.numeric(X[,5]),
+                # spring = as.numeric(X[,6]),
                 nL = ncol(X) - 1, # number of levels
                 pad = as.numeric(dat$paddock),
                 Np = length(unique(dat$paddock)),
@@ -68,19 +68,30 @@ datlist <- list(counts = dat$BRTE,
                 Ab = 10) # stand deviation among paddocks and blocks
 str(datlist)
 
+# likely intercept value
+base <- dat %>%
+  filter(grazing == "ungrazed",
+         spatial == "mono",
+         seed_rate == "low", 
+         seed_coat == "UC")
+hist(base$BRTE, breaks = 30)
+summary(base$quadrat)
+mean(base$BRTE)
+
 # initials
 inits <- function(){
-  list(alpha = runif(1, -3, 0),
-       beta = runif(ncol(X) - 1, -3, 0),
+  list(alpha = rnorm(1, 0, 10),
+       beta = rnorm(ncol(X) - 1, 0, 10),
        psi = runif(1, 0, 1),
-       tau.Eps = runif(1, 0, 1),
-       tau.Gam = runif(1, 0, 1))
+       tau.Eps = runif(1, 0, 3),
+       tau.Gam = runif(1, 0, 3)
+       )
 }
 initslist <- list(inits(), inits(), inits())
 
 # model
 jm <- jags.model(file = "BRTE_counts.jags",
-                 inits = initslist,
+                 inits = its,
                  n.chains = 3,
                  data = datlist)
 update(jm, 10000)
@@ -91,12 +102,17 @@ params <- c("deviance", "Dsum", # evaluate fit
             "diff", # derived parameters
             "tau.Eps", "tau.Gam", "sig.eps", "sig.gam", # precision/variance terms
             "alpha.star", "eps.star", "gam.star",#identifiable intercept and random effects
-            "eps", "gam", "eps.avg") 
+            "eps", "gam", "eps.avg", "gam.avg", "mean.eps.avg") 
+params <- c("deviance", "Dsum", # evaluate fit
+            "alpha", "beta", #"psi", # parameters,
+            "diff") # derived parameters)
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 5000, thin = 1)
+                         n.iter = 50000, thin = 10)
 
 # plot chains
+mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", #"psi",
+                               "alpha"))
 mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", "psi",
                              "alpha.star",  "eps.star", "gam.star",
                              "sig.eps", "sig.gam"))
@@ -113,17 +129,21 @@ gel
 # If not converged, restart model from final iterations
 newinits <-  initfind(coda.out) 
 newinits[[1]]
-saved.state <- removevars(newinits, variables = c(1, 3, 5:8, 10:11))
-its <- list(saved.state[[2]][[2]],
-            saved.state[[2]][[2]],
-            saved.state[[2]][[2]])
-
+saved.state <- removevars(newinits, variables = c(1, 3, 5:12, 14:15))
+saved.state[[1]]
+its <- list(saved.state[[2]][[3]],
+            saved.state[[2]][[3]],
+            saved.state[[2]][[3]])
+grep("tau.Gam", colnames(coda.out[[1]]))
 coda.out[[1]][5000,1]
 coda.out[[2]][5000,1]
 coda.out[[3]][5000,1]
-coda.out[[1]][5000,8]
-coda.out[[2]][5000,8]
-coda.out[[3]][5000,8]
+coda.out[[1]][5000,7]
+coda.out[[2]][5000,7]
+coda.out[[3]][5000,7]
+coda.out[[1]][5000,44]
+coda.out[[2]][5000,44]
+coda.out[[3]][5000,44]
 # mc <- coda.out[[3]]
 # means <- round(colMeans(mc),2)
 
@@ -135,13 +155,20 @@ head(rowSums(mc[,inds.eps[7:9]])) # paddocks within block 3
 inds.gam <-grep("gam.star", colnames(mc))
 head(rowSums(mc[,inds.gam])) # blocks
 
+
+
 # plot trace plots
 traplot(coda.out, parms = "alpha.star")
 traplot(coda.out, parms = "eps")
+traplot(coda.out, parms = "eps.avg")
 traplot(coda.out, parms = "eps.star")
 traplot(coda.out, parms = "gam")
 traplot(coda.out, parms = "gam.star")
 traplot(coda.out, parms = "diff")
+traplot(coda.out, parms = "tau.Gam")
+traplot(coda.out, parms = "sig.gam")
+traplot(coda.out, parms = "tau.Eps")
+traplot(coda.out, parms = "sig.eps")
 
 
 # summarize
