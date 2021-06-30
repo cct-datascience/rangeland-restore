@@ -9,7 +9,8 @@ model{
     mu[i] <- theta[i]*area[i]*p[i] + 0.00001 
     
     # Regression model for theta (proportion) with random effects
-    theta[i] <- exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] + eps[pad[i]] + gam[block[pad[i]]]) 
+    theta[i] <- exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] +
+    beta[4]*mix_high[i] + beta[5]*mix_coated[i] + beta[6]*high_coated[i] + eps[pad[i]] + gam[block[pad[i]]]) 
     #+ beta[4]*fall[i] + beta[5]*spring[i]) 
     
     
@@ -73,13 +74,24 @@ model{
   
   
   # Derived quantities
+  # Probability of BRTE frequency if present (2x2x2 = 8 combinations of 3 factors with 2 levels)
+  prob[1] <- exp(alpha.star) # mono, low, uncoated
+  prob[2] <- exp(alpha.star + beta[1]) # mix, low, uncoated
+  prob[3] <- exp(alpha.star + beta[2]) # mono, high, uncoated
+  prob[4] <- exp(alpha.star + beta[3]) # mono, low, coated
+  prob[5] <- exp(alpha.star + beta[1] + beta[2] + beta[4]) # mix, high, uncoated
+  prob[6] <- exp(alpha.star + beta[1] + beta[3] + beta[5]) # mix, low, coated
+  prob[7] <- exp(alpha.star + beta[2] + beta[3] + beta[6]) # mono, high, coated
+  prob[8] <- exp(alpha.star + beta[1] + beta[2] + beta[3] + beta[4] + beta[5] + beta[6]) # mix, high, coated
+  
 
   # Differences in BRTE frequency if present
-  diff[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # effect of mixture
-  diff[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # effect of high seed rate
-  diff[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # effect of coated seeds
-  #diff[4] <- exp(alpha.star + beta[4]) - exp(alpha.star) # effect of fall grazing
-  #diff[5] <- exp(alpha.star + beta[5]) - exp(alpha.star) # effect of spring grazing
+  diff[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # main effect of mixture
+  diff[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # main effect of high seed rate
+  diff[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # main effect of coated seeds
+  diff[4] <- exp(alpha.star + beta[1] + beta[2] + beta[4]) - exp(alpha.star) # interaction effect of mixture and high seed rate
+  diff[5] <- exp(alpha.star + beta[1] + beta[3] + beta[5]) - exp(alpha.star) # interaction effect of mixture and coated seeds
+  diff[6] <- exp(alpha.star + beta[2] + beta[3] + beta[6]) - exp(alpha.star) # interaction effect of high seed rate and coated seeds
   
   
   # Dsum: posterior predictive loss

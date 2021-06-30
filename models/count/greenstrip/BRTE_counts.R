@@ -40,7 +40,7 @@ dat %>%
 
 
 # model matrix
-X <- model.matrix( ~ spatial + seed_rate + seed_coat, data = dat) 
+X <- model.matrix( ~ (spatial + seed_rate + seed_coat)^2, data = dat) 
 
 # link paddocks to block
 link <- dat %>%
@@ -58,6 +58,9 @@ datlist <- list(counts = dat$BRTE,
                 mix = as.numeric(X[,2]),
                 high = as.numeric(X[,3]),
                 coated = as.numeric(X[,4]),
+                mix_high = as.numeric(X[,5]),
+                mix_coated = as.numeric(X[,6]),
+                high_coated = as.numeric(X[,7]),
                 # fall = as.numeric(X[,5]),
                 # spring = as.numeric(X[,6]),
                 nL = ncol(X) - 1, # number of levels
@@ -91,7 +94,7 @@ initslist <- list(inits(), inits(), inits())
 
 # model
 jm <- jags.model(file = "BRTE_counts.jags",
-                 inits = its,
+                 inits = saved.state[[2]],
                  n.chains = 3,
                  data = datlist)
 update(jm, 10000)
@@ -99,22 +102,20 @@ update(jm, 10000)
 # params to monitor
 params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", "psi", # parameters
-            "diff", # derived parameters
+            "diff", "prob", # derived parameters
             "tau.Eps", "tau.Gam", "sig.eps", "sig.gam", # precision/variance terms
-            "alpha.star", "eps.star", "gam.star",#identifiable intercept and random effects
-            "eps", "gam", "eps.avg", "gam.avg", "mean.eps.avg") 
+            "alpha.star", "eps.star", "gam.star") #identifiable intercept and random effects
+ 
 params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", #"psi", # parameters,
             "diff") # derived parameters)
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 50000, thin = 10)
+                         n.iter = 5000, thin = 1)
 
 # plot chains
-mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", #"psi",
-                               "alpha"))
-mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", "psi",
-                             "alpha.star",  "eps.star", "gam.star",
+mcmcplot(coda.out, parms = c("deviance", "Dsum","psi","alpha.star", 
+                             "beta", "eps.star", "gam.star",
                              "sig.eps", "sig.gam"))
 mcmcplot(coda.out, parms = c("diff"))
 
@@ -131,19 +132,24 @@ newinits <-  initfind(coda.out)
 newinits[[1]]
 saved.state <- removevars(newinits, variables = c(1, 3, 5:12, 14:15))
 saved.state[[1]]
-its <- list(saved.state[[2]][[3]],
-            saved.state[[2]][[3]],
-            saved.state[[2]][[3]])
-grep("tau.Gam", colnames(coda.out[[1]]))
+save(saved.state, file = "inits/inits.Rdata")
+
+its <- list(saved.state[[2]][[2]],
+            saved.state[[2]][[2]],
+            saved.state[[2]][[2]])
+grep("tau.Eps", colnames(coda.out[[1]]))
 coda.out[[1]][5000,1]
 coda.out[[2]][5000,1]
 coda.out[[3]][5000,1]
-coda.out[[1]][5000,7]
-coda.out[[2]][5000,7]
-coda.out[[3]][5000,7]
-coda.out[[1]][5000,44]
-coda.out[[2]][5000,44]
-coda.out[[3]][5000,44]
+coda.out[[1]][5000,10]
+coda.out[[2]][5000,10]
+coda.out[[3]][5000,10]
+coda.out[[1]][5000,46]
+coda.out[[2]][5000,46]
+coda.out[[3]][5000,46]
+coda.out[[1]][5000,47]
+coda.out[[2]][5000,47]
+coda.out[[3]][5000,47]
 # mc <- coda.out[[3]]
 # means <- round(colMeans(mc),2)
 
@@ -172,22 +178,40 @@ traplot(coda.out, parms = "sig.eps")
 
 
 # summarize
-sum.out <- coda.fast(mcmc.list(mc), OpenBUGS = FALSE)
+sum.out <- coda.fast(coda.out, OpenBUGS = FALSE)
 sum.out$var <- row.names(sum.out)
-
-
 
 
 beta.ind <- grep("beta", row.names(sum.out))
 ggplot(sum.out[beta.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2)
 
 diff.ind <- grep("diff", row.names(sum.out))
 ggplot(sum.out[diff.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2)
 
 prob.ind <- grep("prob", row.names(sum.out))
 ggplot(sum.out[prob.ind,], aes(x = var, y = mean)) +
   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
 
-which(dat$quadrat > 100)
+
+# Random effects
+labs <- c()
+for(i in 1:9){
+  labs[i] <- paste0("Plot ", i)
+}
+prob.eps <- grep("eps.star", row.names(sum.out))
+df <- data.frame(sum.out[prob.eps,], block = rep(1:3, each = 3))
+ggplot(df, aes(x = var, y = mean)) +
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5, color = as.factor(block))) +
+  geom_hline(yintercept = 0, color = "red", lty = 2) +
+  scale_x_discrete(labels = labs)
+
+labs <- c("Block 1", "Block 2", "Block 3")
+prob.gam <- grep("gam.star", row.names(sum.out))
+ggplot(sum.out[prob.gam,], aes(x = var, y = mean)) +
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2) +
+  scale_x_discrete(labels = labs)
