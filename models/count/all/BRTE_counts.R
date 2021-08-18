@@ -58,22 +58,29 @@ datlist <- list(counts = dat2$BRTE,
 
 # initials
 inits <- function(){
-  list(alpha = runif(1, -3, 0),
-       beta = runif(ncol(X) - 1, -3, 0),
-       psi = runif(1, 0, 1),
-       tau.Eps = runif(1, 0, 1),
-       tau.Gam = runif(1, 0, 1))
+  list(alpha = runif(1, 0, 10),
+       beta = runif(ncol(X) - 1, 0, 10),
+       Alpha = runif(1, 0, 10),
+       Beta = runif(ncol(X) - 1, 0, 10))
+       # psi = runif(1, 0, 1),
+       # tau.Eps = runif(1, 0, 1),
+       # tau.Gam = runif(1, 0, 1))
 }
 initslist <- list(inits(), inits(), inits())
+load("inits/inits.Rdata")
 
 # model
-jm <- jags.model(file = "BRTE_counts.jags",
-                 inits = its,
+jm <- jags.model(file = "BRTE_counts_RE2.jags",
+                 inits = saved.state[[2]],
                  n.chains = 3,
                  data = datlist)
 update(jm, 10000)
 
 # params to monitor
+params <- c("deviance", "Dsum", # evaluate fit
+            "alpha", "beta", "Alpha", "Beta", # parameters
+            "prob", "Prob", "diff", "Diff") # derived parameters
+
 params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", "psi", # parameters
             "prob", "diff", # derived parameters
@@ -84,10 +91,11 @@ coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 5000, thin = 1)
 
 # plot chains
+mcmcplot(coda.out, parms = c("deviance", "Dsum", "alpha", "beta", "Alpha", "Beta"))
 mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", "psi",
                              "alpha.star",  "eps.star", "gam.star",
                              "sig.eps", "sig.gam"))
-mcmcplot(coda.out, parms = c("prob"))
+mcmcplot(coda.out, parms = c("diff", "Diff"))
 
 # dic samples
 dic.out <- dic.samples(jm, n.iter = 5000)
@@ -100,7 +108,8 @@ gel
 # If not converged, restart model from final iterations
 newinits <-  initfind(coda.out) 
 newinits[[1]]
-saved.state <- removevars(newinits, variables = c(1, 3, 5:8, 10:11))
+saved.state <- removevars(newinits, variables = c(3:4, 7:8)) #5:8, 10:11))
+saved.state[[1]]
 save(saved.state, file = "inits/inits.Rdata")
 
 its <- list(saved.state[[2]][[2]],
@@ -132,22 +141,34 @@ traplot(coda.out, parms = "prob")
 
 
 # summarize
-sum.out <- coda.fast(mcmc.list(mc), OpenBUGS = FALSE)
+sum.out <- coda.fast(coda.out, OpenBUGS = FALSE)
 sum.out$var <- row.names(sum.out)
-
-
 
 
 beta.ind <- grep("beta", row.names(sum.out))
 ggplot(sum.out[beta.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2)
+
+Beta.ind <- grep("Beta", row.names(sum.out))
+ggplot(sum.out[Beta.ind,], aes(x = var, y = mean)) +
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2)
 
 diff.ind <- grep("diff", row.names(sum.out))
 ggplot(sum.out[diff.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2)
+
+Diff.ind <- grep("Diff", row.names(sum.out))
+ggplot(sum.out[Diff.ind,], aes(x = var, y = mean)) +
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2)
 
 prob.ind <- grep("prob", row.names(sum.out))
 ggplot(sum.out[prob.ind,], aes(x = var, y = mean)) +
   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
 
-which(dat$quadrat > 100)
+Prob.ind <- grep("Prob", row.names(sum.out))
+ggplot(sum.out[Prob.ind,], aes(x = var, y = mean)) +
+  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
