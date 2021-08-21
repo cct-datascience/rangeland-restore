@@ -1,3 +1,6 @@
+# ANOVA of both theta and psi
+# theta has nested random effects
+
 model{
   for(i in 1:N){
     # Likelihood

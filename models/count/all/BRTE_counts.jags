@@ -1,3 +1,7 @@
+# Mixture model of Bernoulli and Poisson
+# ANOVA model to predict theta
+# theta has nested random effects
+
 model{
   for(i in 1:N){
     # Likelihood

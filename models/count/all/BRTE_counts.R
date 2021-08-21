@@ -1,4 +1,5 @@
 # Cheatgrass counts modeled as Poisson distribution
+# Ultimately using BRTE_counts_Poisson.jags file
 
 library(rjags)
 load.module('dic')
@@ -13,89 +14,95 @@ dat <- count_all
 str(dat)
 
 # Remove 2 rows with largest quadrat size
-dat2 <- dat %>%
+dat <- dat %>%
   filter(quadrat < 10000)
 
+
 # Plot
-dat2 %>%
+dat %>%
   ggplot(aes(x = fuelbreak, y = BRTE/quadrat)) +
-  geom_jitter(aes(color = block)) +
+  geom_jitter(aes(color = paddock, shape = block)) +
   facet_wrap(~grazing, ncol = 3)
 
-dat2 %>%
+dat %>%
   filter(grazing == "fall") %>%
   ggplot(aes(x = fuelbreak, y = BRTE/quadrat)) +
   geom_jitter(aes(color = block))
 
 
 # model matrix
-X <- model.matrix( ~ grazing + fuelbreak, data = dat2) 
-
-# link paddocks to block
-link <- dat2 %>%
-  group_by(block) %>%
-  summarize(paddock = unique(paddock))
+X <- model.matrix( ~ grazing * fuelbreak, data = dat) 
+colnames(X)
 
 # standard deviation among paddocks and blocks
-sd(tapply(dat2$BRTE, dat2$paddock, FUN = mean))
-sd(tapply(dat2$BRTE, dat2$block, FUN = mean))
+log(sd(tapply(dat$BRTE, dat$paddock, FUN = mean)))
+log(sd(tapply(dat$BRTE, dat$block, FUN = mean)))
+
+# link paddocks to block
+# link <- dat %>%
+#   group_by(block) %>%
+#   summarize(paddock = unique(paddock))
 
 # Assemble model inputs
-datlist <- list(counts = dat2$BRTE,
-                area = dat2$quadrat/100, # convert to square decimeters
-                N = nrow(dat2),
+datlist <- list(counts = dat$BRTE,
+                area = dat$quadrat/100, # convert to square decimeters
+                N = nrow(dat),
                 fall = X[,2],
                 spring = X[,3],
                 herbicide = X[,4],
                 greenstrip = X[,5],
-                nL = ncol(X) - 1, # number of levels
-                pad = as.numeric(dat2$paddock),
-                Np = length(unique(dat2$paddock)),
-                block = as.numeric(link$block),
-                Nb = length(unique(dat2$block)),
-                Ab = 10) # stand deviation among paddocks and blocks
+                fall_herbicide = X[,6],
+                spring_herbicide = X[,7],
+                fall_greenstrip = X[,8],
+                spring_greenstrip = X[,9],
+                nL = ncol(X) - 1, # number of offset levels
+                # pad = as.numeric(dat$paddock),
+                # Np = length(unique(dat$paddock)),
+                block = as.numeric(dat$block),
+                Nb = length(unique(dat$block)),
+                Ab = 5) # stand deviation among paddocks and blocks
 
+# likely intercept value
+base <- dat %>%
+  filter(grazing == "ungrazed",
+         fuelbreak == "control")
+hist(base$BRTE, breaks = 30)
+table(base$quadrat)
+log(median(base$BRTE))
 
-# initials
+# generate random initials
 inits <- function(){
-  list(alpha = runif(1, 0, 10),
-       beta = runif(ncol(X) - 1, 0, 10),
-       Alpha = runif(1, 0, 10),
-       Beta = runif(ncol(X) - 1, 0, 10))
-       # psi = runif(1, 0, 1),
-       # tau.Eps = runif(1, 0, 1),
-       # tau.Gam = runif(1, 0, 1))
+  list(alpha = rnorm(1, 0, 10),
+       beta = rnorm(ncol(X) - 1, 0, 10),
+       tau.Eps = runif(1, 0, 1))
 }
 initslist <- list(inits(), inits(), inits())
-load("inits/inits.Rdata")
+
+# Or, use previous starting values + set seed
+load("inits/inits.Rdata")# saved.state, second element is inits
+initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(13))),
+                  append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
+                  append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_RE2.jags",
-                 inits = saved.state[[2]],
+jm <- jags.model(file = "BRTE_counts_Poisson.jags",
+                 inits = initslist,
                  n.chains = 3,
                  data = datlist)
-update(jm, 10000)
+# update(jm, 10000)
 
 # params to monitor
 params <- c("deviance", "Dsum", # evaluate fit
-            "alpha", "beta", "Alpha", "Beta", # parameters
-            "prob", "Prob", "diff", "Diff") # derived parameters
-
-params <- c("deviance", "Dsum", # evaluate fit
-            "alpha", "beta", "psi", # parameters
-            "prob", "diff", # derived parameters
-            "tau.Eps", "tau.Gam", "sig.eps", "sig.gam", # precision/variance terms
-            "alpha.star", "eps.star", "gam.star") #identifiable intercept and random effects
+            "alpha", "beta", # parameters
+            "tau.Eps", "sig.eps", # precision/variance terms
+            "alpha.star", "eps.star")#identifiable intercept and random effects
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 5000, thin = 1)
+                         n.iter = 15000, thin = 5)
 
 # plot chains
-mcmcplot(coda.out, parms = c("deviance", "Dsum", "alpha", "beta", "Alpha", "Beta"))
-mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta", "psi",
-                             "alpha.star",  "eps.star", "gam.star",
-                             "sig.eps", "sig.gam"))
-mcmcplot(coda.out, parms = c("diff", "Diff"))
+mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta",
+                             "alpha.star",  "eps.star", "sig.eps"))
 
 # dic samples
 dic.out <- dic.samples(jm, n.iter = 5000)
@@ -106,69 +113,79 @@ gel <- gelman.diag(coda.out, multivariate = FALSE)
 gel
 
 # If not converged, restart model from final iterations
-newinits <-  initfind(coda.out) 
-newinits[[1]]
-saved.state <- removevars(newinits, variables = c(3:4, 7:8)) #5:8, 10:11))
-saved.state[[1]]
-save(saved.state, file = "inits/inits.Rdata")
+# newinits <-  initfind(coda.out) 
+# newinits[[1]]
+# saved.state <- removevars(newinits, variables = c(1, 3, 5:6))
+# saved.state[[1]]
+# save(saved.state, file = "inits/inits.Rdata")
 
-its <- list(saved.state[[2]][[2]],
-            saved.state[[2]][[2]],
-            saved.state[[2]][[2]])
-
-coda.out[[1]][5000,1]
-coda.out[[2]][5000,1]
-coda.out[[3]][5000,1]
-coda.out[[1]][5000,8]
-coda.out[[2]][5000,8]
-coda.out[[3]][5000,8]
-# mc <- coda.out[[3]]
-# means <- round(colMeans(mc),2)
-
-# do random effects add up correctly?
-grep("eps.star", colnames(mc))
-head(rowSums(mc[,13:15])) # paddocks within block 1
-head(rowSums(mc[,16:18])) # paddocks within block 2
-head(rowSums(mc[,19:21])) # paddocks within block 3
-grep("gam.star", colnames(mc))
-head(rowSums(mc[,22:24])) # blocks
-
-# plot trace plots
-traplot(coda.out, parms = "alpha.star")
-traplot(coda.out, parms = "eps.star")
-traplot(coda.out, parms = "gam.star")
-traplot(coda.out, parms = "prob")
-
+save(coda.out, file = "coda/coda.Rdata")
 
 # summarize
 sum.out <- coda.fast(coda.out, OpenBUGS = FALSE)
 sum.out$var <- row.names(sum.out)
+sum.out$sig <- ifelse(sum.out$pc2.5*sum.out$pc97.5 > 0, TRUE, FALSE)
+sum.out$dir <- ifelse(sum.out$sig == FALSE, NA, 
+                      ifelse(sum.out$sig == TRUE & sum.out$mean > 0, "pos", "neg"))
 
 
+beta.labs <- c("fall", "spring", "herbicide", "greenstrip", 
+               "fall:herbicide", "spring:herbicide", "fall:greenstrip", "spring:greenstrip")
 beta.ind <- grep("beta", row.names(sum.out))
-ggplot(sum.out[beta.ind,], aes(x = var, y = mean)) +
+betas <- sum.out[beta.ind,]
+betas$var <- factor(betas$var, levels = row.names(betas))
+str(betas)
+ggplot() +
+  geom_pointrange(data = betas, 
+                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5)) +
+  geom_point(data = subset(betas, sig == TRUE),
+             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(beta))) +
+  scale_x_discrete(labels = beta.labs) +
+  scale_color_manual(values = c("forestgreen", "purple")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_blank()) +
+  guides(color = "none")
+
+# Random effects
+# labs <- c()
+# for(i in 1:9){
+#   labs[i] <- paste0("Plot ", i)
+# }
+# prob.eps <- grep("eps.star", row.names(sum.out))
+# df <- data.frame(sum.out[prob.eps,], block = rep(1:3, each = 3))
+# ggplot(df, aes(x = var, y = mean)) +
+#   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5, color = as.factor(block))) +
+#   geom_hline(yintercept = 0, color = "red", lty = 2) +
+#   scale_x_discrete(labels = labs)
+
+labs <- c("Block 1", "Block 2", "Block 3")
+prob.eps <- grep("eps.star", row.names(sum.out))
+ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
-  geom_hline(yintercept = 0, color = "red", lty = 2)
+  geom_hline(yintercept = 0, color = "red", lty = 2) +
+  scale_x_discrete(labels = labs)
 
-Beta.ind <- grep("Beta", row.names(sum.out))
-ggplot(sum.out[Beta.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
-  geom_hline(yintercept = 0, color = "red", lty = 2)
+# Model fit
+params <- c("counts.rep") #monitor replicated data
+coda.rep <- coda.samples(jm, variable.names = params,
+                         n.iter = 5000, thin = 1)
+save(coda.rep, file = "coda/coda_rep.Rdata")
 
-diff.ind <- grep("diff", row.names(sum.out))
-ggplot(sum.out[diff.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
-  geom_hline(yintercept = 0, color = "red", lty = 2)
+sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
 
-Diff.ind <- grep("Diff", row.names(sum.out))
-ggplot(sum.out[Diff.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
-  geom_hline(yintercept = 0, color = "red", lty = 2)
+fit <- data.frame(dat,
+                  mean = sum.rep$mean,
+                  lower = sum.rep$pc2.5,
+                  upper = sum.rep$pc97.5)
 
-prob.ind <- grep("prob", row.names(sum.out))
-ggplot(sum.out[prob.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
+fit.model <- lm(mean ~ BRTE, data = fit[fit$quadrat == 100,])
+summary(fit.model)
 
-Prob.ind <- grep("Prob", row.names(sum.out))
-ggplot(sum.out[Prob.ind,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5))
+ggplot(fit[fit$quadrat == 100,], aes(x = BRTE)) +
+  geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
+  geom_errorbar(aes(ymin = lower, ymax = upper)) +
+  geom_point(aes(y = mean))
