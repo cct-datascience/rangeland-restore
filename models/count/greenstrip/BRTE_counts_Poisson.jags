@@ -1,0 +1,58 @@
+# Poisson only model
+# ANOVA model to predict theta, 2-way interactions included
+# theta has random effects only for block (paddock within block is confounded with grazing + block)
+
+model{
+  for(i in 1:N){
+    # Likelihood
+    counts[i] ~ dpois(mu[i])
+
+    # replicated data
+    counts.rep[i] ~ dpois(mu[i])
+    
+    # Mean model of Poisson
+    mu[i] <- theta[i]*area[i]
+    
+    # Regression model for theta (proportion) with random effects
+    theta[i] <- exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] + 
+    beta[4]*fall[i] + beta[5]*spring[i] + beta[6]*mix_high[i] + beta[7]*mix_coated[i] +
+    beta[8]*mix_fall[i] + beta[9]*mix_spring[i] + beta[10]*high_coated[i] + 
+    beta[11]*high_fall[i] + beta[12]*high_spring[i] + beta[13]*coated_fall[i] +
+    beta[14]*coated_spring[i] +
+    eps[block[i]]) 
+
+    # Part of Dsum calculation
+    Sqdiff[i] <- pow(counts.rep[i] - counts[i], 2)
+  }
+  
+ # Identifiable intercept, post sweeping random effect means into intercept
+  alpha.star <- alpha + mean(eps[])
+  
+  # Relatively non-informative priors
+  
+  # random effects of block
+  for(b in 1:Nb){ # number of blocks
+    eps[b] ~ dnorm(0, tau.eps)
+    
+    # Identifiable random effects - post-sweeping of mean REs by block
+    eps.star[b] <- eps[b] - mean(eps[])
+  }
+  
+  # Block level precisions with folded T priors
+  tau.Eps ~ dt(0, Bb, 2)
+  sig.eps <- abs(tau.Eps)
+  tau.eps <- pow(sig.eps, -2)
+  
+  # dt parameters (set as data)
+  Bb <- 1/(Ab*Ab)
+  
+  # Coefficients
+  alpha ~ dnorm(0, 0.0001)
+  
+  for(l in 1:nL){ # Number of treatment offsets
+    beta[l] ~ dnorm(0, 0.0001)
+  }
+  
+  # Dsum: posterior predictive loss
+  Dsum <- sum(Sqdiff)
+}

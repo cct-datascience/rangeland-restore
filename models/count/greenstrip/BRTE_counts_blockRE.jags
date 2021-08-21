@@ -1,4 +1,7 @@
-# Main effects only
+# Mixture model of Bernoulli and Poisson
+# ANOVA model to predict theta, 2-way interactions included
+# theta has random effects only for block (paddock within block is confounded with grazing + block)
+
 model{
   for(i in 1:N){
     # Likelihood
@@ -12,10 +15,12 @@ model{
     mu[i] <- theta[i]*area[i]*p[i] + 0.00001 
     
     # Regression model for theta (proportion) with random effects
-    theta[i] <- exp(alpha + beta[1]*ELTR[i] + beta[2]*POFE[i] + beta[3]*POSE[i] +
-    beta[4]*VUMI[i] + beta[5]*high[i] + beta[6]*fall[i] + beta[7]*spring[i] +
-    beta[8]*coated[i] +
-    eps[block[i]])
+    theta[i] <- exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] + 
+    beta[4]*fall[i] + beta[5]*spring[i] + beta[6]*mix_high[i] + beta[7]*mix_coated[i] +
+    beta[8]*mix_fall[i] + beta[9]*mix_spring[i] + beta[10]*high_coated[i] + 
+    beta[11]*high_fall[i] + beta[12]*high_spring[i] + beta[13]*coated_fall[i] +
+    beta[14]*coated_spring[i] +
+    eps[block[i]]) 
 
     # Part of Dsum calculation
     Sqdiff[i] <- pow(counts.rep[i] - counts[i], 2)
@@ -34,6 +39,7 @@ model{
     eps.star[b] <- eps[b] - mean(eps[])
   }
   
+  
   # Block level precisions with folded T priors
   tau.Eps ~ dt(0, Bb, 2)
   sig.eps <- abs(tau.Eps)
@@ -44,7 +50,7 @@ model{
   
   # Coefficients
   alpha ~ dnorm(0, 0.0001)
-
+  
   for(l in 1:nL){ # Number of treatment offsets
     beta[l] ~ dnorm(0, 0.0001)
   }

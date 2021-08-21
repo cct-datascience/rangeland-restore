@@ -1,0 +1,62 @@
+# Poisson-only model
+# ANOVA model to predict theta, 2-way interactions included
+# theta has random effects only for block (paddock within block is confounded with grazing + block)
+
+model{
+  for(i in 1:N){
+    # Likelihood
+    counts[i] ~ dpois(mu[i])
+
+    # replicated data
+    counts.rep[i] ~ dpois(mu[i])
+    
+    # Mean model of Poisson
+    mu[i] <- theta[i]*area[i]
+    
+    # Regression model for theta (proportion) with random effects
+    theta[i] <- exp(alpha + beta[1]*ELTR[i] + beta[2]*POFE[i] + beta[3]*POSE[i] +
+    beta[4]*VUMI[i] + beta[5]*high[i] + beta[6]*fall[i] + beta[7]*spring[i] +
+    beta[8]*coated[i] +
+    beta[9]*ELTR[i]*high[i] + beta[10]*POFE[i]*high[i] + beta[11]*POSE[i]*high[i]+ beta[12]*VUMI[i]*high[i] +
+    beta[13]*ELTR[i]*fall[i] + beta[14]*POFE[i]*fall[i] + beta[15]*POSE[i]*fall[i] + beta[16]*VUMI[i]*fall[i] + 
+    beta[17]*ELTR[i]*spring[i] + beta[18]*POFE[i]*spring[i] + beta[19]*POSE[i]*spring[i] + beta[20]*VUMI[i]*spring[i] + 
+    beta[21]*ELTR[i]*coated[i] + beta[22]*POFE[i]*coated[i] + beta[23]*POSE[i]*coated[i] + beta[24]*VUMI[i]*coated[i] + 
+    beta[25]*high[i]*fall[i] + beta[26]*high[i]*spring[i] + beta[27]*high[i]*coated[i] + 
+    beta[28]*fall[i]*coated[i] + beta[29]*spring[i]*coated[i] +
+    eps[block[i]])
+
+    # Part of Dsum calculation
+    Sqdiff[i] <- pow(counts.rep[i] - counts[i], 2)
+  }
+  
+  # Identifiable intercept, post sweeping random effect means into intercept
+  alpha.star <- alpha + mean(eps[])
+  
+  # Relatively non-informative priors
+  
+  # random effects of block
+  for(b in 1:Nb){ # number of blocks
+    eps[b] ~ dnorm(0, tau.eps)
+    
+    # Identifiable random effects - post-sweeping of mean REs by block
+    eps.star[b] <- eps[b] - mean(eps[])
+  }
+  
+  # Block level precisions with folded T priors
+  tau.Eps ~ dt(0, Bb, 2)
+  sig.eps <- abs(tau.Eps)
+  tau.eps <- pow(sig.eps, -2)
+  
+  # dt parameters (set as data)
+  Bb <- 1/(Ab*Ab)
+  
+  # Coefficients
+  alpha ~ dnorm(0, 0.0001)
+
+  for(l in 1:nL){ # Number of treatment offsets
+    beta[l] ~ dnorm(0, 0.0001)
+  }
+  
+  # Dsum: posterior predictive loss
+  Dsum <- sum(Sqdiff)
+}
