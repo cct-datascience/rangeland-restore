@@ -2,6 +2,7 @@
 library(postjags)
 library(ggplot2)
 library(dplyr)
+library(cowplot)
 
 # Read in data
 load("../../../cleaned_data/count_mono.Rdata") # count_mono
@@ -19,7 +20,8 @@ sum.out$sig <- ifelse(sum.out$pc2.5*sum.out$pc97.5 > 0, TRUE, FALSE)
 sum.out$dir <- ifelse(sum.out$sig == FALSE, NA, 
                       ifelse(sum.out$sig == TRUE & sum.out$mean > 0, "pos", "neg"))
 
-
+### Create output figures
+# All betas
 beta.labs <- c("ELTR", "POFE", "POSE", "VUMI", "high", "fall", "spring", "coated",
                "ELTR:high", "POFE:high", "POSE:high", "VUMI:high",
                "ELTR:fall", "POFE:fall", "POSE:fall", "VUMI:fall",
@@ -52,6 +54,62 @@ ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
   geom_hline(yintercept = 0, color = "red", lty = 2) +
   scale_x_discrete(labels = labs)
+
+# Only main effect betas
+beta.labs2 <- c("ELTR", "POFE", "POSE", "VUMI", "high", "fall", "spring", "coated")
+beta.ind <- grep("beta", row.names(sum.out))
+betas <- sum.out[beta.ind[1:8],]
+betas$var <- factor(betas$var, levels = row.names(betas))
+str(betas)
+fig_1a <- ggplot() +
+  geom_pointrange(data = betas, 
+                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5)) +
+  geom_point(data = subset(betas, sig == TRUE),
+             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(beta))) +
+  scale_x_discrete(labels = beta.labs) +
+  scale_color_manual(values = c("forestgreen", "purple")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_blank()) +
+  guides(color = "none")
+
+# Calculate interactions
+beta.labs.ints <- c("ELTR:high", "POFE:high", "POSE:high", "VUMI:high",
+                "ELTR:fall", "POFE:fall", "POSE:fall", "VUMI:fall",
+                "ELTR:spring", "POFE:spring", "POSE:spring", "VUMI:spring",
+                "ELTR:coated", "POFE:coated", "POSE:coated", "VUMI:coated",
+                "high:fall", "high:spring", "high:coated", "fall:coated", "spring:coated")
+beta.int.ind <- grep("int_Beta", row.names(sum.out))
+beta.ints <- sum.out[beta.int.ind,]
+beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
+str(beta.ints)
+fig_1b <- ggplot() +
+  geom_pointrange(data = beta.ints, 
+                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5)) +
+  geom_point(data = subset(beta.ints, sig == TRUE),
+             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(sum(beta))) +
+  scale_x_discrete(labels = beta.labs.ints) +
+  scale_color_manual(values = c("forestgreen", "purple")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_blank()) +
+  guides(color = "none")
+fig_1b
+
+jpeg(filename = "plots/fig1_betas.jpg", 
+     width = 6, 
+     height = 4, 
+     units = "in",
+     res = 600)
+plot_grid(fig_1a, fig_1b, ncol = 1)
+dev.off()
+
 
 # Fit
 sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
