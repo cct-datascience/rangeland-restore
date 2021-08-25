@@ -55,8 +55,8 @@ model{
   # Calculations to monitor, only two-way combinations
   int_Beta[1] <- beta[1] + beta[3] + beta[5] # fall:herbicide
   int_Beta[2] <- beta[2] + beta[3] + beta[6] # spring:herbicide
-  int_Beta[3] <- beta[2] + beta[4] + beta[7] # fall:greenstrip
-  int_Beta[4] <- beta[3] + beta[4] + beta[8] # spring:greenstrip
+  int_Beta[3] <- beta[1] + beta[4] + beta[7] # fall:greenstrip
+  int_Beta[4] <- beta[2] + beta[4] + beta[8] # spring:greenstrip
 
   # Dsum: posterior predictive loss
   Dsum <- sum(Sqdiff)
