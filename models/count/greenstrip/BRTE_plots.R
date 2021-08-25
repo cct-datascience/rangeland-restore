@@ -31,9 +31,10 @@ beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind,]
 betas$var <- factor(betas$var, levels = row.names(betas))
 str(betas)
-ggplot() +
+fig1 <- ggplot() +
   geom_pointrange(data = betas, 
-                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5)) +
+                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
   geom_point(data = subset(betas, sig == TRUE),
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
@@ -45,6 +46,14 @@ ggplot() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         axis.title.x = element_blank()) +
   guides(color = "none")
+
+jpeg(filename = "plots/fig1_betas2.jpg", 
+     width = 6, 
+     height = 3, 
+     units = "in",
+     res = 600)
+print(fig1)
+dev.off()
 
 # Random effects
 labs <- c("Block 1", "Block 2", "Block 3")
@@ -70,10 +79,12 @@ fig_1a <- ggplot() +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(beta))) +
   scale_x_discrete(labels = beta.labs2) +
-  scale_color_manual(values = c("forestgreen", "purple")) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        axis.title.x = element_blank()) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
   guides(color = "none")
 
 # Calculate interactions
@@ -94,19 +105,21 @@ fig_1b <- ggplot() +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(sum(beta))) +
   scale_x_discrete(labels = beta.labs.ints) +
-  scale_color_manual(values = c("forestgreen", "purple")) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
-        axis.title.x = element_blank()) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
   guides(color = "none")
 fig_1b
 
 jpeg(filename = "plots/fig1_betas.jpg", 
      width = 6, 
-     height = 5, 
+     height = 4, 
      units = "in",
      res = 600)
-plot_grid(fig_1a, fig_1b, ncol = 1)
+plot_grid(fig_1a, fig_1b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
 dev.off()
 
 
