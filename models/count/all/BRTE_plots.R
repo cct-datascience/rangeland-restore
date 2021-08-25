@@ -80,7 +80,7 @@ fig_1a <- ggplot() +
   scale_x_discrete(labels = beta.labs2) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
-  theme_bw(base_size = 12) +
+  theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -106,7 +106,7 @@ fig_1b <- ggplot() +
   scale_x_discrete(labels = beta.labs.ints) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
-  theme_bw(base_size = 12) +
+  theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
