@@ -77,7 +77,7 @@ fig_1a <- ggplot() +
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(beta))) +
-  scale_x_discrete(labels = beta.labs2) +
+  scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
@@ -103,7 +103,7 @@ fig_1b <- ggplot() +
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(sum(beta))) +
-  scale_x_discrete(labels = beta.labs.ints) +
+  scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
