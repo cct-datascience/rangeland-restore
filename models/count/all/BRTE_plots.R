@@ -1,11 +1,15 @@
-# Plot model outputs
+# Plot model outputs and fit
+library(postjags)
+library(ggplot2)
+library(dplyr)
+library(cowplot)
 
 # Read in raw data
 load("../../../cleaned_data/count_all.Rdata") # count_all
 dat <- count_all %>%
   filter(quadrat < 10000)
 
-# Load coda and coda.re
+# Load coda and coda.rep
 load(file = "coda/coda.Rdata") # coda.out
 load(file = "coda/coda_rep.Rdata") # coda.rep
 
@@ -18,15 +22,18 @@ sum.out$dir <- ifelse(sum.out$sig == FALSE, NA,
                       ifelse(sum.out$sig == TRUE & sum.out$mean > 0, "pos", "neg"))
 
 
+#### Create output figures
+# All betas
 beta.labs <- c("fall", "spring", "herbicide", "greenstrip", 
                "fall:herbicide", "spring:herbicide", "fall:greenstrip", "spring:greenstrip")
 beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind,]
 betas$var <- factor(betas$var, levels = row.names(betas))
 str(betas)
-ggplot() +
+fig1 <- ggplot() +
   geom_pointrange(data = betas, 
-                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5)) +
+                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
   geom_point(data = subset(betas, sig == TRUE),
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
@@ -39,18 +46,15 @@ ggplot() +
         axis.title.x = element_blank()) +
   guides(color = "none")
 
-# Random effects
-# labs <- c()
-# for(i in 1:9){
-#   labs[i] <- paste0("Plot ", i)
-# }
-# prob.eps <- grep("eps.star", row.names(sum.out))
-# df <- data.frame(sum.out[prob.eps,], block = rep(1:3, each = 3))
-# ggplot(df, aes(x = var, y = mean)) +
-#   geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5, color = as.factor(block))) +
-#   geom_hline(yintercept = 0, color = "red", lty = 2) +
-#   scale_x_discrete(labels = labs)
+jpeg(filename = "plots/fig1_betas2.jpg", 
+     width = 6, 
+     height = 3, 
+     units = "in",
+     res = 600)
+print(fig1)
+dev.off()
 
+# Random effects
 labs <- c("Block 1", "Block 2", "Block 3")
 prob.eps <- grep("eps.star", row.names(sum.out))
 ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
@@ -58,6 +62,62 @@ ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
   geom_hline(yintercept = 0, color = "red", lty = 2) +
   scale_x_discrete(labels = labs)
 
+# Only main effect betas
+beta.labs2 <- c("fall", "spring", "herbicide", "greenstrip")
+beta.ind <- grep("beta", row.names(sum.out))
+betas <- sum.out[beta.ind[1:length(beta.labs2)],]
+betas$var <- factor(betas$var, levels = row.names(betas))
+str(betas)
+fig_1a <- ggplot() +
+  geom_pointrange(data = betas, 
+                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
+  geom_point(data = subset(betas, sig == TRUE),
+             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(beta))) +
+  scale_x_discrete(labels = beta.labs2) +
+  scale_color_manual(values = c("forestgreen", "purple")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_blank()) +
+  guides(color = "none")
+
+# Calculate interactions
+beta.labs.ints <- c("fall:herbicide", "spring:herbicide", 
+                    "fall:greenstrip", "spring:greenstrip")
+beta.int.ind <- grep("int_Beta", row.names(sum.out))
+beta.ints <- sum.out[beta.int.ind,]
+beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
+str(beta.ints)
+fig_1b <- ggplot() +
+  geom_pointrange(data = beta.ints, 
+                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
+  geom_point(data = subset(beta.ints, sig == TRUE),
+             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(sum(beta))) +
+  scale_x_discrete(labels = beta.labs.ints) +
+  scale_color_manual(values = c("forestgreen", "purple")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_blank()) +
+  guides(color = "none")
+fig_1b
+
+jpeg(filename = "plots/fig1_betas.jpg", 
+     width = 6, 
+     height = 5, 
+     units = "in",
+     res = 600)
+plot_grid(fig_1a, fig_1b, ncol = 1)
+dev.off()
+
+
+# Replicated data summary and fit
 sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
 
 fit <- data.frame(dat,
