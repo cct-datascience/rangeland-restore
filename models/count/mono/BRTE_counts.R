@@ -141,5 +141,5 @@ save(coda.out, file = "coda/coda.Rdata")
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
-                         n.iter = 5000, thin = 1)
+                         n.iter = 15000, thin = 5)
 save(coda.rep, file = "coda/coda_rep.Rdata")
