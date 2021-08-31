@@ -8,6 +8,7 @@ library(cowplot)
 load("../../../cleaned_data/count_mono.Rdata") # count_mono
 dat <- count_mono %>%
   filter(quadrat < 10000)
+dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))
 
 # Load posterior chains
 load(file = "coda/coda.Rdata")
@@ -22,11 +23,11 @@ sum.out$dir <- ifelse(sum.out$sig == FALSE, NA,
 
 ### Create output figures
 # All betas
-beta.labs <- c("ELTR", "POFE", "POSE", "VUMI", "high", "fall", "spring", "coated",
-               "ELTR:high", "POFE:high", "POSE:high", "VUMI:high",
-               "ELTR:fall", "POFE:fall", "POSE:fall", "VUMI:fall",
-               "ELTR:spring", "POFE:spring", "POSE:spring", "VUMI:spring",
-               "ELTR:coated", "POFE:coated", "POSE:coated", "VUMI:coated",
+beta.labs <- c("POSE", "POFE", "VUMI", "ELEL", "high", "fall", "spring", "coated",
+               "POSE:high", "POFE:high", "VUMI:high", "ELEL:high",
+               "POSE:fall", "POFE:fall", "VUMI:fall", "ELEL:fall",
+               "POSE:spring", "POFE:spring", "VUMI:spring", "ELEL:spring",
+               "POSE:coated", "POFE:coated", "VUMI:coated", "ELEL:coated",
                "high:fall", "high:spring", "high:coated", "fall:coated", "spring:coated")
 beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind,]
@@ -65,7 +66,7 @@ ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
   scale_x_discrete(labels = labs)
 
 # Only main effect betas
-beta.labs2 <- c("ELTR", "POFE", "POSE", "VUMI", "high", "fall", "spring", "coated")
+beta.labs2 <- c("POSE", "POFE", "VUMI", "ELEL", "high", "fall", "spring", "coated")
 beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind[1:length(beta.labs2)],]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -89,10 +90,10 @@ fig_1a <- ggplot() +
   guides(color = "none")
 
 # Calculate interactions
-beta.labs.ints <- c("ELTR:high", "POFE:high", "POSE:high", "VUMI:high",
-                "ELTR:fall", "POFE:fall", "POSE:fall", "VUMI:fall",
-                "ELTR:spring", "POFE:spring", "POSE:spring", "VUMI:spring",
-                "ELTR:coated", "POFE:coated", "POSE:coated", "VUMI:coated",
+beta.labs.ints <- c("POSE:high", "POFE:high", "VUMI:high", "ELEL:high",
+                "POSE:fall", "POFE:fall", "VUMI:fall", "ELEL:fall",
+                "POSE:spring", "POFE:spring", "VUMI:spring", "ELEL:spring",
+                "POSE:coated", "POFE:coated", "VUMI:coated", "ELEL:coated",
                 "high:fall", "high:spring", "high:coated", "fall:coated", "spring:coated")
 beta.int.ind <- grep("int_Beta", row.names(sum.out))
 beta.ints <- sum.out[beta.int.ind,]
@@ -108,7 +109,7 @@ fig_1b <- ggplot() +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(sum(beta))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -125,7 +126,70 @@ jpeg(filename = "plots/fig1_betas.jpg",
 plot_grid(fig_1a, fig_1b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
 dev.off()
 
+# Convert to seedlings m^-2
+alph <- sum.out[grep("alpha.star", row.names(sum.out)),]
+exp(alph[1,1])*100
+exp(alph[1,4])*100
+exp(alph[1,5])*100
 
+beta.labs2 <- c("POSE", "POFE", "VUMI", "ELEL", "high", "fall", "spring", "coated")
+beta.ind <- grep("Diff_Beta", row.names(sum.out))
+betas <- sum.out[beta.ind[1:length(beta.labs2)],]
+betas$var <- factor(betas$var, levels = row.names(betas))
+str(betas)
+fig_2a <- ggplot() +
+  geom_pointrange(data = betas, 
+                  aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
+                  size = 0.5) +
+  geom_point(data = subset(betas, sig == TRUE),
+             aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " BRTE ", m^-2))) +
+  scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+
+beta.labs.ints <- c("POSE:high", "POFE:high", "VUMI:high", "ELEL:high",
+                    "POSE:fall", "POFE:fall", "VUMI:fall", "ELEL:fall",
+                    "POSE:spring", "POFE:spring", "VUMI:spring", "ELEL:spring",
+                    "POSE:coated", "POFE:coated", "VUMI:coated", "ELEL:coated",
+                    "high:fall", "high:spring", "high:coated", "fall:coated", "spring:coated")
+beta.int.ind <- grep("diff_Beta", row.names(sum.out))
+beta.ints <- sum.out[beta.int.ind,]
+beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
+str(beta.ints)
+fig_2b <- ggplot() +
+  geom_pointrange(data = beta.ints, 
+                  aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
+                  size = 0.5) +
+  geom_point(data = subset(beta.ints, sig == TRUE),
+             aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(sum(Delta), " BRTE ", m^-2))) +
+  scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+fig_2b
+
+jpeg(filename = "plots/fig2_betas.jpg", 
+     width = 6, 
+     height = 6, 
+     units = "in",
+     res = 600)
+plot_grid(fig_2a, fig_2b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
+dev.off()
 
 # Fit
 sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)

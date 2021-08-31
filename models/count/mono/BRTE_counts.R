@@ -15,7 +15,10 @@ load("../../../cleaned_data/count_mono.Rdata") # count_mono
 dat <- count_mono
 str(dat)
 
-# Quadrat sizes
+# Relevel species based on fig. 6b from Porensky et al. 2018
+dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))
+
+# Quadrat sizes (eliminate largest size)
 dat <- dat %>%
    filter(quadrat < 10000)
 table(dat$quadrat)
@@ -57,10 +60,10 @@ log(sd(tapply(dat$BRTE, dat$block, FUN = mean)))
 datlist <- list(counts = dat$BRTE,
                 area = dat$quadrat/100, # convert to square decimeters
                 N = nrow(dat),
-                ELTR = as.numeric(X[,2]),
+                POSE = as.numeric(X[,2]),
                 POFE = as.numeric(X[,3]),
-                POSE = as.numeric(X[,4]),
-                VUMI = as.numeric(X[,5]),
+                VUMI = as.numeric(X[,4]),
+                ELEL = as.numeric(X[,5]),
                 high = as.numeric(X[,6]),
                 fall = as.numeric(X[,7]), 
                 spring = as.numeric(X[,8]), 
@@ -76,7 +79,7 @@ str(datlist)
 # likely intercept value
 base <- dat %>%
   filter(grazing == "ungrazed",
-         species == "ELEL",
+         species == "ELTR",
          seed_rate == "low", 
          seed_coat == "UC")
 hist(base$BRTE, breaks = 30)
@@ -110,7 +113,7 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star",  # identifiable intercept and random effects
-            "int_Beta") # interaction terms
+            "int_Beta", "Diff_Beta", "diff_Beta") # calculated terms
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
@@ -119,7 +122,7 @@ coda.out <- coda.samples(jm, variable.names = params,
 mcmcplot(coda.out, parms = c("deviance", "Dsum","alpha.star", 
                              "beta", "eps.star", "sig.eps"))
 
-traplot(coda.out, parms = "sig.eps")
+traplot(coda.out, parms = "alpha.star")
 
 # dic samples
 dic.out <- dic.samples(jm, n.iter = 5000)
@@ -132,7 +135,7 @@ gel
 # If not converged, restart model from final iterations
 # newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(1, 3, 5:6))
+# saved.state <- removevars(newinits, variables = c(1, 3, 5:9))
 # saved.state[[1]]
 # save(saved.state, file = "inits/inits.Rdata")
 
