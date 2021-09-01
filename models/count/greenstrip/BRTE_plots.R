@@ -122,6 +122,69 @@ jpeg(filename = "plots/fig1_betas.jpg",
 plot_grid(fig_1a, fig_1b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
 dev.off()
 
+# Convert to seedlings m^-2
+alph <- sum.out[grep("alpha.star", row.names(sum.out)),]
+exp(alph[1,1])*100
+exp(alph[1,4])*100
+exp(alph[1,5])*100
+
+beta.labs2 <- c("mix", "high", "coated", "fall", "spring")
+beta.ind <- grep("Diff_Beta", row.names(sum.out))
+betas <- sum.out[beta.ind[1:length(beta.labs2)],]
+betas$var <- factor(betas$var, levels = row.names(betas))
+str(betas)
+fig_2a <- ggplot() +
+  geom_pointrange(data = betas, 
+                  aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
+                  size = 0.5) +
+  geom_point(data = subset(betas, sig == TRUE),
+             aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " BRTE ", m^-2))) +
+  scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+
+beta.labs.ints <- c("mix:high", "mix:coated", "mix:fall", "mix:spring",
+                    "high:coated", "high:fall", "high:spring", 
+                    "coated:fall", "coated:spring")
+beta.int.ind <- grep("diff_Beta", row.names(sum.out))
+beta.ints <- sum.out[beta.int.ind,]
+beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
+str(beta.ints)
+fig_2b <- ggplot() +
+  geom_pointrange(data = beta.ints, 
+                  aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
+                  size = 0.5) +
+  geom_point(data = subset(beta.ints, sig == TRUE),
+             aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " BRTE ", m^-2))) +
+  scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+fig_2b
+
+jpeg(filename = "plots/fig2_betas.jpg", 
+     width = 8, 
+     height = 6, 
+     units = "in",
+     res = 600)
+plot_grid(fig_2a, fig_2b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
+dev.off()
+
 
 # Replicated data
 sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)

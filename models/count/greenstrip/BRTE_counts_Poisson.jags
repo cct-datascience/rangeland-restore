@@ -64,6 +64,23 @@ model{
   int_Beta[8] <- beta[3] + beta[4] + beta[13] # coated:fall
   int_Beta[9] <- beta[3] + beta[5] + beta[14] # coated:spring
 
+  # Calculations to monitor, only two-way combinations
+  Diff_Beta[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # mix
+  Diff_Beta[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # high
+  Diff_Beta[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # coated
+  Diff_Beta[4] <- exp(alpha.star + beta[4]) - exp(alpha.star) # fall
+  Diff_Beta[5] <- exp(alpha.star + beta[5]) - exp(alpha.star) # spring
+
+  
+diff_Beta[1] <- exp(alpha.star + beta[1] + beta[2] + beta[6]) - exp(alpha.star) # mix:high
+diff_Beta[2] <- exp(alpha.star + beta[1] + beta[3] + beta[7]) - exp(alpha.star) # mix:coated
+diff_Beta[3] <- exp(alpha.star + beta[1] + beta[4] + beta[8]) - exp(alpha.star) # mix:fall
+diff_Beta[4] <- exp(alpha.star + beta[1] + beta[5] + beta[9]) - exp(alpha.star) # mix:spring
+diff_Beta[5] <- exp(alpha.star + beta[2] + beta[3] + beta[10]) - exp(alpha.star) # high:coated
+diff_Beta[6] <- exp(alpha.star + beta[2] + beta[4] + beta[11]) - exp(alpha.star) # high:fall
+diff_Beta[7] <- exp(alpha.star + beta[2] + beta[5] + beta[12]) - exp(alpha.star) # high:spring
+diff_Beta[8] <- exp(alpha.star + beta[3] + beta[4] + beta[13]) - exp(alpha.star) # coated:fall
+diff_Beta[9] <- exp(alpha.star + beta[3] + beta[5] + beta[14]) - exp(alpha.star) # coated:spring  
   
   # Dsum: posterior predictive loss
   Dsum <- sum(Sqdiff)
