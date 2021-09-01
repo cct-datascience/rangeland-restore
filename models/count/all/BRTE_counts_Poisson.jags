@@ -57,7 +57,19 @@ model{
   int_Beta[2] <- beta[2] + beta[3] + beta[6] # spring:herbicide
   int_Beta[3] <- beta[1] + beta[4] + beta[7] # fall:greenstrip
   int_Beta[4] <- beta[2] + beta[4] + beta[8] # spring:greenstrip
+  
+  # Calculations to monitor, only two-way combinations
+  Diff_Beta[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # fall
+  Diff_Beta[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # spring
+  Diff_Beta[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # herbicide
+  Diff_Beta[4] <- exp(alpha.star + beta[4]) - exp(alpha.star) # greenstrip
 
+  diff_Beta[1] <- exp(alpha.star + beta[1] + beta[3] + beta[5]) - exp(alpha.star) # fall:herbicide
+  diff_Beta[2] <- exp(alpha.star + beta[2] + beta[3] + beta[6]) - exp(alpha.star) # spring:herbicide
+  diff_Beta[3] <- exp(alpha.star + beta[1] + beta[4] + beta[7]) - exp(alpha.star) # fall:greenstrip
+  diff_Beta[4] <- exp(alpha.star + beta[2] + beta[4] + beta[8]) - exp(alpha.star) # spring:greenstrip
+  
+  
   # Dsum: posterior predictive loss
   Dsum <- sum(Sqdiff)
 }
