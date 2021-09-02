@@ -1,0 +1,86 @@
+# Multivariate normal model of functional groups BRTE, forbs, grass
+# ANOVA of grazing with 3 levels, ungrazed, fall, spring
+# Random effect of paddock nested within block 
+
+model{
+  for(i in 1:N){
+    # Likelihood
+    biomass[i, 1:3] ~ dmnorm(mu[i, 1:3], omega[1:3, 1:3])
+    
+    # Replicated data 
+    biomass.rep[i, 1:3] ~ dmnorm(mu[i, 1:3], omega[1:3, 1:3])
+    
+    # ANOVA model
+    for(j in 1:3){ # for 3 functional groups
+      mu[i, j] <- alpha[j] +
+        beta[1, j]*fall[i] +
+        beta[2, j]*spring[i] +
+        eps[block[i], j]
+       
+    # Part of Dsum calculation
+    Sqdiff[i, j] <- pow(biomass.rep[i, j] - biomass[i, j], 2) 
+    }
+  }
+
+  for(j in 1:3){ # number of functional groups
+    
+    # Identifiable intercept, post sweeping random effect means into intercept
+    alpha.star[j] <- alpha[j] + mean.eps[j]
+    
+    # Block level precisions with folded T priors
+    tau.Eps[j] ~ dt(0, Bb, 2)
+    sig.eps[j] <- abs(tau.Eps[j])
+    tau.eps[j] <- pow(sig.eps[j], -2)
+    
+    # calculate and monitor posterior mean of average Eps value for each response column
+    mean.eps[j] <- mean(eps[,j])
+    
+    # intercept root nodes
+    alpha[j] ~ dnorm(0, 0.0001)
+    
+    #Posterior predictive loss is the posterior mean of Dsum, must monitor Dsum
+    Dsum[j] <- sum(Sqdiff[,j])
+    
+  }
+  
+  for(b in 1:Nb){ # number of blocks
+    for(j in 1:3){ # number of functional groups
+      
+      # random effects of block
+      eps[b, j] ~ dnorm(0, tau.eps[j]) 
+      # Identifiable random effects - post-sweeping of mean REs by block
+      eps.star[b, j] <- eps[b, j] - mean.eps[j]
+    }
+  }
+  
+  # dt parameters (set as data)
+  Bb <- 1/(Ab*Ab)
+  
+  
+  for(l in 1:nL){ # Number of treatment offsets
+    for(j in 1:3){
+      
+      # offset root nodes
+      beta[l, j] ~ dnorm(0, 0.0001)
+    }
+  }
+  
+  # Paramterize precision matrices with wishart distributions
+  omega[1:3, 1:3] ~ dwish(R[1:3,1:3], 4)
+  
+  # Variance-covariance matrix
+  Sig2[1:3, 1:3] <- inverse(omega[1:3, 1:3])
+  
+  # Extract standard deviations
+  for(i in 1:3){
+    Sig[i] <- sqrt(Sig2[i, i])#std dev of each trait
+  }
+  
+  # Calculate the correlation between traits
+  for(i in 2:3){
+    for(j in 1:(i-1)){
+      Rho[i, j] <- Sig2[i, j]/(sqrt(Sig2[i, i])*sqrt(Sig2[j, j]))
+    }
+  }
+    
+}
