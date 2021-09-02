@@ -28,9 +28,12 @@ model{
     alpha.star[j] <- alpha[j] + mean.eps[j]
     
     # Block level precisions with folded T priors
-    tau.Eps[j] ~ dt(0, Bb, 2)
+    tau.Eps[j] ~ dt(0, Bb[j], 2)
     sig.eps[j] <- abs(tau.Eps[j])
     tau.eps[j] <- pow(sig.eps[j], -2)
+    
+    # dt parameters (set as data)
+    Bb[j] <- 1/(Ab[j]*Ab[j])    
     
     # calculate and monitor posterior mean of average Eps value for each response column
     mean.eps[j] <- mean(eps[,j])
@@ -53,10 +56,7 @@ model{
     }
   }
   
-  # dt parameters (set as data)
-  Bb <- 1/(Ab*Ab)
-  
-  
+
   for(l in 1:nL){ # Number of treatment offsets
     for(j in 1:3){
       

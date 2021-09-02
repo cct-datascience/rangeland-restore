@@ -1,6 +1,5 @@
 # Cheatgrass biomass, relative to total and total live
 
-
 library(rjags)
 load.module('dic')
 load.module('glm')
@@ -56,7 +55,7 @@ datlist <- list(biomass = dat[,5:7],
                 block = as.numeric(dat$block),
                 Nb = length(unique(dat$block)),
                 R = R,
-                Ab = 5) # stand deviation among paddocks and blocks
+                Ab = c(3, 5, 2)) # stand deviation among blocks for each pft
 
 # likely intercept value
 base <- dat %>%
@@ -112,7 +111,7 @@ mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta",
 
 traplot(coda.out, parms = "sig.eps")
 caterplot(coda.out, parms = "eps.star", reorder = FALSE)
-
+caterplot(coda.out, parms = "Rho", reorder = FALSE)
 
 # dic samples
 dic.out <- dic.samples(jm, n.iter = 5000)
