@@ -23,65 +23,66 @@ For datasets 2 & 3, the data were further subdivided to account for different AN
 | III    | species       | 5   | **ELTR**, POSE, POFE, VUMI, ELEL |
 
 ### Repository description
-`cleaned_data` contains 7 output csv files from `scripts/01_organize.R`, including 1 biomass file and 3 files for the 3 levels of count and cover data
+`cleaned_data/` contains 7 output csv files from `scripts/01_organize.R`, including 1 biomass file and 3 files for the 3 levels of count and cover data
 
-`initial_models` contains exploratory Bayesian models for biomass and count data
+`initial_models/` contains exploratory Bayesian models for biomass and count data
 
-`models` contains 3 subfolders for each data type:
-  - `biomass` contains 1 model:
-    - `all`
+`models/` contains 3 subfolders for each data type:
+  - `biomass/` contains 1 model:
+    - `all/`
       - `BRTE_biomass.R` runs the JAGS model
       - `BRTE_biomass_mvnorm.jags` codes the multivariate log-normal model
       - `BRTE_plots.R` calculates and plots modeled output
-      - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits` contains initials to run the JAGS model as .Rdata files 
-      - `plots` contains plots of model results as .jpg files
-  - `count` contains 3 models:
-    - `all`
+      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+      - `inits/` contains initials to run the JAGS model as .Rdata files 
+      - `plots/` contains plots of model results as .jpg files
+  - `count/` contains 3 models:
+    - `all/`
       - `BRTE_counts.R` runs the JAGS model
       - `BRTE_counts_Poisson.jags` codes the Poisson model
       - `BRTE_plots.R` calculates and plots modeled output
-      - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits` contains initials to run the JAGS model as .Rdata files 
-      - `plots` contains plots of model results as .jpg files
-    - `greenstrip`
+      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+      - `inits/` contains initials to run the JAGS model as .Rdata files 
+      - `plots/` contains plots of model results as .jpg files
+    - `greenstrip/`
       - `BRTE_counts.R` runs the JAGS model
       - `BRTE_counts_Poisson.jags` codes the Poisson model
       - `BRTE_plots.R` calculates and plots modeled output
-      - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits` contains initials to run the JAGS model as .Rdata files 
-      - `plots` contains plots of model results as .jpg files
-    - `mono`
+      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+      - `inits/` contains initials to run the JAGS model as .Rdata files 
+      - `plots/` contains plots of model results as .jpg files
+    - `mono/`
       - `BRTE_counts.R` runs the JAGS model
       - `BRTE_counts_Poisson.jags` codes the Poisson model
       - `BRTE_plots.R` calculates and plots modeled output
-      - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits` contains initials to run the JAGS model as .Rdata files 
-      - `plots` contains plots of model results as .jpg files
-  - `cover` contains 3 models:
-    - `all`
+      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+      - `inits/` contains initials to run the JAGS model as .Rdata files 
+      - `plots/` contains plots of model results as .jpg files
+  - `cover/` contains 3 models:
+    - `all/`
       - `BRTE_cover.R` runs the JAGS model
       - `BRTE_cover_zoib.jags` codes the zero-one inflated beta model
       - `BRTE_plots.R` calculates and plots modeled output
-      - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits` contains initials to run the JAGS model as .Rdata files 
-      - `plots` contains plots of model results as .jpg files
-    - `greenstrip`
+      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+      - `inits/` contains initials to run the JAGS model as .Rdata files 
+      - `plots/` contains plots of model results as .jpg files
+    - `greenstrip/`
       - `BRTE_cover.R` runs the JAGS model
       - `BRTE_cover_zoib.jags` codes the zero-one inflated beta model
       - `BRTE_plots.R` calculates and plots modeled output
-      - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits` contains initials to run the JAGS model as .Rdata files 
-      - `plots` contains plots of model results as .jpg files
-    - `mono`
+      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+      - `inits/` contains initials to run the JAGS model as .Rdata files 
+      - `plots/` contains plots of model results as .jpg files
+    - `mono/`
       - `BRTE_cover.R` runs the JAGS model
       - `BRTE_cover_zoib.jags` codes the zero-one inflated beta model
       - `BRTE_plots.R` calculates and plots modeled output
-      - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits` contains initials to run the JAGS model as .Rdata files 
-      - `plots` contains plots of model results as .jpg files
+      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+      - `inits/` contains initials to run the JAGS model as .Rdata files 
+      - `plots/` contains plots of model results as .jpg files
   
 
-`raw_data` contains 2 csv files from Lauren Porensky descriting the biomass and cover/count data. 
+`raw_data/` contains 2 csv files from Lauren Porensky descriting the biomass and cover/count data. 
 
-`scripts` contains R scripts to organize data and plot raw and modeled data. 
+`scripts/` contains R scripts.
+  - `01_organize.R` organizes the `raw_data/` files into `cleaned_data`
