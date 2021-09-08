@@ -85,4 +85,4 @@ For datasets 2 & 3, the data were further subdivided to account for different AN
 `raw_data/` contains 2 csv files from Lauren Porensky descriting the biomass and cover/count data. 
 
 `scripts/` contains R scripts.
-  - `01_organize.R` organizes the `raw_data/` files into `cleaned_data`
+  - `01_organize.R` organizes the `raw_data/` files into `cleaned_data/` files
