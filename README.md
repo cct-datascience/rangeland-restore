@@ -28,7 +28,7 @@ For datasets 2 & 3, the data were further subdivided to account for different AN
 `initial_models` contains exploratory Bayesian models for biomass and count data
 
 `models` contains 3 subfolders for each data type:
-  - `biomass` contaians 1 model:
+  - `biomass` contains 1 model:
     - `all`
       - `BRTE_biomass.R` runs the JAGS model
       - `BRTE_biomass_mvnorm.jags` codes the multivariate log-normal model
@@ -36,7 +36,7 @@ For datasets 2 & 3, the data were further subdivided to account for different AN
       - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
       - `inits` contains initials to run the JAGS model as .Rdata files 
       - `plots` contains plots of model results as .jpg files
-  - `count`
+  - `count` contains 3 models:
     - `all`
       - `BRTE_counts.R` runs the JAGS model
       - `BRTE_counts_Poisson.jags` codes the Poisson model
@@ -58,7 +58,7 @@ For datasets 2 & 3, the data were further subdivided to account for different AN
       - `coda` contains posterior chains for parameters and replicated data, as .Rdata files 
       - `inits` contains initials to run the JAGS model as .Rdata files 
       - `plots` contains plots of model results as .jpg files
-  - `cover`
+  - `cover` contains 3 models:
     - `all`
       - `BRTE_cover.R` runs the JAGS model
       - `BRTE_cover_zoib.jags` codes the zero-one inflated beta model
