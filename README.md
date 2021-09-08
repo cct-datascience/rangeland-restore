@@ -11,7 +11,7 @@ In contrast to the challenges of transforming plant abundance data to satisfy co
 3) Plot-level BRTE cover were modeled as a zero-one inflated beta distribution. 
 Plots were nested within the random-effect of block.
 
-For datasets 2 & 3, the data were further subdivided to account for different ANOVA designs. Main effects and all two-way interactions were included. 
+For datasets 2 & 3, the data were further subdivided and three different ANOVA models were run (see table below). Main effects and all two-way interactions were included. 
 
 | Models      | Factor | N   | Levels |
 | ---        |  ---   |     --- |      --- |
