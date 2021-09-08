@@ -14,7 +14,7 @@ Plots were nested within the random-effect of block.
 For datasets 2 & 3, the data were further subdivided to account for different ANOVA designs. Main effects and all two-way interactions were included. 
 
 | Models      | Factor | N   | Levels |
-| :---        |    :----:   |     : ---: |      ---: |
+| ---        |  ---   |     --- |      --- |
 | I      | fuelbreak       | 3   | **Control**, herbicide, greenstrip |
 | I, II, III      | grazing       | 3   | **Ungrazed**, fall, spring |
 | II      | spatial       | 2   | **Monoculture**, mixture |
