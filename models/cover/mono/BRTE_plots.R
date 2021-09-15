@@ -20,6 +20,10 @@ dat <- cover_mono %>%
          intro_forbs = intro_forbs/100,
          native_grass = native_grass/100,
          native_forbs = native_forbs/100)
+
+# Relevel species based on fig. 6b from Porensky et al. 2018
+dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))
+
 str(dat)
 
 # Load coda and coda.rep
