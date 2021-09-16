@@ -99,7 +99,8 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
-            "omega", "Sig", "Rho") # monitored interaction effects
+            "omega", "Sig", "Rho", # monitored interaction effects
+            "m.ungrazed", "m.fall", "m.spring") # monitored observed groups
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
@@ -110,6 +111,7 @@ mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta",
                              "Sig", "Rho"))
 
 traplot(coda.out, parms = "sig.eps")
+caterplot(coda.out, parms = c("m.ungrazed", "m.fall", "m.spring"), reorder = FALSE)
 caterplot(coda.out, parms = "eps.star", reorder = FALSE)
 caterplot(coda.out, parms = "Rho", reorder = FALSE)
 
