@@ -119,7 +119,10 @@ params <- c("deviance", # evaluate fit
             "psi", "alpha", "beta", # parameters
             "tau", "sig", "tau.eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta") # monitored main and two-way treatment effects
+            "int_Beta", "Diff_Beta", "diff_Beta", # monitored main and two-way treatment effects
+            "m.ungrazed.control", "m.ungrazed.herbicide", "m.ungrazed.greenstrip",
+            "m.fall.control", "m.fall.herbicide", "m.fall.greenstrip",
+            "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip") 
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)

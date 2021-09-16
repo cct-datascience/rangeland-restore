@@ -89,4 +89,18 @@ model{
   diff_Beta[3] <- ilogit(alpha.star + beta[1] + beta[4] + beta[7]) - ilogit(alpha.star) # fall:greenstrip
   diff_Beta[4] <- ilogit(alpha.star + beta[2] + beta[4] + beta[8]) - ilogit(alpha.star) # spring:greenstrip
   
+  # Monitor the mean of each group
+  m.ungrazed.control <- ilogit(alpha.star) 
+  m.ungrazed.herbicide <- ilogit(alpha.star + beta[3]) 
+  m.ungrazed.greenstrip <- ilogit(alpha.star + beta[4]) 
+  
+  m.fall.control <- ilogit(alpha.star + beta[1]) 
+  m.fall.herbicide <- ilogit(alpha.star + beta[1] + beta[3] + beta[5]) 
+  m.fall.greenstrip <- ilogit(alpha.star + beta[1] + beta[4] + beta[7]) 
+    
+  m.spring.control <- ilogit(alpha.star + beta[2])  
+  m.spring.herbicide <- ilogit(alpha.star + beta[2] + beta[3] + beta[6]) 
+  m.spring.greenstrip <- ilogit(alpha.star + beta[2] + beta[4] + beta[8])  
+  
+  
 }
