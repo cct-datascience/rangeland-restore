@@ -96,7 +96,10 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta") # monitored interaction effects
+            "int_Beta", "Diff_Beta", "diff_Beta", # monitored interaction effects
+            "m.ungrazed.control", "m.ungrazed.herbicide", "m.ungrazed.greenstrip",
+            "m.fall.control", "m.fall.herbicide", "m.fall.greenstrip",
+            "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip") 
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
