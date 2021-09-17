@@ -79,13 +79,13 @@ inits <- function(){
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("inits/inits.Rdata")# saved.state, second element is inits
+load("inits/inits_zip.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_Poisson.jags",
+jm <- jags.model(file = "BRTE_counts_ziPoisson.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -93,10 +93,11 @@ jm <- jags.model(file = "BRTE_counts_Poisson.jags",
 
 # params to monitor
 params <- c("deviance", "Dsum", # evaluate fit
-            "alpha", "beta", # parameters
+            "psi", "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
             "int_Beta", "Diff_Beta", "diff_Beta", # monitored interaction effects
+            # "gam.star", "tau.Gam", "sig.gam", # nested random effects terms
             "m.ungrazed.control", "m.ungrazed.herbicide", "m.ungrazed.greenstrip",
             "m.fall.control", "m.fall.herbicide", "m.fall.greenstrip",
             "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip") 
@@ -117,17 +118,17 @@ gel <- gelman.diag(coda.out, multivariate = FALSE)
 gel
 
 # If not converged, restart model from final iterations
-# newinits <-  initfind(coda.out) 
+# newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(1, 3, 5:6))
+# saved.state <- removevars(newinits, variables = c(1:2, 4, 6:17,19))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits.Rdata")
+# save(saved.state, file = "inits/inits_zip.Rdata")
 
-save(coda.out, file = "coda/coda.Rdata")
+save(coda.out, file = "coda/coda_zip.Rdata")
 
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
-save(coda.rep, file = "coda/coda_rep.Rdata")
+save(coda.rep, file = "coda/coda_zip_rep.Rdata")

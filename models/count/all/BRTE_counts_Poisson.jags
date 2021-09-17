@@ -6,11 +6,11 @@ model{
   for(i in 1:N){
     # Likelihood
     counts[i] ~ dpois(mu[i])
-
+    
     # replicated data
     counts.rep[i] ~ dpois(mu[i])
     
-    # Mean model of Poisson
+    # Mean model of zero-inflated Poisson
     mu[i] <- theta[i]*area[i]
     
     # Regression model for theta (proportion) with random effects
@@ -74,13 +74,13 @@ model{
   m.ungrazed.herbicide <- exp(alpha.star + beta[3]) 
   m.ungrazed.greenstrip <- exp(alpha.star + beta[4]) 
   
-  m.fall.control <- exp(alpha.star + beta[1] ) 
-  m.fall.herbicide <- exp(alpha.star + beta[1] + beta[3]) 
-  m.fall.greenstrip <- exp(alpha.star + beta[1] + beta[4]) 
+  m.fall.control <- exp(alpha.star + beta[1]) 
+  m.fall.herbicide <- exp(alpha.star + beta[1] + beta[3] + beta[5]) 
+  m.fall.greenstrip <- exp(alpha.star + beta[1] + beta[4] + beta[7]) 
     
   m.spring.control <- exp(alpha.star + beta[2])  
-  m.spring.herbicide <- exp(alpha.star + beta[2] + beta[3]) 
-  m.spring.greenstrip <- exp(alpha.star + beta[2] + beta[4])  
+  m.spring.herbicide <- exp(alpha.star + beta[2] + beta[3] + beta[6]) 
+  m.spring.greenstrip <- exp(alpha.star + beta[2] + beta[4] + beta[8])  
   
   # Dsum: posterior predictive loss
   Dsum <- sum(Sqdiff)
