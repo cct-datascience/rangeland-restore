@@ -122,10 +122,11 @@ fig3 <- ggplot() +
         panel.grid.minor = element_blank(),
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = 12),
-        legend.position = c(.89, .9),
+        legend.position = c(.89, .92),
         legend.title = element_blank(),
         legend.background = element_rect(fill='transparent'),
-        strip.background = element_rect(fill = "transparent"))
+        strip.background = element_rect(fill = "transparent"),
+        legend.key.size = unit(.5, "lines"))
 
 jpeg(filename = "../plots/Fig3_count_greenstrip.jpg",
      height = 4, width = 6,
@@ -198,10 +199,11 @@ fig4 <- ggplot() +
         panel.grid.minor = element_blank(),
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = 10),
-        legend.position = c(.89, .9),
+        legend.position = c(.89, .92),
         legend.title = element_blank(),
         legend.background = element_rect(fill = 'transparent'),
-        strip.background = element_rect(fill = "transparent"))
+        strip.background = element_rect(fill = "transparent"),
+        legend.key.size = unit(.5, "lines"))
 
 jpeg(filename = "../plots/Fig4_count_mono.jpg",
      height = 4, width = 6,
