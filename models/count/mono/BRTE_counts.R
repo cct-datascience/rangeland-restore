@@ -19,9 +19,6 @@ dat <- count_mono %>%
   mutate(species = factor(species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL")))
 str(dat)
 
-
-dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))
-
 # Quadrat sizes (eliminate largest size)
 dat <- dat %>%
    filter(quadrat < 10000)
