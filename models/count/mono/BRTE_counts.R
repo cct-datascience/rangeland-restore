@@ -12,10 +12,14 @@ library(dplyr)
 
 # Read in data
 load("../../../cleaned_data/count_mono.Rdata") # count_mono
-dat <- count_mono
+
+# Organize: remove largest quadrat and relevel species based on fig. 6b from Porensky et al. 2018
+dat <- count_mono %>%
+  filter(quadrat < 10000) %>%
+  mutate(species = factor(species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL")))
 str(dat)
 
-# Relevel species based on fig. 6b from Porensky et al. 2018
+
 dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))
 
 # Quadrat sizes (eliminate largest size)
@@ -96,13 +100,13 @@ inits <- function(){
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("inits/inits.Rdata")# saved.state, second element is inits
+load("inits/inits_zip.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Marsaglia-Multicarry"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_Poisson.jags",
+jm <- jags.model(file = "BRTE_counts_ziPoisson.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -113,7 +117,18 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star",  # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta") # calculated terms
+            "int_Beta", "Diff_Beta", "diff_Beta", # calculated terms
+            "m.ELEL.low.ungrazed.uncoated", "m.ELEL.low.ungrazed.coated", "m.ELEL.low.fall.uncoated", "m.ELEL.low.fall.coated", "m.ELEL.low.spring.uncoated", "m.ELEL.low.spring.coated", 
+            "m.ELEL.high.ungrazed.uncoated", "m.ELEL.high.ungrazed.coated", "m.ELEL.high.fall.uncoated", "m.ELEL.high.fall.coated", "m.ELEL.high.spring.uncoated", "m.ELEL.high.spring.coated", 
+            "m.VUMI.low.ungrazed.uncoated", "m.VUMI.low.ungrazed.coated", "m.VUMI.low.fall.uncoated", "m.VUMI.low.fall.coated", "m.VUMI.low.spring.uncoated", "m.VUMI.low.spring.coated", 
+            "m.VUMI.high.ungrazed.uncoated", "m.VUMI.high.ungrazed.coated", "m.VUMI.high.fall.uncoated", "m.VUMI.high.fall.coated" , "m.VUMI.high.spring.uncoated", "m.VUMI.high.spring.coated", 
+            "m.POFE.low.ungrazed.uncoated", "m.POFE.low.ungrazed.coated", "m.POFE.low.fall.uncoated", "m.POFE.low.fall.coated", "m.POFE.low.spring.uncoated", "m.POFE.low.spring.coated", 
+            "m.POFE.high.ungrazed.uncoated", "m.POFE.high.ungrazed.coated", "m.POFE.high.fall.uncoated", "m.POFE.high.fall.coated", "m.POFE.high.spring.uncoated", "m.POFE.high.spring.coated", 
+            "m.POSE.low.ungrazed.uncoated", "m.POSE.low.ungrazed.coated", "m.POSE.low.fall.uncoated", "m.POSE.low.fall.coated", "m.POSE.low.spring.uncoated", "m.POSE.low.spring.coated", 
+            "m.POSE.high.ungrazed.uncoated", "m.POSE.high.ungrazed.coated", "m.POSE.high.fall.uncoated", "m.POSE.high.fall.coated", "m.POSE.high.spring.uncoated", "m.POSE.high.spring.coated", 
+            "m.ELTR.low.ungrazed.uncoated", "m.ELTR.low.ungrazed.coated", "m.ELTR.low.fall.uncoated", "m.ELTR.low.fall.coated", "m.ELTR.low.spring.uncoated", "m.ELTR.low.spring.coated", 
+            "m.ELTR.high.ungrazed.uncoated", "m.ELTR.high.ungrazed.coated", "m.ELTR.high.fall.uncoated", "m.ELTR.high.fall.coated", "m.ELTR.high.spring.uncoated", "m.ELTR.high.spring.coated"
+)
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
@@ -135,14 +150,14 @@ gel
 # If not converged, restart model from final iterations
 # newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(1, 3, 5:9))
+# saved.state <- removevars(newinits, variables = c(1:2, 4, 6:9))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits.Rdata")
+# save(saved.state, file = "inits/inits_zip.Rdata")
 
-save(coda.out, file = "coda/coda.Rdata")
+save(coda.out, file = "coda/coda_zip.Rdata")
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
-save(coda.rep, file = "coda/coda_rep.Rdata")
+save(coda.rep, file = "coda/coda_zip_rep.Rdata")
