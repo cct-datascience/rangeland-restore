@@ -133,7 +133,15 @@ params <- c("deviance", # evaluate fit
             "psi", "alpha", "beta", # parameters
             "tau", "sig", "tau.eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta") # monitored main and two-way treatment effects
+            "int_Beta", "Diff_Beta", "diff_Beta", # monitored main and two-way treatment effects
+            "m.mono.low.uncoated.ungrazed", "m.mono.low.uncoated.fall", "m.mono.low.uncoated.spring", 
+            "m.mono.low.coated.ungrazed", "m.mono.low.coated.fall", "m.mono.low.coated.spring",
+            "m.mono.high.uncoated.ungrazed", "m.mono.high.uncoated.fall", "m.mono.high.uncoated.spring",
+            "m.mono.high.coated.ungrazed", "m.mono.high.coated.fall", "m.mono.high.coated.spring",
+            "m.mix.low.uncoated.ungrazed", "m.mix.low.uncoated.fall", "m.mix.low.uncoated.spring",
+            "m.mix.low.coated.ungrazed", "m.mix.low.coated.fall", "m.mix.low.coated.spring",
+            "m.mix.high.uncoated.ungrazed", "m.mix.high.uncoated.fall", "m.mix.high.uncoated.spring",
+            "m.mix.high.coated.ungrazed", "m.mix.high.coated.fall", "m.mix.high.coated.spring") 
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
@@ -160,7 +168,7 @@ gel
 # newinits[[1]]
 # saved.state <- removevars(newinits, variables = c(1, 3, 5:7, 9:10))
 # saved.state[[1]]
-save(saved.state, file = "inits/inits.Rdata")
+# save(saved.state, file = "inits/inits.Rdata")
 
 save(coda.out, file = "coda/coda.Rdata")
 
