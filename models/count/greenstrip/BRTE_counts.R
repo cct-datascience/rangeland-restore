@@ -1,4 +1,4 @@
-# Cheatgrass counts modeled as Poisson distribution
+# Cheatgrass counts modeled as zero-inflated Poisson distribution
 
 library(rjags)
 load.module('dic')
@@ -103,7 +103,7 @@ initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Ma
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_Poisson.jags",
+jm <- jags.model(file = "BRTE_counts_ziPoisson.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -111,17 +111,25 @@ jm <- jags.model(file = "BRTE_counts_Poisson.jags",
 
 # params to monitor
 params <- c("deviance", "Dsum", # evaluate fit
-            "alpha", "beta",  # parameters
+            "alpha", "beta", "psi",  # parameters
             "tau.Eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta") # monitored interaction terms
+            "int_Beta", "Diff_Beta", "diff_Beta", # monitored interaction terms
+            "m.mono.low.uncoated.ungrazed", "m.mono.low.uncoated.fall", "m.mono.low.uncoated.spring", 
+            "m.mono.low.coated.ungrazed", "m.mono.low.coated.fall", "m.mono.low.coated.spring",
+            "m.mono.high.uncoated.ungrazed", "m.mono.high.uncoated.fall", "m.mono.high.uncoated.spring",
+            "m.mono.high.coated.ungrazed", "m.mono.high.coated.fall", "m.mono.high.coated.spring",
+            "m.mix.low.uncoated.ungrazed", "m.mix.low.uncoated.fall", "m.mix.low.uncoated.spring",
+            "m.mix.low.coated.ungrazed", "m.mix.low.coated.fall", "m.mix.low.coated.spring",
+            "m.mix.high.uncoated.ungrazed", "m.mix.high.uncoated.fall", "m.mix.high.uncoated.spring",
+            "m.mix.high.coated.ungrazed", "m.mix.high.coated.fall", "m.mix.high.coated.spring") 
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
 
 # plot chains
 mcmcplot(coda.out, parms = c("deviance", "Dsum", "alpha.star", 
-                             "beta", "eps.star",
+                             "beta", "psi", "eps.star",
                              "sig.eps"))
 
 # dic samples
@@ -133,16 +141,16 @@ gel <- gelman.diag(coda.out, multivariate = FALSE)
 gel
 
 # If not converged, restart model from final iterations
-# newinits <-  initfind(coda.out) 
+# newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(1, 3, 5:6))
+# saved.state <- removevars(newinits, variables = c(1:2, 4, 6:10))
 # saved.state[[1]]
 # save(saved.state, file = "inits/inits.Rdata")
 
-save(coda.out, file = "coda/coda.Rdata")
+save(coda.out, file = "coda/coda_zip.Rdata")
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
-save(coda.rep, file = "coda/coda_rep.Rdata")
+save(coda.rep, file = "coda/coda_zip_rep.Rdata")

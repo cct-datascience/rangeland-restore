@@ -82,6 +82,23 @@ diff_Beta[7] <- exp(alpha.star + beta[2] + beta[5] + beta[12]) - exp(alpha.star)
 diff_Beta[8] <- exp(alpha.star + beta[3] + beta[4] + beta[13]) - exp(alpha.star) # coated:fall
 diff_Beta[9] <- exp(alpha.star + beta[3] + beta[5] + beta[14]) - exp(alpha.star) # coated:spring  
   
+  
+  # Monitor the mean of each group
+  exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] + 
+    beta[4]*fall[i] + beta[5]*spring[i] + beta[6]*mix_high[i] + beta[7]*mix_coated[i] +
+    beta[8]*mix_fall[i] + beta[9]*mix_spring[i] + beta[10]*high_coated[i] + 
+    beta[11]*high_fall[i] + beta[12]*high_spring[i] + beta[13]*coated_fall[i] +
+    beta[14]*coated_spring[i] +
+    eps[block[i]])
+    
+  m.mono.low.uncoated.ungrazed <- exp(alpha.star) 
+  m.mono.low.uncoated.fall <- exp(alpha.star + beta[4]) 
+  m.mono.low.uncoated.spring <- exp(alpha.star + beta[5]) 
+  
+  m.mono.low.coated.ungrazed <- exp(alpha.star + beta[3]) 
+  m.mono.low.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13]) 
+  m.mono.low.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14]) 
+  
   # Dsum: posterior predictive loss
   Dsum <- sum(Sqdiff)
 }
