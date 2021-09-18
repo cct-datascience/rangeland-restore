@@ -15,7 +15,8 @@ str(dat)
 
 # Remove 2 rows with largest quadrat size
 dat <- dat %>%
-  filter(quadrat < 10000)
+  filter(quadrat < 10000) %>%
+  arrange(block)
 
 
 # Plot
@@ -79,13 +80,13 @@ inits <- function(){
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("inits/inits_zip.Rdata")# saved.state, second element is inits
+load("inits/inits_OLRE.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_ziPoisson.jags",
+jm <- jags.model(file = "BRTE_counts_PoissonOLRE.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -93,21 +94,28 @@ jm <- jags.model(file = "BRTE_counts_ziPoisson.jags",
 
 # params to monitor
 params <- c("deviance", "Dsum", # evaluate fit
-            "psi", "alpha", "beta", # parameters
+            "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
             "int_Beta", "Diff_Beta", "diff_Beta", # monitored interaction effects
             # "gam.star", "tau.Gam", "sig.gam", # nested random effects terms
             "m.ungrazed.control", "m.ungrazed.herbicide", "m.ungrazed.greenstrip",
+            "tau", "sig", # precision/sd among observation-level RE 
             "m.fall.control", "m.fall.herbicide", "m.fall.greenstrip",
             "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip") 
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 15000, thin = 5)
+                         n.iter = 150000, thin = 50)
 
 # plot chains
 mcmcplot(coda.out, parms = c("deviance", "Dsum", "beta",
-                             "alpha.star",  "eps.star", "sig.eps"))
+                             "alpha.star",  "eps.star", "sig.eps", 
+                             "sig"))
+traplot(coda.out, parms = "beta")
+traplot(coda.out, parms = "alpha.star")
+traplot(coda.out, parms = "sig.eps")
+traplot(coda.out, parms = "sig")
+traplot(coda.out, parms = "eps.star")
 
 # dic samples
 dic.out <- dic.samples(jm, n.iter = 5000)
@@ -120,15 +128,15 @@ gel
 # If not converged, restart model from final iterations
 # newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(1:2, 4, 6:17,19))
+# saved.state <- removevars(newinits, variables = c(1:2, 4, 6:19))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits_zip.Rdata")
+# save(saved.state, file = "inits/inits_OLRE.Rdata")
 
-save(coda.out, file = "coda/coda_zip.Rdata")
+save(coda.out, file = "coda/coda_OLRE.Rdata")
 
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
-                         n.iter = 15000, thin = 5)
-save(coda.rep, file = "coda/coda_zip_rep.Rdata")
+                         n.iter = 150000, thin = 50)
+save(coda.rep, file = "coda/coda_OLRE_rep.Rdata")

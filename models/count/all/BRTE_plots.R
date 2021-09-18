@@ -10,8 +10,8 @@ dat <- count_all %>%
   filter(quadrat < 10000)
 
 # Load coda and coda.rep
-load(file = "coda/coda.Rdata") # coda.out
-load(file = "coda/coda_rep.Rdata") # coda.rep
+load(file = "coda/coda_OLRE.Rdata") # coda.out
+load(file = "coda/coda_OLRE_rep.Rdata") # coda.rep
 
 
 # summarize
@@ -199,5 +199,5 @@ summary(fit.model)
 
 ggplot(fit[fit$quadrat == 100,], aes(x = BRTE)) +
   geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
-  geom_errorbar(aes(ymin = lower, ymax = upper)) +
+  geom_errorbar(aes(ymin = lower, ymax = upper), width = 0) +
   geom_point(aes(y = mean))
