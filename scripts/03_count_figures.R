@@ -12,7 +12,7 @@ raw_dat <- count_all %>%
   mutate(BRTE_count_m2 = BRTE/quadrat*100*100)
 
 # Load coda and coda.rep
-load(file = "../models/count/all/coda/coda_zip.Rdata") # coda.out
+load(file = "../models/count/all/coda/coda_OLRE.Rdata") # coda.out
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
 sum_out <- broom.mixed::tidyMCMC(coda.out, conf.int = TRUE, 
