@@ -8,11 +8,13 @@ library(cowplot)
 # Read in data
 load("../../../cleaned_data/count_greenstrip.Rdata") # count_greenstrip
 dat <- count_greenstrip %>%
-  filter(quadrat < 10000)
+  filter(quadrat < 10000) %>%
+  arrange(block)
+
 
 # Load coda and coda.rep
-load(file = "coda/coda.Rdata") # coda.out
-load(file = "coda/coda_rep.Rdata") # coda.rep
+load(file = "coda/coda_OLRE.Rdata") # coda.out
+load(file = "coda/coda_OLRE_rep.Rdata") # coda.rep
 
 # summarize
 sum.out <- coda.fast(coda.out, OpenBUGS = FALSE)
@@ -137,13 +139,14 @@ fig_2a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
+  geom_point(data = betas,
              aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "BRTE ", m^-2))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"), 
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -162,13 +165,14 @@ fig_2b <- ggplot() +
   geom_pointrange(data = beta.ints, 
                   aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
                   size = 0.5) +
-  geom_point(data = subset(beta.ints, sig == TRUE),
+  geom_point(data = beta.ints,
              aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "BRTE ", m^-2))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),

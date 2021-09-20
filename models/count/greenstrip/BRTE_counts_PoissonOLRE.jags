@@ -1,0 +1,143 @@
+# Poisson only model
+# ANOVA model to predict theta, 2-way interactions included
+# theta has random effects for block
+# and at the observation level to address overdispersion
+
+model{
+  for(i in 1:N){
+    # Likelihood
+    counts[i] ~ dpois(mu[i])
+
+    # replicated data
+    counts.rep[i] ~ dpois(mu[i])
+    
+    # Mean model of Poisson
+    mu[i] <- theta[i]*area[i]
+    
+    # Regression model for theta (proportion) with random effects
+    theta[i] <- exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] + 
+    beta[4]*fall[i] + beta[5]*spring[i] + beta[6]*mix_high[i] + beta[7]*mix_coated[i] +
+    beta[8]*mix_fall[i] + beta[9]*mix_spring[i] + beta[10]*high_coated[i] + 
+    beta[11]*high_fall[i] + beta[12]*high_spring[i] + beta[13]*coated_fall[i] +
+    beta[14]*coated_spring[i] +
+    eps[block[i]] + OLRE[i]) 
+
+    # Part of Dsum calculation
+    Sqdiff[i] <- pow(counts.rep[i] - counts[i], 2)
+  }
+  
+  # Identifiable intercept, post sweeping random effect means into intercept
+  alpha.star <- alpha + grand.mean.OLRE + eps.avg
+  
+  # Compute average block random effect and mean of mean paddock random effects
+  eps.avg <- mean(eps[])
+  grand.mean.OLRE <- mean(OLRE.avg[])
+  
+  # Relatively non-informative priors
+  
+  # random effects of block
+  for(b in 1:Nb){ # number of blocks
+    eps[b] ~ dnorm(0, tau.eps)
+    
+    # Identifiable random effects - post-sweeping of mean REs by block
+    eps.star[b] <- eps[b] + OLRE.avg[b] - grand.mean.OLRE - eps.avg
+    
+  }
+  
+  # Manually compute average OLRE within each block
+  OLRE.avg[1] <- mean(OLRE[1:112])
+  OLRE.avg[2] <- mean(OLRE[113:196])
+  OLRE.avg[3] <- mean(OLRE[197:316])
+  
+  # Block level precisions with folded T priors
+  tau.Eps ~ dt(0, Bb, 2)
+  sig.eps <- abs(tau.Eps)
+  tau.eps <- pow(sig.eps, -2)
+  
+  # dt parameters (set as data)
+  Bb <- 1/(Ab*Ab)
+  
+  # Observation-level random effects nested within block
+  for(i in 1:N) {
+    # Random effect for each plot
+    OLRE[i] ~ dnorm(0, tau)
+    
+    # Identifiable OLRE
+    OLRE.star[i] <- OLRE[i] - OLRE.avg[block[i]]
+  }
+  tau ~ dgamma (0.001, 0.001)
+  sig <- pow(tau, -0.5)
+  
+  # Coefficients
+  alpha ~ dnorm(0, 0.0001)
+  
+  for(l in 1:nL){ # Number of treatment offsets
+    beta[l] ~ dnorm(0, 0.0001)
+  }
+  
+  # Calculations to monitor, only two-way combinations
+  int_Beta[1] <- beta[1] + beta[2] + beta[6] # mix:high
+  int_Beta[2] <- beta[1] + beta[3] + beta[7] # mix:coated
+  int_Beta[3] <- beta[1] + beta[4] + beta[8] # mix:fall
+  int_Beta[4] <- beta[1] + beta[5] + beta[9] # mix:spring
+  int_Beta[5] <- beta[2] + beta[3] + beta[10] # high:coated
+  int_Beta[6] <- beta[2] + beta[4] + beta[11] # high:fall
+  int_Beta[7] <- beta[2] + beta[5] + beta[12] # high:spring
+  int_Beta[8] <- beta[3] + beta[4] + beta[13] # coated:fall
+  int_Beta[9] <- beta[3] + beta[5] + beta[14] # coated:spring
+
+  # Calculations to monitor, only two-way combinations
+  Diff_Beta[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # mix
+  Diff_Beta[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # high
+  Diff_Beta[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # coated
+  Diff_Beta[4] <- exp(alpha.star + beta[4]) - exp(alpha.star) # fall
+  Diff_Beta[5] <- exp(alpha.star + beta[5]) - exp(alpha.star) # spring
+
+  
+diff_Beta[1] <- exp(alpha.star + beta[1] + beta[2] + beta[6]) - exp(alpha.star) # mix:high
+diff_Beta[2] <- exp(alpha.star + beta[1] + beta[3] + beta[7]) - exp(alpha.star) # mix:coated
+diff_Beta[3] <- exp(alpha.star + beta[1] + beta[4] + beta[8]) - exp(alpha.star) # mix:fall
+diff_Beta[4] <- exp(alpha.star + beta[1] + beta[5] + beta[9]) - exp(alpha.star) # mix:spring
+diff_Beta[5] <- exp(alpha.star + beta[2] + beta[3] + beta[10]) - exp(alpha.star) # high:coated
+diff_Beta[6] <- exp(alpha.star + beta[2] + beta[4] + beta[11]) - exp(alpha.star) # high:fall
+diff_Beta[7] <- exp(alpha.star + beta[2] + beta[5] + beta[12]) - exp(alpha.star) # high:spring
+diff_Beta[8] <- exp(alpha.star + beta[3] + beta[4] + beta[13]) - exp(alpha.star) # coated:fall
+diff_Beta[9] <- exp(alpha.star + beta[3] + beta[5] + beta[14]) - exp(alpha.star) # coated:spring  
+  
+  
+  # Monitor the mean of each group
+  m.mono.low.uncoated.ungrazed <- exp(alpha.star) 
+  m.mono.low.uncoated.fall <- exp(alpha.star + beta[4]) 
+  m.mono.low.uncoated.spring <- exp(alpha.star + beta[5]) 
+  
+  m.mono.low.coated.ungrazed <- exp(alpha.star + beta[3]) 
+  m.mono.low.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13]) 
+  m.mono.low.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14]) 
+  
+  m.mono.high.uncoated.ungrazed <- exp(alpha.star + beta[2]) 
+  m.mono.high.uncoated.fall <- exp(alpha.star + beta[4] + beta[2] + beta[11]) 
+  m.mono.high.uncoated.spring <- exp(alpha.star + beta[5] + beta[2] + beta[12]) 
+  
+  m.mono.high.coated.ungrazed <- exp(alpha.star + beta[3] + beta[2] + beta[10]) 
+  m.mono.high.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10]) 
+  m.mono.high.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10])
+  
+  m.mix.low.uncoated.ungrazed <- exp(alpha.star + beta[1]) 
+  m.mix.low.uncoated.fall <- exp(alpha.star + beta[4] + beta[1] + beta[8]) 
+  m.mix.low.uncoated.spring <- exp(alpha.star + beta[5] + beta[1] + beta[9]) 
+  
+  m.mix.low.coated.ungrazed <- exp(alpha.star + beta[3] + beta[1] + beta[7]) 
+  m.mix.low.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[1] + beta[8] + beta[7]) 
+  m.mix.low.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[1] + beta[9] + beta[7]) 
+  
+  m.mix.high.uncoated.ungrazed <- exp(alpha.star + beta[2] + beta[1] + beta[6]) 
+  m.mix.high.uncoated.fall <- exp(alpha.star + beta[4] + beta[2] + beta[11] + beta[1] + beta[6] + beta[8]) 
+  m.mix.high.uncoated.spring <- exp(alpha.star + beta[5] + beta[2] + beta[12] + beta[1] + beta[6] + beta[9]) 
+  
+  m.mix.high.coated.ungrazed <- exp(alpha.star + beta[3] + beta[2] + beta[10] + beta[1] + beta[6] + beta[7]) 
+  m.mix.high.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10] + beta[1] + beta[6] + beta[7] + beta [8]) 
+  m.mix.high.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10] + beta[1] + beta[6] + beta[7] + beta[9])
+  
+  # Dsum: posterior predictive loss
+  Dsum <- sum(Sqdiff)
+}
