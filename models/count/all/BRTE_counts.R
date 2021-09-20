@@ -13,7 +13,7 @@ load("../../../cleaned_data/count_all.Rdata") # count_all
 dat <- count_all
 str(dat)
 
-# Remove 2 rows with largest quadrat size
+# Remove 2 rows with largest quadrat size, arrange by block (key to OL within block REs)
 dat <- dat %>%
   filter(quadrat < 10000) %>%
   arrange(block)
