@@ -9,7 +9,8 @@ library(ggthemes)
 load("../cleaned_data/count_all.Rdata") # count_all
 raw_dat <- count_all %>%
   filter(quadrat < 10000) %>%
-  mutate(BRTE_count_m2 = BRTE/quadrat*100*100)
+  mutate(BRTE_count_m2 = BRTE/quadrat*100*100) %>%
+  arrange(block)
 
 # Load coda and coda.rep
 load(file = "../models/count/all/coda/coda_OLRE.Rdata") # coda.out
@@ -67,6 +68,7 @@ dev.off()
 load("../cleaned_data/count_greenstrip.Rdata") # count_greenstrip
 raw_dat <- count_greenstrip %>%
   filter(quadrat < 10000) %>%
+  arrange(block) %>%
   mutate(BRTE_count_m2 = BRTE/quadrat*100*100,
          seed_coat = case_when(seed_coat == "C" ~ "coated",
                                seed_coat == "UC" ~ "uncoated"),
@@ -76,7 +78,7 @@ raw_dat <- count_greenstrip %>%
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
 # Load coda and coda.rep
-load(file = "../models/count/greenstrip/coda/coda_zip.Rdata") # coda.out
+load(file = "../models/count/greenstrip/coda/coda_OLRE.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
@@ -141,6 +143,7 @@ load("../cleaned_data/count_mono.Rdata") # count_mono
 # Organize: remove largest quadrat and relevel species based on fig. 6b from Porensky et al. 2018
 raw_dat <- count_mono %>%
   filter(quadrat < 10000) %>%
+  arrange(block) %>%
   mutate(BRTE_count_m2 = BRTE/quadrat*100*100,
          seed_coat = case_when(seed_coat == "C" ~ "coated",
                                seed_coat == "UC" ~ "uncoated"),
@@ -150,7 +153,7 @@ raw_dat <- count_mono %>%
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
 # Load coda and coda.rep
-load(file = "../models/count/mono/coda/coda_zip.Rdata") # coda.out
+load(file = "../models/count/mono/coda/coda_OLRE.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
