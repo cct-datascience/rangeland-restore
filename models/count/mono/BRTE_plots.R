@@ -7,12 +7,13 @@ library(cowplot)
 # Read in data
 load("../../../cleaned_data/count_mono.Rdata") # count_mono
 dat <- count_mono %>%
-  filter(quadrat < 10000)
-dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))
+  filter(quadrat < 10000) %>%
+  mutate(species = factor(species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))) %>%
+  arrange(block)
 
 # Load posterior chains
-load(file = "coda/coda.Rdata")
-load(file = "coda/coda_rep.Rdata")
+load(file = "coda/coda_OLRE.Rdata")
+load(file = "coda/coda_OLRE_rep.Rdata")
 
 # summarize
 sum.out <- coda.fast(coda.out, OpenBUGS = FALSE)
@@ -75,13 +76,14 @@ fig_1a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
+  geom_point(data = betas,
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(beta))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -103,13 +105,14 @@ fig_1b <- ggplot() +
   geom_pointrange(data = beta.ints, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(beta.ints, sig == TRUE),
+  geom_point(data = beta.ints,
              aes(x = var, y = min(pc2.5) - 0.1, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(sum(beta))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -141,13 +144,14 @@ fig_2a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
+  geom_point(data = betas,
              aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "BRTE ", m^-2))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -168,13 +172,14 @@ fig_2b <- ggplot() +
   geom_pointrange(data = beta.ints, 
                   aes(x = var, y = mean*100, ymin = pc2.5*100, ymax = pc97.5*100),
                   size = 0.5) +
-  geom_point(data = subset(beta.ints, sig == TRUE),
+  geom_point(data = beta.ints,
              aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "BRTE ", m^-2))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),

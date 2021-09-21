@@ -16,13 +16,14 @@ load("../../../cleaned_data/count_mono.Rdata") # count_mono
 # Organize: remove largest quadrat and relevel species based on fig. 6b from Porensky et al. 2018
 dat <- count_mono %>%
   filter(quadrat < 10000) %>%
-  mutate(species = factor(species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL")))
+  mutate(species = factor(species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))) %>%
+  arrange(block)
 str(dat)
 
-# Quadrat sizes (eliminate largest size)
-dat <- dat %>%
-   filter(quadrat < 10000)
-table(dat$quadrat)
+range(which(dat$block == "one"))
+range(which(dat$block == "two"))
+range(which(dat$block == "three"))
+
 
 # Plot
 dat %>%
@@ -92,18 +93,18 @@ inits <- function(){
   list(alpha = runif(1, 0, 5), 
        beta = rnorm(ncol(X) - 1, 0, 10),
        tau.Eps = runif(1, 0, 3)
-       )
+  )
 }
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("inits/inits_zip.Rdata")# saved.state, second element is inits
+load("inits/inits_OLRE.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Marsaglia-Multicarry"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_ziPoisson.jags",
+jm <- jags.model(file = "BRTE_counts_PoissonOLRE.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -112,8 +113,9 @@ jm <- jags.model(file = "BRTE_counts_ziPoisson.jags",
 # params to monitor
 params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", # parameters
-            "tau.Eps", "sig.eps", # precision/variance terms
-            "alpha.star", "eps.star",  # identifiable intercept and random effects
+            "tau.Eps", "sig.eps", # precision/variance terms for block RE
+            "tau", "sig", # precision/variance terms for OLRE
+            "alpha.star", "eps.star",  # identifiable intercept and block RE
             "int_Beta", "Diff_Beta", "diff_Beta", # calculated terms
             "m.ELEL.low.ungrazed.uncoated", "m.ELEL.low.ungrazed.coated", "m.ELEL.low.fall.uncoated", "m.ELEL.low.fall.coated", "m.ELEL.low.spring.uncoated", "m.ELEL.low.spring.coated", 
             "m.ELEL.high.ungrazed.uncoated", "m.ELEL.high.ungrazed.coated", "m.ELEL.high.fall.uncoated", "m.ELEL.high.fall.coated", "m.ELEL.high.spring.uncoated", "m.ELEL.high.spring.coated", 
@@ -128,11 +130,11 @@ params <- c("deviance", "Dsum", # evaluate fit
 )
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 15000, thin = 5)
+                         n.iter = 150000, thin = 50)
 
 # plot chains
 mcmcplot(coda.out, parms = c("deviance", "Dsum","alpha.star", 
-                             "beta", "eps.star", "sig.eps"))
+                             "beta", "eps.star", "sig.eps", "sig"))
 
 traplot(coda.out, parms = "alpha.star")
 
@@ -147,14 +149,14 @@ gel
 # If not converged, restart model from final iterations
 # newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(1:2, 4, 6:9))
+# saved.state <- removevars(newinits, variables = c(1:2, 4, 6:70))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits_zip.Rdata")
+# save(saved.state, file = "inits/inits_OLRE.Rdata")
 
-save(coda.out, file = "coda/coda_zip.Rdata")
+save(coda.out, file = "coda/coda_OLRE.Rdata")
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
-                         n.iter = 15000, thin = 5)
-save(coda.rep, file = "coda/coda_zip_rep.Rdata")
+                         n.iter = 150000, thin = 50)
+save(coda.rep, file = "coda/coda_OLRE_rep.Rdata")
