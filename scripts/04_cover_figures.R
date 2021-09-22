@@ -86,7 +86,7 @@ raw_dat <- cover_greenstrip %>%
          seed_coat = case_when(seed_coat == "C" ~ "coated",
                                seed_coat == "UC" ~ "uncoated"),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
-         spatial = factor(spatial, levels = c("mono", "mix")),
+         spatial = factor(spatial, levels = c("mix", "mono")),
          seed_rate = factor(seed_rate, levels = c("low", "high")),
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
@@ -114,7 +114,7 @@ model_dat <- sum_out %>%
          seed_coat = case_when(grepl("uncoated", param) ~ "uncoated",
                                !grepl("uncoated", param) ~ "coated",),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
-         spatial = factor(spatial, levels = c("mono", "mix")),
+         spatial = factor(spatial, levels = c("mix", "mono")),
          seed_rate = factor(seed_rate, levels = c("low", "high")),
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
@@ -137,7 +137,7 @@ fig6 <- ggplot() +
         panel.grid.minor = element_blank(),
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = 12),
-        legend.position = c(.89, .92),
+        legend.position = c(.6, .92),
         legend.title = element_blank(),
         legend.background = element_rect(fill='transparent'),
         strip.background = element_rect(fill = "transparent"),
