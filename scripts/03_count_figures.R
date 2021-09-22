@@ -63,6 +63,12 @@ jpeg(filename = "../plots/Fig2_count_all.jpg",
 print(fig2)
 dev.off()
 
+# Is greenstrip*spring marginally significant?
+all <- do.call(rbind, coda.out)
+which(colnames(all) == "diff_Beta[4]")
+ttest <- ifelse(all[,20] < 0, 0, 1)
+mean(ttest)
+
 ### GREENSTRIP
 # Read in raw data
 load("../cleaned_data/count_greenstrip.Rdata") # count_greenstrip
