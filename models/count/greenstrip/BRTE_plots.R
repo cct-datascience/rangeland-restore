@@ -25,8 +25,8 @@ sum.out$dir <- ifelse(sum.out$sig == FALSE, NA,
 
 #### Create output figures
 # All betas
-beta.labs <- c("mix", "high", "coated", "fall", "spring",
-               "mix:high", "mix:coated", "mix:fall", "mix:spring",
+beta.labs <- c("mono", "high", "coated", "fall", "spring",
+               "mono:high", "mono:coated", "mono:fall", "mono:spring",
                "high:coated", "high:fall", "high:spring", 
                "coated:fall", "coated:spring")
 beta.ind <- grep("beta", row.names(sum.out))
@@ -66,7 +66,7 @@ ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
   scale_x_discrete(labels = labs)
 
 # Only main effect betas
-beta.labs2 <- c("mix", "high", "coated", "fall", "spring")
+beta.labs2 <- c("mono", "high", "coated", "fall", "spring")
 beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind[1:length(beta.labs2)],]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -75,13 +75,14 @@ fig_1a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
+  geom_point(data = betas,
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(beta))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -90,7 +91,7 @@ fig_1a <- ggplot() +
   guides(color = "none")
 
 # Calculate interactions
-beta.labs.ints <- c("mix:high", "mix:coated", "mix:fall", "mix:spring",
+beta.labs.ints <- c("mono:high", "mono:coated", "mono:fall", "mono:spring",
                     "high:coated", "high:fall", "high:spring", 
                     "coated:fall", "coated:spring")
 beta.int.ind <- grep("int_Beta", row.names(sum.out))
@@ -101,13 +102,14 @@ fig_1b <- ggplot() +
   geom_pointrange(data = beta.ints, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(beta.ints, sig == TRUE),
+  geom_point(data = beta.ints,
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(sum(beta))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -130,7 +132,7 @@ exp(alph[1,1])*100
 exp(alph[1,4])*100
 exp(alph[1,5])*100
 
-beta.labs2 <- c("mix", "high", "coated", "fall", "spring")
+beta.labs2 <- c("mono", "high", "coated", "fall", "spring")
 beta.ind <- grep("Diff_Beta", row.names(sum.out))
 betas <- sum.out[beta.ind[1:length(beta.labs2)],]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -154,7 +156,7 @@ fig_2a <- ggplot() +
         panel.grid.minor = element_blank()) +
   guides(color = "none")
 
-beta.labs.ints <- c("mix:high", "mix:coated", "mix:fall", "mix:spring",
+beta.labs.ints <- c("mono:high", "mono:coated", "mono:fall", "mono:spring",
                     "high:coated", "high:fall", "high:spring", 
                     "coated:fall", "coated:spring")
 beta.int.ind <- grep("diff_Beta", row.names(sum.out))

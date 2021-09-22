@@ -15,9 +15,9 @@ model{
     mu[i] <- theta[i]*area[i]
     
     # Regression model for theta (proportion) with random effects
-    theta[i] <- exp(alpha + beta[1]*mix[i] + beta[2]*high[i] + beta[3]*coated[i] + 
-    beta[4]*fall[i] + beta[5]*spring[i] + beta[6]*mix_high[i] + beta[7]*mix_coated[i] +
-    beta[8]*mix_fall[i] + beta[9]*mix_spring[i] + beta[10]*high_coated[i] + 
+    theta[i] <- exp(alpha + beta[1]*mono[i] + beta[2]*high[i] + beta[3]*coated[i] + 
+    beta[4]*fall[i] + beta[5]*spring[i] + beta[6]*mono_high[i] + beta[7]*mono_coated[i] +
+    beta[8]*mono_fall[i] + beta[9]*mono_spring[i] + beta[10]*high_coated[i] + 
     beta[11]*high_fall[i] + beta[12]*high_spring[i] + beta[13]*coated_fall[i] +
     beta[14]*coated_spring[i] +
     eps[block[i]] + OLRE[i]) 
@@ -76,10 +76,10 @@ model{
   }
   
   # Calculations to monitor, only two-way combinations
-  int_Beta[1] <- beta[1] + beta[2] + beta[6] # mix:high
-  int_Beta[2] <- beta[1] + beta[3] + beta[7] # mix:coated
-  int_Beta[3] <- beta[1] + beta[4] + beta[8] # mix:fall
-  int_Beta[4] <- beta[1] + beta[5] + beta[9] # mix:spring
+  int_Beta[1] <- beta[1] + beta[2] + beta[6] # mono:high
+  int_Beta[2] <- beta[1] + beta[3] + beta[7] # mono:coated
+  int_Beta[3] <- beta[1] + beta[4] + beta[8] # mono:fall
+  int_Beta[4] <- beta[1] + beta[5] + beta[9] # mono:spring
   int_Beta[5] <- beta[2] + beta[3] + beta[10] # high:coated
   int_Beta[6] <- beta[2] + beta[4] + beta[11] # high:fall
   int_Beta[7] <- beta[2] + beta[5] + beta[12] # high:spring
@@ -87,17 +87,17 @@ model{
   int_Beta[9] <- beta[3] + beta[5] + beta[14] # coated:spring
 
   # Calculations to monitor, only two-way combinations
-  Diff_Beta[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # mix
+  Diff_Beta[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # mono
   Diff_Beta[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # high
   Diff_Beta[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # coated
   Diff_Beta[4] <- exp(alpha.star + beta[4]) - exp(alpha.star) # fall
   Diff_Beta[5] <- exp(alpha.star + beta[5]) - exp(alpha.star) # spring
 
   
-diff_Beta[1] <- exp(alpha.star + beta[1] + beta[2] + beta[6]) - exp(alpha.star) # mix:high
-diff_Beta[2] <- exp(alpha.star + beta[1] + beta[3] + beta[7]) - exp(alpha.star) # mix:coated
-diff_Beta[3] <- exp(alpha.star + beta[1] + beta[4] + beta[8]) - exp(alpha.star) # mix:fall
-diff_Beta[4] <- exp(alpha.star + beta[1] + beta[5] + beta[9]) - exp(alpha.star) # mix:spring
+diff_Beta[1] <- exp(alpha.star + beta[1] + beta[2] + beta[6]) - exp(alpha.star) # mono:high
+diff_Beta[2] <- exp(alpha.star + beta[1] + beta[3] + beta[7]) - exp(alpha.star) # mono:coated
+diff_Beta[3] <- exp(alpha.star + beta[1] + beta[4] + beta[8]) - exp(alpha.star) # mono:fall
+diff_Beta[4] <- exp(alpha.star + beta[1] + beta[5] + beta[9]) - exp(alpha.star) # mono:spring
 diff_Beta[5] <- exp(alpha.star + beta[2] + beta[3] + beta[10]) - exp(alpha.star) # high:coated
 diff_Beta[6] <- exp(alpha.star + beta[2] + beta[4] + beta[11]) - exp(alpha.star) # high:fall
 diff_Beta[7] <- exp(alpha.star + beta[2] + beta[5] + beta[12]) - exp(alpha.star) # high:spring
@@ -106,37 +106,37 @@ diff_Beta[9] <- exp(alpha.star + beta[3] + beta[5] + beta[14]) - exp(alpha.star)
   
   
   # Monitor the mean of each group
-  m.mono.low.uncoated.ungrazed <- exp(alpha.star) 
-  m.mono.low.uncoated.fall <- exp(alpha.star + beta[4]) 
-  m.mono.low.uncoated.spring <- exp(alpha.star + beta[5]) 
+  m.mix.low.uncoated.ungrazed <- exp(alpha.star) 
+  m.mix.low.uncoated.fall <- exp(alpha.star + beta[4]) 
+  m.mix.low.uncoated.spring <- exp(alpha.star + beta[5]) 
   
-  m.mono.low.coated.ungrazed <- exp(alpha.star + beta[3]) 
-  m.mono.low.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13]) 
-  m.mono.low.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14]) 
+  m.mix.low.coated.ungrazed <- exp(alpha.star + beta[3]) 
+  m.mix.low.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13]) 
+  m.mix.low.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14]) 
   
-  m.mono.high.uncoated.ungrazed <- exp(alpha.star + beta[2]) 
-  m.mono.high.uncoated.fall <- exp(alpha.star + beta[4] + beta[2] + beta[11]) 
-  m.mono.high.uncoated.spring <- exp(alpha.star + beta[5] + beta[2] + beta[12]) 
+  m.mix.high.uncoated.ungrazed <- exp(alpha.star + beta[2]) 
+  m.mix.high.uncoated.fall <- exp(alpha.star + beta[4] + beta[2] + beta[11]) 
+  m.mix.high.uncoated.spring <- exp(alpha.star + beta[5] + beta[2] + beta[12]) 
   
-  m.mono.high.coated.ungrazed <- exp(alpha.star + beta[3] + beta[2] + beta[10]) 
-  m.mono.high.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10]) 
-  m.mono.high.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10])
+  m.mix.high.coated.ungrazed <- exp(alpha.star + beta[3] + beta[2] + beta[10]) 
+  m.mix.high.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10]) 
+  m.mix.high.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10])
   
-  m.mix.low.uncoated.ungrazed <- exp(alpha.star + beta[1]) 
-  m.mix.low.uncoated.fall <- exp(alpha.star + beta[4] + beta[1] + beta[8]) 
-  m.mix.low.uncoated.spring <- exp(alpha.star + beta[5] + beta[1] + beta[9]) 
+  m.mono.low.uncoated.ungrazed <- exp(alpha.star + beta[1]) 
+  m.mono.low.uncoated.fall <- exp(alpha.star + beta[4] + beta[1] + beta[8]) 
+  m.mono.low.uncoated.spring <- exp(alpha.star + beta[5] + beta[1] + beta[9]) 
   
-  m.mix.low.coated.ungrazed <- exp(alpha.star + beta[3] + beta[1] + beta[7]) 
-  m.mix.low.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[1] + beta[8] + beta[7]) 
-  m.mix.low.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[1] + beta[9] + beta[7]) 
+  m.mono.low.coated.ungrazed <- exp(alpha.star + beta[3] + beta[1] + beta[7]) 
+  m.mono.low.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[1] + beta[8] + beta[7]) 
+  m.mono.low.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[1] + beta[9] + beta[7]) 
   
-  m.mix.high.uncoated.ungrazed <- exp(alpha.star + beta[2] + beta[1] + beta[6]) 
-  m.mix.high.uncoated.fall <- exp(alpha.star + beta[4] + beta[2] + beta[11] + beta[1] + beta[6] + beta[8]) 
-  m.mix.high.uncoated.spring <- exp(alpha.star + beta[5] + beta[2] + beta[12] + beta[1] + beta[6] + beta[9]) 
+  m.mono.high.uncoated.ungrazed <- exp(alpha.star + beta[2] + beta[1] + beta[6]) 
+  m.mono.high.uncoated.fall <- exp(alpha.star + beta[4] + beta[2] + beta[11] + beta[1] + beta[6] + beta[8]) 
+  m.mono.high.uncoated.spring <- exp(alpha.star + beta[5] + beta[2] + beta[12] + beta[1] + beta[6] + beta[9]) 
   
-  m.mix.high.coated.ungrazed <- exp(alpha.star + beta[3] + beta[2] + beta[10] + beta[1] + beta[6] + beta[7]) 
-  m.mix.high.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10] + beta[1] + beta[6] + beta[7] + beta [8]) 
-  m.mix.high.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10] + beta[1] + beta[6] + beta[7] + beta[9])
+  m.mono.high.coated.ungrazed <- exp(alpha.star + beta[3] + beta[2] + beta[10] + beta[1] + beta[6] + beta[7]) 
+  m.mono.high.coated.fall <- exp(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10] + beta[1] + beta[6] + beta[7] + beta [8]) 
+  m.mono.high.coated.spring <- exp(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10] + beta[1] + beta[6] + beta[7] + beta[9])
   
   # Dsum: posterior predictive loss
   Dsum <- sum(Sqdiff)

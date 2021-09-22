@@ -16,7 +16,8 @@ str(dat)
 # Remove largest quadrat size and arrange by block (key to OL within block REs)
 dat <- dat %>%
   filter(quadrat < 10000) %>%
-  arrange(block)
+  arrange(block) %>%
+  mutate(spatial = factor(spatial, levels = c("mix", "mono")))
 
 range(which(dat$block == "one"))
 range(which(dat$block == "two"))
@@ -58,15 +59,15 @@ log(sd(tapply(dat$BRTE, dat$block, FUN = mean)))
 datlist <- list(counts = dat$BRTE,
                 area = dat$quadrat/100, # convert to square decimeters
                 N = nrow(dat),
-                mix = as.numeric(X[,2]),
+                mono = as.numeric(X[,2]),
                 high = as.numeric(X[,3]),
                 coated = as.numeric(X[,4]),
                 fall = as.numeric(X[,5]),
                 spring = as.numeric(X[,6]),
-                mix_high = as.numeric(X[,7]),
-                mix_coated = as.numeric(X[,8]),
-                mix_fall = as.numeric(X[,9]),
-                mix_spring = as.numeric(X[,10]),
+                mono_high = as.numeric(X[,7]),
+                mono_coated = as.numeric(X[,8]),
+                mono_fall = as.numeric(X[,9]),
+                mono_spring = as.numeric(X[,10]),
                 high_coated = as.numeric(X[,11]),
                 high_fall = as.numeric(X[,12]),
                 high_spring = as.numeric(X[,13]),
@@ -83,7 +84,7 @@ str(datlist)
 # likely intercept value
 base <- dat %>%
   filter(grazing == "ungrazed",
-         spatial == "mono",
+         spatial == "mix",
          seed_rate == "low", 
          seed_coat == "UC")
 hist(base$BRTE, breaks = 30)
@@ -152,7 +153,7 @@ gel
 # saved.state[[1]]
 # save(saved.state, file = "inits/inits_OLRE.Rdata")
 
-save(coda.out, file = "coda/coda_ORLE.Rdata")
+save(coda.out, file = "coda/coda_OLRE.Rdata")
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
