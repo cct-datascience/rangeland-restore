@@ -19,7 +19,8 @@ dat <- cover_greenstrip %>%
   mutate(BRTE = BRTE/100,
          intro_forbs = intro_forbs/100,
          native_grass = native_grass/100,
-         native_forbs = native_forbs/100)
+         native_forbs = native_forbs/100,
+         spatial = factor(spatial, levels = c("mix", "mono")))
 str(dat)
 
 # Load coda and coda.rep
@@ -37,8 +38,10 @@ sum.out$dir <- ifelse(sum.out$sig == FALSE, NA,
 
 #### Create output figures
 # All betas
-beta.labs <- c("fall", "spring", "herbicide", "greenstrip", 
-               "fall:herbicide", "spring:herbicide", "fall:greenstrip", "spring:greenstrip")
+beta.labs <- c("mono", "high", "coated", "fall", "spring", 
+               "mono:high", "mono:coated", "mono:fall", "mono:spring",
+               "high:coated", "high:fall", "high:spring", 
+               "coated:fall", "coated:spring")
 beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind,]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -76,7 +79,7 @@ ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
   scale_x_discrete(labels = labs)
 
 # Only main effect betas
-beta.labs2 <- c("mix", "high", "coated", "fall", "spring")
+beta.labs2 <- c("mono", "high", "coated", "fall", "spring")
 beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind[1:length(beta.labs2)],]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -85,13 +88,14 @@ fig_1a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
+  geom_point(data = betas,
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(beta))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -101,7 +105,7 @@ fig_1a <- ggplot() +
 fig_1a
 
 # Calculate interactions
-beta.labs.ints <- c("mix:high", "mix:coated", "mix:fall", "mix:spring",
+beta.labs.ints <- c("mono:high", "mono:coated", "mono:fall", "mono:spring",
                     "high:coated", "high:fall", "high:spring", 
                     "coated:fall", "coated:spring")
 beta.int.ind <- grep("int_Beta", row.names(sum.out))
@@ -139,7 +143,7 @@ dev.off()
 alph <- sum.out[grep("alpha.star", row.names(sum.out)),]
 ilogit(alph[,1:5])
 
-beta.labs2 <- c("mix", "high", "coated", "fall", "spring")
+beta.labs2 <- c("mono", "high", "coated", "fall", "spring")
 beta.ind <- grep("Diff_Beta", row.names(sum.out))
 betas <- sum.out[beta.ind[1:length(beta.labs2)],]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -148,13 +152,14 @@ fig_2a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
+  geom_point(data = betas,
              aes(x = var, y = min(pc2.5) - 0.01, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "BRTE proportion cover"))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -162,7 +167,7 @@ fig_2a <- ggplot() +
         panel.grid.minor = element_blank()) +
   guides(color = "none")
 
-beta.labs.ints <- c("mix:high", "mix:coated", "mix:fall", "mix:spring",
+beta.labs.ints <- c("mono:high", "mono:coated", "mono:fall", "mono:spring",
                     "high:coated", "high:fall", "high:spring", 
                     "coated:fall", "coated:spring")
 beta.int.ind <- grep("diff_Beta", row.names(sum.out))
