@@ -1,4 +1,5 @@
 # Figures script for cover data at 3 levels
+library(coda)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -65,6 +66,13 @@ jpeg(filename = "../plots/Fig5_cover_all.jpg",
      units = "in", res = 600)
 print(fig5)
 dev.off()
+
+# Is spring marginally significant?
+all <- do.call(rbind, coda.out)
+which(colnames(all) == "Diff_Beta[2]")
+ttest <- ifelse(all[,2] < 0, 0, 1)
+mean(ttest)
+
 
 ### GREENSTRIP
 # read in data
