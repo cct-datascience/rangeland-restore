@@ -49,7 +49,7 @@ fig5 <- ggplot() +
                   shape = 15,
                   size = 0.75,
                   position = position_dodge(width = 0.5)) +
-  scale_y_continuous(expression(paste("BRTE ", m^-2))) +
+  scale_y_continuous(expression(paste("BRTE cover"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
   theme(panel.grid.major = element_blank(),
