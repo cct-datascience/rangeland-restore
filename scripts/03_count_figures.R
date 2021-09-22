@@ -79,7 +79,7 @@ raw_dat <- count_greenstrip %>%
          seed_coat = case_when(seed_coat == "C" ~ "coated",
                                seed_coat == "UC" ~ "uncoated"),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
-         spatial = factor(spatial, levels = c("mono", "mix")),
+         spatial = factor(spatial, levels = c("mix", "mono")),
          seed_rate = factor(seed_rate, levels = c("low", "high")),
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
@@ -107,7 +107,7 @@ model_dat <- sum_out %>%
          seed_coat = case_when(grepl("uncoated", param) ~ "uncoated",
                                !grepl("uncoated", param) ~ "coated",),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
-         spatial = factor(spatial, levels = c("mono", "mix")),
+         spatial = factor(spatial, levels = c("mix", "mono")),
          seed_rate = factor(seed_rate, levels = c("low", "high")),
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
