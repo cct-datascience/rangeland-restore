@@ -13,7 +13,7 @@ ilogit <- function(x){
 }
 
 # Read in raw data
-load("../../../cleaned_data/cover_all.Rdata") # cover_all
+load("../../../../cleaned_data/cover_all.Rdata") # cover_all
 # convert to proportions
 dat <- cover_all %>%
   mutate(BRTE = BRTE/100,
@@ -34,6 +34,10 @@ sum.out$sig <- ifelse(sum.out$pc2.5*sum.out$pc97.5 > 0, TRUE, FALSE)
 sum.out$dir <- ifelse(sum.out$sig == FALSE, NA, 
                       ifelse(sum.out$sig == TRUE & sum.out$mean > 0, "pos", "neg"))
 
+# Check rho
+sum.out[grep("rho", row.names(sum.out)),]
+length(which(dat$native_grass ==0))/nrow(dat)
+# ~42% observations of 0 native grass cover
 
 #### Create output figures
 # All betas
@@ -47,13 +51,13 @@ fig1 <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
-             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
-             shape = 8) +
+  # geom_point(data = subset(betas, sig == TRUE),
+  #            aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+  #            shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(beta))) +
   scale_x_discrete(labels = beta.labs) +
-  scale_color_manual(values = c("forestgreen", "purple")) +
+  # scale_color_manual(values = c("forestgreen", "purple")) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         axis.title.x = element_blank()) +
@@ -85,13 +89,13 @@ fig_1a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
-             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
-             shape = 8) +
+  # geom_point(data = subset(betas, sig == TRUE),
+  #            aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+  #            shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(beta))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -111,13 +115,13 @@ fig_1b <- ggplot() +
   geom_pointrange(data = beta.ints, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(beta.ints, sig == TRUE),
-             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
-             shape = 8) +
+  # geom_point(data = subset(beta.ints, sig == TRUE),
+  #            aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+  #            shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(sum(beta))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -147,13 +151,13 @@ fig_2a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
-             aes(x = var, y = min(pc2.5) - 0.01, col = as.factor(dir)),
-             shape = 8) +
+  # geom_point(data = subset(betas, sig == TRUE),
+  #            aes(x = var, y = min(pc2.5) - 0.01, col = as.factor(dir)),
+  #            shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "BRTE proportion cover"))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -171,13 +175,13 @@ fig_2b <- ggplot() +
   geom_pointrange(data = beta.ints, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(beta.ints, sig == TRUE),
-             aes(x = var, y = min(pc2.5) - .01, col = as.factor(dir)),
-             shape = 8) +
+  # geom_point(data = subset(beta.ints, sig == TRUE),
+  #            aes(x = var, y = min(pc2.5) - .01, col = as.factor(dir)),
+  #            shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "BRTE proportion cover"))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -201,7 +205,7 @@ dis.rep <- sum.rep[grep("y.d.rep", row.names(sum.rep)),]
 cont.rep <- sum.rep[grep("y.c.rep", row.names(sum.rep)),]
 
 #align
-y.temp <- with(dat, ifelse(BRTE == 1 | BRTE == 0, BRTE, NA))
+y.temp <- with(dat, ifelse(native_grass == 1 | native_grass == 0, native_grass, NA))
 y.discrete <- ifelse(is.na(y.temp), 0, 1)
 which.dis <- which(y.discrete == 1)
 which.cont <- which(y.discrete == 0)
@@ -219,10 +223,10 @@ fit <- rbind.data.frame(cbind(dat[which.dis, ],
                               upper = cont.rep$pc97.5)
 )
 
-fit.model <- lm(mean ~ BRTE, data = fit)
+fit.model <- lm(mean ~ native_grass, data = fit)
 summary(fit.model)
 
-ggplot(fit, aes(x = BRTE)) +
+ggplot(fit, aes(x = native_grass)) +
   geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
-  geom_errorbar(aes(ymin = lower, ymax = upper)) +
+  # geom_errorbar(aes(ymin = lower, ymax = upper)) +
   geom_point(aes(y = mean))
