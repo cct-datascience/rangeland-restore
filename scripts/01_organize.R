@@ -49,7 +49,7 @@ bio %>% pivot_longer(BRTE_abs:standingdead_abs,
 cover <- read_csv("../raw_data/2019_Greenstrips_Cover_and_Densities.csv",
                   na = c("na", "n/a"),
                   col_types = "cc?ciccccccccciddddddddddddddiiiiicc__________") %>%
-  select(1:27) %>%
+  select(1:28) %>%
   rename(QAQC = "Exclude for Cover Analyses",
          date = Date,
          block = Block,
@@ -71,7 +71,8 @@ cover <- read_csv("../raw_data/2019_Greenstrips_Cover_and_Densities.csv",
          bryo = "Moss/Lichen/Crust",
          litter = Litter,
          rock = Rock,
-         bare = Bare) %>%
+         bare = Bare,
+         height = "Height (cm)") %>%
   mutate(date = mdy(date),
          block = factor(block, levels = c("one", "two", "three")),
          paddock = factor(paddock, levels = 1:9),
@@ -92,17 +93,23 @@ cover <- read_csv("../raw_data/2019_Greenstrips_Cover_and_Densities.csv",
 
 # Split cover into 3 analysis levels; write out
 cover_all <- cover %>%
-  select(block, paddock, grazing, fuelbreak, BRTE:native_forbs, totveg_all, totveg_live)
+  select(block, paddock, grazing, fuelbreak, BRTE:native_forbs, 
+         bryo:height,
+         totveg_all, totveg_live)
 
 cover_greenstrip <- cover %>%
   filter(fuelbreak == "greenstrip" & !grepl("kochia", plot)) %>% # limit to greenstrips and not kochia plots
   select(block, paddock, grazing, spatial, seed_rate, seed_coat, 
-         BRTE:native_forbs, totveg_all, totveg_live)
+         BRTE:native_forbs, 
+         bryo:height,
+         totveg_all, totveg_live)
 
 cover_mono <- cover %>%
   filter(fuelbreak == "greenstrip" & spatial == "mono") %>%
   select(block, paddock, grazing, species, seed_rate, seed_coat, 
-         BRTE:native_forbs, totveg_all, totveg_live)
+         BRTE:native_forbs, 
+         bryo:height,
+         totveg_all, totveg_live)
 
 save(cover_all, file = "../cleaned_data/cover_all.Rdata")
 save(cover_greenstrip, file = "../cleaned_data/cover_greenstrip.Rdata")
