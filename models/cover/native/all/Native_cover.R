@@ -16,7 +16,14 @@ ilogit <- function(x){
 }
 
 # read in data
-dat <- read.csv("data/cover.csv")
+load("../../../../cleaned_data/cover_all.Rdata") # cover_all
+# convert to proportions
+dat <- cover_all %>%
+  mutate(BRTE = BRTE/100,
+         intro_forbs = intro_forbs/100,
+         native_grass = native_grass/100,
+         native_forbs = native_forbs/100)
+str(dat)
 
 # model matrix
 X <- model.matrix( ~ grazing * fuelbreak, data = dat) 
@@ -85,13 +92,13 @@ inits <- function(){
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("models/cover-invasive/inits/inits.Rdata")# saved.state, second element is inits
+load("inits/inits.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "models/cover-native/Native_cover_zoib.jags",
+jm <- jags.model(file = "Native_cover_zoib.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -101,25 +108,24 @@ jm <- jags.model(file = "models/cover-native/Native_cover_zoib.jags",
 params <- c("deviance", # evaluate fit
             "rho", "alpha", "beta", # parameters
             "tau", "sig", "tau.eps", "sig.eps", # precision/variance terms
-            "alpha.star", "eps.star") # identifiable intercept and random effects
+            "alpha.star", "eps.star", # identifiable intercept and random effects
+            "int_Beta", "Diff_Beta", "diff_Beta", # monitored main and two-way treatment effects
+            "m.ungrazed.control", "m.ungrazed.herbicide", "m.ungrazed.greenstrip",
+            "m.fall.control", "m.fall.herbicide", "m.fall.greenstrip",
+            "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip") 
            
 
 coda.out <- coda.samples(jm, variable.names = params,
-                         n.iter = 5000, thin = 5)
+                         n.iter = 15000, thin = 5)
 
 # plot chains
 mcmcplot(coda.out, parms = c("deviance", "rho", "beta",
                              "alpha.star",  "eps.star", 
                              "sig", "sig.eps"))
-
-traplot(coda.out, parms = "beta")
-traplot(coda.out, parms = "alpha.star")
-traplot(coda.out, parms = "sig.eps")
-traplot(coda.out, parms = "sig")
-traplot(coda.out, parms = "eps.star")
-
 caterplot(coda.out, parms = "eps.star", reorder = FALSE)
 caterplot(coda.out, parms = "beta", reorder = FALSE)
+caterplot(coda.out, parms = "Diff_Beta", reorder = FALSE)
+caterplot(coda.out, parms = "diff_Beta", reorder = FALSE)
 
 # dic samples
 dic.out <- dic.samples(jm, n.iter = 5000)
@@ -129,8 +135,18 @@ dic.out
 gel <- gelman.diag(coda.out, multivariate = FALSE)
 gel
 
+# If not converged, restart model from final iterations
+# newinits <-  initfind(coda.out)
+# newinits[[1]]
+# saved.state <- removevars(newinits, variables = c(2, 4, 6:7))
+# saved.state[[1]]
+# save(saved.state, file = "inits/inits.Rdata")
+
+save(coda.out, file = "coda/coda.Rdata")
+
 
 # Model fit
 params <- c("y.discrete.rep", "y.d.rep", "y.c.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
+save(coda.rep, file = "coda/coda_rep.Rdata")
