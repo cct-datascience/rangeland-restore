@@ -161,7 +161,7 @@ fig_2a <- ggplot() +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "Forbs proportion cover"))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("forestgreen"),
+  scale_color_manual(values = c("goldenrod", "forestgreen"),
                      na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
