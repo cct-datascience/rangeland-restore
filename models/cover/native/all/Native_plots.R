@@ -201,6 +201,7 @@ dev.off()
 
 # Replicated data summary and fit
 sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
+all.rep <- sum.rep[grep("y.discrete.rep", row.names(sum.rep)),]
 dis.rep <- sum.rep[grep("y.d.rep", row.names(sum.rep)),]
 cont.rep <- sum.rep[grep("y.c.rep", row.names(sum.rep)),]
 
@@ -229,4 +230,14 @@ summary(fit.model)
 ggplot(fit, aes(x = native_grass)) +
   geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
   # geom_errorbar(aes(ymin = lower, ymax = upper)) +
-  geom_point(aes(y = mean))
+  geom_point(aes(y = median))
+
+fit %>%
+  filter(native_grass == 0) %>%
+  ggplot(aes(x = native_grass, y = mean)) +
+  geom_point()
+
+fit %>%
+  filter(native_grass != 0) %>%
+  ggplot(aes(x = native_grass, y = mean)) +
+  geom_point()
