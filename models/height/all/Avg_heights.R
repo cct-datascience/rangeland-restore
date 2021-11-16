@@ -86,7 +86,7 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", "tau", "sig", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta", # monitored interaction effects
+            "int_Beta", # monitored interaction effects
             "m.ungrazed.control", "m.ungrazed.herbicide", "m.ungrazed.greenstrip",
             "m.fall.control", "m.fall.herbicide", "m.fall.greenstrip",
             "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip") 

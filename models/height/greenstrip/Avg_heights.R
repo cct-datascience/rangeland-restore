@@ -92,7 +92,7 @@ params <- c("deviance", "Dsum", # evaluate fit
             "alpha", "beta", # parameters
             "tau.Eps", "sig.eps", "tau", "sig", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta", # monitored interaction effects
+            "int_Beta", # monitored interaction effects
             "m.mono.low.uncoated.ungrazed", "m.mono.low.uncoated.fall", "m.mono.low.uncoated.spring", 
             "m.mono.low.coated.ungrazed", "m.mono.low.coated.fall", "m.mono.low.coated.spring",
             "m.mono.high.uncoated.ungrazed", "m.mono.high.uncoated.fall", "m.mono.high.uncoated.spring",

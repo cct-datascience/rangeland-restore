@@ -59,29 +59,19 @@ model{
   int_Beta[3] <- beta[1] + beta[4] + beta[7] # fall:greenstrip
   int_Beta[4] <- beta[2] + beta[4] + beta[8] # spring:greenstrip
   
-  # Calculations to monitor, only two-way combinations
-  Diff_Beta[1] <- exp(alpha.star + beta[1]) - exp(alpha.star) # fall
-  Diff_Beta[2] <- exp(alpha.star + beta[2]) - exp(alpha.star) # spring
-  Diff_Beta[3] <- exp(alpha.star + beta[3]) - exp(alpha.star) # herbicide
-  Diff_Beta[4] <- exp(alpha.star + beta[4]) - exp(alpha.star) # greenstrip
-
-  diff_Beta[1] <- exp(alpha.star + beta[1] + beta[3] + beta[5]) - exp(alpha.star) # fall:herbicide
-  diff_Beta[2] <- exp(alpha.star + beta[2] + beta[3] + beta[6]) - exp(alpha.star) # spring:herbicide
-  diff_Beta[3] <- exp(alpha.star + beta[1] + beta[4] + beta[7]) - exp(alpha.star) # fall:greenstrip
-  diff_Beta[4] <- exp(alpha.star + beta[2] + beta[4] + beta[8]) - exp(alpha.star) # spring:greenstrip
   
   # Monitor the mean of each group
-  m.ungrazed.control <- exp(alpha.star) 
-  m.ungrazed.herbicide <- exp(alpha.star + beta[3]) 
-  m.ungrazed.greenstrip <- exp(alpha.star + beta[4]) 
+  m.ungrazed.control <- (alpha.star) 
+  m.ungrazed.herbicide <- (alpha.star + beta[3]) 
+  m.ungrazed.greenstrip <- (alpha.star + beta[4]) 
   
-  m.fall.control <- exp(alpha.star + beta[1]) 
-  m.fall.herbicide <- exp(alpha.star + beta[1] + beta[3] + beta[5]) 
-  m.fall.greenstrip <- exp(alpha.star + beta[1] + beta[4] + beta[7]) 
+  m.fall.control <- (alpha.star + beta[1]) 
+  m.fall.herbicide <- (alpha.star + beta[1] + beta[3] + beta[5]) 
+  m.fall.greenstrip <- (alpha.star + beta[1] + beta[4] + beta[7]) 
     
-  m.spring.control <- exp(alpha.star + beta[2])  
-  m.spring.herbicide <- exp(alpha.star + beta[2] + beta[3] + beta[6]) 
-  m.spring.greenstrip <- exp(alpha.star + beta[2] + beta[4] + beta[8])  
+  m.spring.control <- (alpha.star + beta[2])  
+  m.spring.herbicide <- (alpha.star + beta[2] + beta[3] + beta[6]) 
+  m.spring.greenstrip <- (alpha.star + beta[2] + beta[4] + beta[8])  
   
   # Dsum: posterior predictive loss
   Dsum <- sum(Sqdiff)
