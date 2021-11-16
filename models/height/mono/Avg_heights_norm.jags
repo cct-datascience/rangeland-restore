@@ -1,0 +1,158 @@
+# Normal height model
+# ANOVA model to predict theta, 2-way interactions included
+# theta has random effects only for block (paddock within block is confounded with grazing + block)
+
+model{
+  for(i in 1:N){
+    # Likelihood
+    height[i] ~ dnorm(mu[i], tau)
+    
+    # replicated data
+    height.rep[i] ~ dnorm(mu[i], tau)
+    
+    # Regression model for mu with random effects
+    mu[i] <- alpha + beta[1]*POSE[i] + beta[2]*POFE[i] + beta[3]*VUMI[i] +
+    beta[4]*ELEL[i] + beta[5]*high[i] + beta[6]*fall[i] + beta[7]*spring[i] +
+    beta[8]*coated[i] +
+    beta[9]*POSE[i]*high[i] + beta[10]*POFE[i]*high[i] + beta[11]*VUMI[i]*high[i]+ beta[12]*ELEL[i]*high[i] +
+    beta[13]*POSE[i]*fall[i] + beta[14]*POFE[i]*fall[i] + beta[15]*VUMI[i]*fall[i] + beta[16]*ELEL[i]*fall[i] + 
+    beta[17]*POSE[i]*spring[i] + beta[18]*POFE[i]*spring[i] + beta[19]*VUMI[i]*spring[i] + beta[20]*ELEL[i]*spring[i] + 
+    beta[21]*POSE[i]*coated[i] + beta[22]*POFE[i]*coated[i] + beta[23]*VUMI[i]*coated[i] + beta[24]*ELEL[i]*coated[i] + 
+    beta[25]*high[i]*fall[i] + beta[26]*high[i]*spring[i] + beta[27]*high[i]*coated[i] + 
+    beta[28]*fall[i]*coated[i] + beta[29]*spring[i]*coated[i] +
+    eps[block[i]]
+    
+    # Part of Dsum calculation
+    Sqdiff[i] <- pow(height.rep[i] - height[i], 2)
+  }
+  
+  # Identifiable intercept, post sweeping random effect means into intercept
+  alpha.star <- alpha + mean(eps[])
+  
+  # Relatively non-informative priors
+  
+  # random effects of block
+  for(b in 1:Nb){ # number of blocks
+    eps[b] ~ dnorm(0, tau.eps)
+    
+    # Identifiable random effects - post-sweeping of mean REs by block
+    eps.star[b] <- eps[b] - mean(eps[])
+  }
+  
+  # Block level precisions with folded T priors
+  tau.Eps ~ dt(0, Bb, 2)
+  sig.eps <- abs(tau.Eps)
+  tau.eps <- pow(sig.eps, -2)
+  
+  # dt parameters (set as data)
+  Bb <- 1/(Ab*Ab)
+  
+  # Coefficient root notes
+  alpha ~ dnorm(0, 0.0001)
+
+  for(l in 1:nL){ # Number of treatment offsets
+    beta[l] ~ dnorm(0, 0.0001)
+  }
+  
+  # Prior for population level precision
+  tau ~ dgamma(0.01, 0.01)
+  sig <- pow(tau, -0.5)
+  
+ # Calculations to monitor, only two-way combinations
+  int_Beta[1] <- beta[1] + beta[5] + beta[9] # POSE:high
+  int_Beta[2] <- beta[2] + beta[5] + beta[10] # POFE:high
+  int_Beta[3] <- beta[3] + beta[5] + beta[11] # VUMI:high
+  int_Beta[4] <- beta[4] + beta[5] + beta[12] # ELEL:high
+  int_Beta[5] <- beta[1] + beta[6] + beta[13] # POSE:fall
+  int_Beta[6] <- beta[2] + beta[6] + beta[14] # POFE:fall
+  int_Beta[7] <- beta[3] + beta[6] + beta[15] # VUMI:fall
+  int_Beta[8] <- beta[4] + beta[6] + beta[16] # ELEL:fall
+  int_Beta[9] <- beta[1] + beta[7] + beta[17] # POSE:spring
+  int_Beta[10] <- beta[2] + beta[7] + beta[18] # POFE:spring
+  int_Beta[11] <- beta[3] + beta[7] + beta[19] # VUMI:spring
+  int_Beta[12] <- beta[4] + beta[7] + beta[20] # ELEL:spring
+  int_Beta[13] <- beta[1] + beta[8] + beta[21] # POSE:coated
+  int_Beta[14] <- beta[2] + beta[8] + beta[22] # POFE:coated
+  int_Beta[15] <- beta[3] + beta[8] + beta[23] # VUMI:coated
+  int_Beta[16] <- beta[4] + beta[8] + beta[24] # ELEL:coated
+  int_Beta[17] <- beta[5] + beta[6] + beta[25] # high:fall
+  int_Beta[18] <- beta[5] + beta[7] + beta[26] # high:spring
+  int_Beta[19] <- beta[5] + beta[8] + beta[27] # high:coated
+  int_Beta[20] <- beta[6] + beta[8] + beta[28] # fall:coated
+  int_Beta[21] <- beta[7] + beta[8] + beta[29] # spring:coated
+  
+ 
+  # Monitor group means
+m.ELEL.low.ungrazed.uncoated <- (alpha.star + beta[4])
+m.ELEL.low.ungrazed.coated <- (alpha.star + beta[8] + beta[4] + beta[24])
+m.ELEL.low.fall.uncoated <- (alpha.star + beta[6] + beta[4] + beta[16])
+m.ELEL.low.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[4] + beta[24] + beta[16])
+m.ELEL.low.spring.uncoated <- (alpha.star + beta[7] + beta[4] + beta[20])
+m.ELEL.low.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[4] + beta[24] + beta[20])
+
+m.ELEL.high.ungrazed.uncoated <- (alpha.star + beta[5]+ beta[4] + beta[12])
+m.ELEL.high.ungrazed.coated <- (alpha.star + beta[8] + beta[5] + beta[27]+ beta[4] + beta[24] + beta[12])
+m.ELEL.high.fall.uncoated <- (alpha.star + beta[6] + beta[5] + beta[25]+ beta[4] + beta[16] + beta[12])
+m.ELEL.high.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25] + beta[4] + beta[24] + beta[16] + beta[12])
+m.ELEL.high.spring.uncoated <- (alpha.star + beta[7] + beta[5] + beta[26]+ beta[4] + beta[20] + beta[12])
+m.ELEL.high.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[4] + beta[24] + beta[20] + beta[12])
+
+m.VUMI.low.ungrazed.uncoated <- (alpha.star + beta[3])
+m.VUMI.low.ungrazed.coated <- (alpha.star + beta[8] + beta[3] + beta[23])
+m.VUMI.low.fall.uncoated <- (alpha.star + beta[6] + beta[3] + beta[15])
+m.VUMI.low.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[3] + beta[23] + beta[15])
+m.VUMI.low.spring.uncoated <- (alpha.star + beta[7] + beta[3] + beta[19])
+m.VUMI.low.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[3] + beta[23] + beta[19])
+
+m.VUMI.high.ungrazed.uncoated <- (alpha.star + beta[5]+ beta[3] + beta[11])
+m.VUMI.high.ungrazed.coated <- (alpha.star + beta[8] + beta[5] + beta[27]+ beta[3] + beta[23] + beta[11])
+m.VUMI.high.fall.uncoated <- (alpha.star + beta[6] + beta[5] + beta[25]+ beta[3] + beta[15] + beta[11])
+m.VUMI.high.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25] + beta[3] + beta[23] + beta[15] + beta[11])
+m.VUMI.high.spring.uncoated <- (alpha.star + beta[7] + beta[5] + beta[26]+ beta[3] + beta[19] + beta[11])
+m.VUMI.high.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[3] + beta[23] + beta[19] + beta[11])
+
+m.POFE.low.ungrazed.uncoated <- (alpha.star + beta[2])
+m.POFE.low.ungrazed.coated <- (alpha.star + beta[8] + beta[2] + beta[22])
+m.POFE.low.fall.uncoated <- (alpha.star + beta[6] + beta[2] + beta[14])
+m.POFE.low.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[2] + beta[22] + beta[14])
+m.POFE.low.spring.uncoated <- (alpha.star + beta[7] + beta[2] + beta[18])
+m.POFE.low.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[2] + beta[22] + beta[18])
+
+m.POFE.high.ungrazed.uncoated <- (alpha.star + beta[5] + beta[2] + beta[10])
+m.POFE.high.ungrazed.coated <- (alpha.star + beta[8] + beta[5] + beta[27]+ beta[2] + beta[22] + beta[10])
+m.POFE.high.fall.uncoated <- (alpha.star + beta[6] + beta[5] + beta[25]+ beta[2] + beta[14] + beta[10])
+m.POFE.high.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25] + beta[2] + beta[22] + beta[14] + beta[10])
+m.POFE.high.spring.uncoated <- (alpha.star + beta[7] + beta[5] + beta[26] + beta[2] + beta[18] + beta[10])
+m.POFE.high.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[2] + beta[22] + beta[18] + beta[10])
+
+m.POSE.low.ungrazed.uncoated <- (alpha.star + beta[1])
+m.POSE.low.ungrazed.coated <- (alpha.star + beta[8] + beta[1] + beta[21])
+m.POSE.low.fall.uncoated <- (alpha.star + beta[6] + beta[1] + beta[13])
+m.POSE.low.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[1] + beta[21] + beta[13])
+m.POSE.low.spring.uncoated <- (alpha.star + beta[7] + beta[1] + beta[17])
+m.POSE.low.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[1] + beta[21] + beta[17])
+
+m.POSE.high.ungrazed.uncoated <- (alpha.star + beta[5] + beta[1] + beta[9])
+m.POSE.high.ungrazed.coated <- (alpha.star + beta[8] + beta[5] + beta[27] + beta[1] + beta[21] + beta[9])
+m.POSE.high.fall.uncoated <- (alpha.star + beta[6] + beta[5] + beta[25] + beta[1] + beta[13] + beta[9])
+m.POSE.high.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25]+ beta[1] + beta[21] + beta[13] + beta[9])
+m.POSE.high.spring.uncoated <- (alpha.star + beta[7] + beta[5] + beta[26]+ beta[1] + beta[17] + beta[9])
+m.POSE.high.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[1] + beta[21] + beta[17] + beta[9])
+
+m.ELTR.low.ungrazed.uncoated <- (alpha.star)
+m.ELTR.low.ungrazed.coated <- (alpha.star + beta[8])
+m.ELTR.low.fall.uncoated <- (alpha.star + beta[6])
+m.ELTR.low.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28])
+m.ELTR.low.spring.uncoated <- (alpha.star + beta[7])
+m.ELTR.low.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29])
+
+m.ELTR.high.ungrazed.uncoated <- (alpha.star + beta[5])
+m.ELTR.high.ungrazed.coated <- (alpha.star + beta[8] + beta[5] + beta[27])
+m.ELTR.high.fall.uncoated <- (alpha.star + beta[6] + beta[5] + beta[25])
+m.ELTR.high.fall.coated <- (alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25])
+m.ELTR.high.spring.uncoated <- (alpha.star + beta[7] + beta[5] + beta[26])
+m.ELTR.high.spring.coated <- (alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26])
+
+  # Dsum: posterior predictive loss
+  Dsum <- sum(Sqdiff)
+}
