@@ -76,13 +76,14 @@ fig_1a <- ggplot() +
   geom_pointrange(data = betas, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(betas, sig == TRUE),
+  geom_point(data = betas,
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, " height (cm)"))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -103,13 +104,14 @@ fig_1b <- ggplot() +
   geom_pointrange(data = beta.ints, 
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
-  geom_point(data = subset(beta.ints, sig == TRUE),
+  geom_point(data = beta.ints,
              aes(x = var, y = min(pc2.5) - 0.1, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, " height (cm)"))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
