@@ -1,0 +1,182 @@
+# two-way ANOVA for beta regression model
+model{
+  
+  for(i in 1:N){ # loop through all observations
+    y[i] ~ dbeta(p[i], q[i])
+    # replicated data
+    y.rep[i] ~ dbeta(p[i], q[i])
+    
+    # reparameterization to mean and precision
+    p[i] <- mu[i] * tau
+    q[i] <- (1 - mu[i]) * tau
+    
+    # mean ANOVA model 
+    logit(mu[i]) <- alpha + beta[1]*POSE[i] + beta[2]*POFE[i] + beta[3]*VUMI[i] +
+    beta[4]*ELEL[i] + beta[5]*high[i] + beta[6]*fall[i] + beta[7]*spring[i] +
+    beta[8]*coated[i] +
+    beta[9]*POSE[i]*high[i] + beta[10]*POFE[i]*high[i] + beta[11]*VUMI[i]*high[i]+ beta[12]*ELEL[i]*high[i] +
+    beta[13]*POSE[i]*fall[i] + beta[14]*POFE[i]*fall[i] + beta[15]*VUMI[i]*fall[i] + beta[16]*ELEL[i]*fall[i] + 
+    beta[17]*POSE[i]*spring[i] + beta[18]*POFE[i]*spring[i] + beta[19]*VUMI[i]*spring[i] + beta[20]*ELEL[i]*spring[i] + 
+    beta[21]*POSE[i]*coated[i] + beta[22]*POFE[i]*coated[i] + beta[23]*VUMI[i]*coated[i] + beta[24]*ELEL[i]*coated[i] + 
+    beta[25]*high[i]*fall[i] + beta[26]*high[i]*spring[i] + beta[27]*high[i]*coated[i] + 
+    beta[28]*fall[i]*coated[i] + beta[29]*spring[i]*coated[i] +
+    eps[block[i]]
+    
+  }
+  
+  # Identifiable intercept, post sweeping random effect means into intercept
+  alpha.star <- alpha + mean(eps[])
+  
+  # Relatively non-informative priors
+  
+  # random effects of block
+  for(b in 1:Nb){ # number of blocks
+    eps[b] ~ dnorm(0, tau.eps)
+    
+    # Identifiable random effects - post-sweeping of mean REs by block
+    eps.star[b] <- eps[b] - mean(eps[])
+  }
+  
+  # Block level precisions with folded T priors
+  tau.eps ~ dt(0, 10, 2)T(0, )
+  
+  # Coefficient root notes
+  alpha ~ dnorm(0, 0.0001)
+
+  for(l in 1:nL){ # Number of treatment offsets
+    beta[l] ~ dnorm(0, 0.0001)
+  }
+  
+  # General priors
+  tau ~ dt(0, 10, 2)T(0, )
+  sig <- pow(tau, -0.5)
+  sig.eps <- pow(tau.eps, -0.5)
+
+  # Calculations to monitor, only two-way combinations
+  int_Beta[1] <- beta[1] + beta[5] + beta[9] # POSE:high
+  int_Beta[2] <- beta[2] + beta[5] + beta[10] # POFE:high
+  int_Beta[3] <- beta[3] + beta[5] + beta[11] # VUMI:high
+  int_Beta[4] <- beta[4] + beta[5] + beta[12] # ELEL:high
+  int_Beta[5] <- beta[1] + beta[6] + beta[13] # POSE:fall
+  int_Beta[6] <- beta[2] + beta[6] + beta[14] # POFE:fall
+  int_Beta[7] <- beta[3] + beta[6] + beta[15] # VUMI:fall
+  int_Beta[8] <- beta[4] + beta[6] + beta[16] # ELEL:fall
+  int_Beta[9] <- beta[1] + beta[7] + beta[17] # POSE:spring
+  int_Beta[10] <- beta[2] + beta[7] + beta[18] # POFE:spring
+  int_Beta[11] <- beta[3] + beta[7] + beta[19] # VUMI:spring
+  int_Beta[12] <- beta[4] + beta[7] + beta[20] # ELEL:spring
+  int_Beta[13] <- beta[1] + beta[8] + beta[21] # POSE:coated
+  int_Beta[14] <- beta[2] + beta[8] + beta[22] # POFE:coated
+  int_Beta[15] <- beta[3] + beta[8] + beta[23] # VUMI:coated
+  int_Beta[16] <- beta[4] + beta[8] + beta[24] # ELEL:coated
+  int_Beta[17] <- beta[5] + beta[6] + beta[25] # high:fall
+  int_Beta[18] <- beta[5] + beta[7] + beta[26] # high:spring
+  int_Beta[19] <- beta[5] + beta[8] + beta[27] # high:coated
+  int_Beta[20] <- beta[6] + beta[8] + beta[28] # fall:coated
+  int_Beta[21] <- beta[7] + beta[8] + beta[29] # spring:coated
+  
+  # Calculations to monitor, only two-way combinations
+  Diff_Beta[1] <- ilogit(alpha.star + beta[1]) - ilogit(alpha.star) # POSE
+  Diff_Beta[2] <- ilogit(alpha.star + beta[2]) - ilogit(alpha.star) # POFE
+  Diff_Beta[3] <- ilogit(alpha.star + beta[3]) - ilogit(alpha.star) # VUMI
+  Diff_Beta[4] <- ilogit(alpha.star + beta[4]) - ilogit(alpha.star) # ELEL
+  Diff_Beta[5] <- ilogit(alpha.star + beta[5]) - ilogit(alpha.star) # high
+  Diff_Beta[6] <- ilogit(alpha.star + beta[6]) - ilogit(alpha.star) # fall
+  Diff_Beta[7] <- ilogit(alpha.star + beta[7]) - ilogit(alpha.star) # spring
+  Diff_Beta[8] <- ilogit(alpha.star + beta[8]) - ilogit(alpha.star) # coated
+
+  diff_Beta[1] <- ilogit(alpha.star + beta[1] + beta[5] + beta[9]) - ilogit(alpha.star) # POSE:high
+  diff_Beta[2] <- ilogit(alpha.star + beta[2] + beta[5] + beta[10]) - ilogit(alpha.star) # POFE:high
+  diff_Beta[3] <- ilogit(alpha.star + beta[3] + beta[5] + beta[11]) - ilogit(alpha.star) # VUMI:high
+  diff_Beta[4] <- ilogit(alpha.star + beta[4] + beta[5] + beta[12]) - ilogit(alpha.star) # ELEL:high
+  diff_Beta[5] <- ilogit(alpha.star + beta[1] + beta[6] + beta[13]) - ilogit(alpha.star) # POSE:fall
+  diff_Beta[6] <- ilogit(alpha.star + beta[2] + beta[6] + beta[14]) - ilogit(alpha.star) # POFE:fall
+  diff_Beta[7] <- ilogit(alpha.star + beta[3] + beta[6] + beta[15]) - ilogit(alpha.star) # VUMI:fall
+  diff_Beta[8] <- ilogit(alpha.star + beta[4] + beta[6] + beta[16]) - ilogit(alpha.star) # ELEL:fall
+  diff_Beta[9] <- ilogit(alpha.star + beta[1] + beta[7] + beta[17]) - ilogit(alpha.star) # POSE:spring
+  diff_Beta[10] <- ilogit(alpha.star + beta[2] + beta[7] + beta[18]) - ilogit(alpha.star) # POFE:spring
+  diff_Beta[11] <- ilogit(alpha.star + beta[3] + beta[7] + beta[19]) - ilogit(alpha.star) # VUMI:spring
+  diff_Beta[12] <- ilogit(alpha.star + beta[4] + beta[7] + beta[20]) - ilogit(alpha.star) # ELEL:spring
+  diff_Beta[13] <- ilogit(alpha.star + beta[1] + beta[8] + beta[21]) - ilogit(alpha.star) # POSE:coated
+  diff_Beta[14] <- ilogit(alpha.star + beta[2] + beta[8] + beta[22]) - ilogit(alpha.star) # POFE:coated
+  diff_Beta[15] <- ilogit(alpha.star + beta[3] + beta[8] + beta[23]) - ilogit(alpha.star) # VUMI:coated
+  diff_Beta[16] <- ilogit(alpha.star + beta[4] + beta[8] + beta[24]) - ilogit(alpha.star) # ELEL:coated
+  diff_Beta[17] <- ilogit(alpha.star + beta[5] + beta[6] + beta[25]) - ilogit(alpha.star) # high:fall
+  diff_Beta[18] <- ilogit(alpha.star + beta[5] + beta[7] + beta[26]) - ilogit(alpha.star) # high:spring
+  diff_Beta[19] <- ilogit(alpha.star + beta[5] + beta[8] + beta[27]) - ilogit(alpha.star) # high:coated
+  diff_Beta[20] <- ilogit(alpha.star + beta[6] + beta[8] + beta[28]) - ilogit(alpha.star) # fall:coated
+  diff_Beta[21] <- ilogit(alpha.star + beta[7] + beta[8] + beta[29]) - ilogit(alpha.star) # spring:coated
+  
+  
+  # Monitor group means
+m.ELEL.low.ungrazed.uncoated <- ilogit(alpha.star + beta[4])
+m.ELEL.low.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[4] + beta[24])
+m.ELEL.low.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[4] + beta[16])
+m.ELEL.low.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[4] + beta[24] + beta[16])
+m.ELEL.low.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[4] + beta[20])
+m.ELEL.low.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[4] + beta[24] + beta[20])
+
+m.ELEL.high.ungrazed.uncoated <- ilogit(alpha.star + beta[5]+ beta[4] + beta[12])
+m.ELEL.high.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[5] + beta[27]+ beta[4] + beta[24] + beta[12])
+m.ELEL.high.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[5] + beta[25]+ beta[4] + beta[16] + beta[12])
+m.ELEL.high.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25] + beta[4] + beta[24] + beta[16] + beta[12])
+m.ELEL.high.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[5] + beta[26]+ beta[4] + beta[20] + beta[12])
+m.ELEL.high.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[4] + beta[24] + beta[20] + beta[12])
+
+m.VUMI.low.ungrazed.uncoated <- ilogit(alpha.star + beta[3])
+m.VUMI.low.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[3] + beta[23])
+m.VUMI.low.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[3] + beta[15])
+m.VUMI.low.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[3] + beta[23] + beta[15])
+m.VUMI.low.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[3] + beta[19])
+m.VUMI.low.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[3] + beta[23] + beta[19])
+
+m.VUMI.high.ungrazed.uncoated <- ilogit(alpha.star + beta[5]+ beta[3] + beta[11])
+m.VUMI.high.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[5] + beta[27]+ beta[3] + beta[23] + beta[11])
+m.VUMI.high.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[5] + beta[25]+ beta[3] + beta[15] + beta[11])
+m.VUMI.high.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25] + beta[3] + beta[23] + beta[15] + beta[11])
+m.VUMI.high.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[5] + beta[26]+ beta[3] + beta[19] + beta[11])
+m.VUMI.high.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[3] + beta[23] + beta[19] + beta[11])
+
+m.POFE.low.ungrazed.uncoated <- ilogit(alpha.star + beta[2])
+m.POFE.low.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[2] + beta[22])
+m.POFE.low.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[2] + beta[14])
+m.POFE.low.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[2] + beta[22] + beta[14])
+m.POFE.low.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[2] + beta[18])
+m.POFE.low.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[2] + beta[22] + beta[18])
+
+m.POFE.high.ungrazed.uncoated <- ilogit(alpha.star + beta[5] + beta[2] + beta[10])
+m.POFE.high.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[5] + beta[27]+ beta[2] + beta[22] + beta[10])
+m.POFE.high.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[5] + beta[25]+ beta[2] + beta[14] + beta[10])
+m.POFE.high.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25] + beta[2] + beta[22] + beta[14] + beta[10])
+m.POFE.high.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[5] + beta[26] + beta[2] + beta[18] + beta[10])
+m.POFE.high.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[2] + beta[22] + beta[18] + beta[10])
+
+m.POSE.low.ungrazed.uncoated <- ilogit(alpha.star + beta[1])
+m.POSE.low.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[1] + beta[21])
+m.POSE.low.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[1] + beta[13])
+m.POSE.low.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[1] + beta[21] + beta[13])
+m.POSE.low.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[1] + beta[17])
+m.POSE.low.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[1] + beta[21] + beta[17])
+
+m.POSE.high.ungrazed.uncoated <- ilogit(alpha.star + beta[5] + beta[1] + beta[9])
+m.POSE.high.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[5] + beta[27] + beta[1] + beta[21] + beta[9])
+m.POSE.high.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[5] + beta[25] + beta[1] + beta[13] + beta[9])
+m.POSE.high.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25]+ beta[1] + beta[21] + beta[13] + beta[9])
+m.POSE.high.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[5] + beta[26]+ beta[1] + beta[17] + beta[9])
+m.POSE.high.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26] + beta[1] + beta[21] + beta[17] + beta[9])
+
+m.ELTR.low.ungrazed.uncoated <- ilogit(alpha.star)
+m.ELTR.low.ungrazed.coated <- ilogit(alpha.star + beta[8])
+m.ELTR.low.fall.uncoated <- ilogit(alpha.star + beta[6])
+m.ELTR.low.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28])
+m.ELTR.low.spring.uncoated <- ilogit(alpha.star + beta[7])
+m.ELTR.low.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29])
+
+m.ELTR.high.ungrazed.uncoated <- ilogit(alpha.star + beta[5])
+m.ELTR.high.ungrazed.coated <- ilogit(alpha.star + beta[8] + beta[5] + beta[27])
+m.ELTR.high.fall.uncoated <- ilogit(alpha.star + beta[6] + beta[5] + beta[25])
+m.ELTR.high.fall.coated <- ilogit(alpha.star + beta[8] + beta[6] + beta[28] + beta[5] + beta[27] + beta[25])
+m.ELTR.high.spring.uncoated <- ilogit(alpha.star + beta[7] + beta[5] + beta[26])
+m.ELTR.high.spring.coated <- ilogit(alpha.star + beta[8] + beta[7] + beta[29] + beta[5] + beta[27] + beta[26])
+
+}
