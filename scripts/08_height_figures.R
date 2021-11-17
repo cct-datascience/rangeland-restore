@@ -1,29 +1,25 @@
-# Figures script for biomass data
+# Figures script for average height data at 3 levels
+library(coda)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(ggthemes)
 
 ### ALL
-# Read in raw data
-load("../cleaned_data/count_all.Rdata") # count_all
-raw_dat <- count_all %>%
-  filter(quadrat < 10000) %>%
-  mutate(BRTE_count_m2 = BRTE/quadrat*100*100) %>%
-  arrange(block)
-
-SE <- function(x){sd(x, na.rm = TRUE)/sum(!is.na(x))}
-
-raw_dat %>%
-  group_by(grazing, fuelbreak) %>%
-  summarize(mean = mean(BRTE_count_m2),
-            sd = sd(BRTE_count_m2),
-            se = SE(BRTE_count_m2),
-            lower = mean - 2*se,
-            upper = mean + 2*se)
+# read in data
+load("../cleaned_data/cover_all.Rdata") # cover_all
+# convert to proportions
+raw_dat <- cover_all %>%
+  mutate(BRTE = BRTE/100,
+         intro_forbs = intro_forbs/100,
+         native_grass = native_grass/100,
+         native_forbs = native_forbs/100,
+         forbs = intro_forbs + native_forbs)
+str(raw_dat)
 
 # Load coda and coda.rep
-load(file = "../models/count/all/coda/coda_OLRE.Rdata") # coda.out
+load(file = "../models/height/all/coda/coda.Rdata") # coda.out
+
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
 sum_out <- broom.mixed::tidyMCMC(coda.out, conf.int = TRUE, 
@@ -39,24 +35,23 @@ model_dat <- sum_out %>%
                              grepl("fall", param) ~ "fall",
                              grepl("spring", param) ~ "spring"),
          fuelbreak = case_when(grepl("control", param) ~ "control",
-                         grepl("herbicide", param) ~ "herbicide",
-                         grepl("greenstrip", param) ~ "greenstrip"),
+                               grepl("herbicide", param) ~ "herbicide",
+                               grepl("greenstrip", param) ~ "greenstrip"),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
          fuelbreak = factor(fuelbreak, levels = c("control", "herbicide", "greenstrip")))
 
-
-fig2 <- ggplot() +
-  geom_point(data = raw_dat, aes(x = fuelbreak, y = BRTE_count_m2, color = grazing),
+fig12 <- ggplot() +
+  geom_point(data = raw_dat, aes(x = fuelbreak, y = height, color = grazing),
              position = position_jitterdodge(dodge.width = 0.5, jitter.width = 0.2),
              alpha = 0.2) +
-  geom_pointrange(data = model_dat, aes(x = fuelbreak, y = mean*100,
-                                        ymin = pc2.5*100,
-                                        ymax = pc97.5*100, 
+  geom_pointrange(data = model_dat, aes(x = fuelbreak, y = mean,
+                                        ymin = pc2.5,
+                                        ymax = pc97.5, 
                                         color = grazing),
                   shape = 15,
                   size = 0.75,
                   position = position_dodge(width = 0.5)) +
-  scale_y_continuous(expression(paste("BRTE ", m^-2))) +
+  scale_y_continuous(expression(paste("Average height (cm)"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
   theme(panel.grid.major = element_blank(),
@@ -67,25 +62,36 @@ fig2 <- ggplot() +
         legend.title = element_blank(),
         legend.background = element_rect(fill='transparent'))
 
-jpeg(filename = "../plots/Fig2_count_all.jpg",
+jpeg(filename = "../plots/Fig12_height_all.jpg",
      height = 4, width = 6,
      units = "in", res = 600)
-print(fig2)
+print(fig12)
 dev.off()
 
-# Is greenstrip*spring marginally significant?
+# Are fall, spring, and greenstrip marginally significant?
 all <- do.call(rbind, coda.out)
-which(colnames(all) == "diff_Beta[4]")
-ttest <- ifelse(all[,20] < 0, 0, 1)
+which(colnames(all) == "beta[1]") # fall
+ttest <- ifelse(all[,4] < 0, 0, 1)
 mean(ttest)
+which(colnames(all) == "beta[2]") # spring
+ttest <- ifelse(all[,5] < 0, 0, 1)
+mean(ttest)
+which(colnames(all) == "beta[4]") # greenstrip
+ttest <- ifelse(all[,7] < 0, 0, 1)
+mean(ttest)
+# Yes, all are marginally significant at p < 0.1
+
 
 ### GREENSTRIP
-# Read in raw data
-load("../cleaned_data/count_greenstrip.Rdata") # count_greenstrip
-raw_dat <- count_greenstrip %>%
-  filter(quadrat < 10000) %>%
-  arrange(block) %>%
-  mutate(BRTE_count_m2 = BRTE/quadrat*100*100,
+# read in data
+load("../cleaned_data/cover_greenstrip.Rdata") # cover_greenstrip
+# convert to proportions
+raw_dat <- cover_greenstrip %>%
+  mutate(BRTE = BRTE/100,
+         intro_forbs = intro_forbs/100,
+         native_grass = native_grass/100,
+         native_forbs = native_forbs/100,
+         forbs = intro_forbs + native_forbs,
          seed_coat = case_when(seed_coat == "C" ~ "coated",
                                seed_coat == "UC" ~ "uncoated"),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
@@ -94,7 +100,7 @@ raw_dat <- count_greenstrip %>%
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
 # Load coda and coda.rep
-load(file = "../models/count/greenstrip/coda/coda_OLRE.Rdata") # coda.out
+load(file = "../models/height/greenstrip/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
@@ -113,7 +119,7 @@ model_dat <- sum_out %>%
          spatial = case_when(grepl("mono", param) ~ "mono",
                              grepl("mix", param) ~ "mix"),
          seed_rate = case_when(grepl("high", param) ~ "high",
-                             grepl("low", param) ~ "low"),
+                               grepl("low", param) ~ "low"),
          seed_coat = case_when(grepl("uncoated", param) ~ "uncoated",
                                !grepl("uncoated", param) ~ "coated",),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
@@ -121,46 +127,49 @@ model_dat <- sum_out %>%
          seed_rate = factor(seed_rate, levels = c("low", "high")),
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
-fig3 <- ggplot() +
-  geom_point(data = raw_dat, aes(x = spatial, y = BRTE_count_m2, color = grazing),
+fig13 <- ggplot() +
+  geom_point(data = raw_dat, aes(x = spatial, y = height, color = grazing),
              position = position_jitterdodge(dodge.width = 0.5, jitter.width = 0.2),
              alpha = 0.2) +
-  geom_pointrange(data = model_dat, aes(x = spatial, y = mean*100,
-                                        ymin = pc2.5*100,
-                                        ymax = pc97.5*100, 
+  geom_pointrange(data = model_dat, aes(x = spatial, y = mean,
+                                        ymin = pc2.5,
+                                        ymax = pc97.5, 
                                         color = grazing),
                   shape = 15,
                   size = 0.5,
                   position = position_dodge(width = 0.5)) +
   facet_grid(rows = vars(seed_rate), cols = vars(seed_coat)) +
-  scale_y_continuous(expression(paste("BRTE ", m^-2))) +
+  scale_y_continuous(expression(paste("Average height (cm)"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = 12),
-        legend.position = c(.89, .92),
+        legend.position = c(.6, .92),
         legend.title = element_blank(),
         legend.background = element_rect(fill='transparent'),
         strip.background = element_rect(fill = "transparent"),
         legend.key.size = unit(.5, "lines"))
 
-jpeg(filename = "../plots/Fig3_count_greenstrip.jpg",
+jpeg(filename = "../plots/Fig13_height_greenstrip.jpg",
      height = 4, width = 6,
      units = "in", res = 600)
-print(fig3)
+print(fig13)
 dev.off()
+
 
 ### MONO
 # Read in data
-load("../cleaned_data/count_mono.Rdata") # count_mono
+load("../cleaned_data/cover_mono.Rdata") # cover_mono
 
 # Organize: remove largest quadrat and relevel species based on fig. 6b from Porensky et al. 2018
-raw_dat <- count_mono %>%
-  filter(quadrat < 10000) %>%
-  arrange(block) %>%
-  mutate(BRTE_count_m2 = BRTE/quadrat*100*100,
+raw_dat <- cover_mono %>%
+  mutate(BRTE = BRTE/100,
+         intro_forbs = intro_forbs/100,
+         native_grass = native_grass/100,
+         native_forbs = native_forbs/100,
+         forbs = intro_forbs + native_forbs,
          seed_coat = case_when(seed_coat == "C" ~ "coated",
                                seed_coat == "UC" ~ "uncoated"),
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
@@ -169,7 +178,7 @@ raw_dat <- count_mono %>%
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
 # Load coda and coda.rep
-load(file = "../models/count/mono/coda/coda_OLRE.Rdata") # coda.out
+load(file = "../models/height/mono/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
@@ -199,33 +208,33 @@ model_dat <- sum_out %>%
          seed_rate = factor(seed_rate, levels = c("low", "high")),
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
-fig4 <- ggplot() +
-  geom_point(data = raw_dat, aes(x = species, y = BRTE_count_m2, color = grazing),
+fig14 <- ggplot() +
+  geom_point(data = raw_dat, aes(x = species, y = height, color = grazing),
              position = position_jitterdodge(dodge.width = 0.5, jitter.width = 0.2),
              alpha = 0.2) +
-  geom_pointrange(data = model_dat, aes(x = species, y = mean*100,
-                                        ymin = pc2.5*100,
-                                        ymax = pc97.5*100, 
+  geom_pointrange(data = model_dat, aes(x = species, y = mean,
+                                        ymin = pc2.5,
+                                        ymax = pc97.5, 
                                         color = grazing),
                   shape = 15,
                   size = 0.5,
                   position = position_dodge(width = 0.5)) +
   facet_grid(rows = vars(seed_rate), cols = vars(seed_coat)) +
-  scale_y_continuous(expression(paste("BRTE ", m^-2))) +
+  scale_y_continuous(expression(paste("Average height (cm)"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.title.x = element_blank(),
         axis.text.x = element_text(size = 10),
-        legend.position = c(.89, .92),
+        legend.position = c(.4, .92),
         legend.title = element_blank(),
         legend.background = element_rect(fill = 'transparent'),
         strip.background = element_rect(fill = "transparent"),
         legend.key.size = unit(.5, "lines"))
 
-jpeg(filename = "../plots/Fig4_count_mono.jpg",
+jpeg(filename = "../plots/Fig14_height_mono.jpg",
      height = 4, width = 6,
      units = "in", res = 600)
-print(fig4)
+print(fig14)
 dev.off()
