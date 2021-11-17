@@ -131,10 +131,12 @@ coda.out <- coda.samples(jm, variable.names = params,
 mcmcplot(coda.out, parms = c("deviance", "psi", "beta",
                              "alpha.star",  "eps.star", 
                              "sig", "sig.eps"))
+traplot(coda.out, parms = "psi")
 caterplot(coda.out, parms = "eps.star", reorder = FALSE)
 caterplot(coda.out, parms = "beta", reorder = FALSE)
 caterplot(coda.out, parms = "Diff_Beta", reorder = FALSE)
 caterplot(coda.out, parms = "diff_Beta", reorder = FALSE)
+caterplot(coda.out, regex = "m\\.")
 
 # dic samples
 dic.out <- dic.samples(jm, n.iter = 5000)
