@@ -31,27 +31,24 @@ dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "E
 str(dat)
 
 # plot
-
 ggplot(dat, aes(x = species, y = BRTE, color = seed_rate)) +
   geom_point() +
-  facet_wrap(~grazing)
+  facet_grid(cols = vars(grazing),
+             rows = vars(seed_coat))
+
+# No zeroes
 
 # model matrix
 X <- model.matrix( ~ (species + seed_rate + grazing + seed_coat)^2, data = dat) 
 colnames(X)
 
-# split the data into discrete and continuous components
-y.temp <- with(dat, ifelse(BRTE == 1 | BRTE == 0, BRTE, NA))
-y.discrete <- ifelse(is.na(y.temp), 0, 1)
-
-# group discrete response + predictors
-y.d <- y.temp[!is.na(y.temp)]
-x.d <- X[y.discrete == 1,]
-n.discrete <- length(y.d)
-block.d <- as.numeric(dat$block)[y.discrete == 1]
+# split the data into 0 and continuous components
+y.temp <- with(dat, ifelse(BRTE == 0, 
+                           BRTE, NA))
+y.0 <- ifelse(is.na(y.temp), 0, 1)
 
 # group continuous response + predictors
-which.cont <- which(y.discrete == 0)
+which.cont <- which(y.0 == 0)
 y.c <- dat$BRTE[which.cont]
 x.c <- X[which.cont,]
 n.cont <- length(y.c)
@@ -59,18 +56,7 @@ block.c <- as.numeric(dat$block)[which.cont]
 
 # Assemble model inputs
 datlist <- list(N = nrow(dat),
-                y.discrete = y.discrete,
-                n.discrete = n.discrete,
-                y.d = y.d, 
-                POSE = x.d[,2],
-                POFE = x.d[,3],
-                VUMI = x.d[,4],
-                ELEL = x.d[,5],
-                high = x.d[,6],
-                fall = x.d[,7], 
-                spring = x.d[,8], 
-                coated = x.d[,9],
-                block.d = block.d,
+                y.0 = y.0,
                 n.cont = n.cont,
                 y.c = y.c,
                 POSE2 = x.c[,2],
@@ -84,6 +70,8 @@ datlist <- list(N = nrow(dat),
                 block.c = block.c,
                 Nb = length(unique(dat$block)),
                 nL = ncol(X) - 1)
+
+str(datlist)
 
 # likely intercept value
 base <- dat %>%
@@ -100,7 +88,7 @@ inits <- function(){
        beta = rnorm(ncol(X) - 1, 0, 10),
        tau = runif(1, 0, 1),
        tau.eps = runif(1, 0, 1),
-       psi = runif(1, 0, 1))
+       rho = runif(1, 0, 1))
 }
 initslist <- list(inits(), inits(), inits())
 
@@ -111,7 +99,7 @@ initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Ma
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_cover_zoib.jags",
+jm <- jags.model(file = "BRTE_cover_zib.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -119,7 +107,7 @@ jm <- jags.model(file = "BRTE_cover_zoib.jags",
 
 # params to monitor
 params <- c("deviance", # evaluate fit
-            "psi", "alpha", "beta", # parameters
+            "rho", "alpha", "beta", # parameters
             "tau", "sig", "tau.eps", "sig.eps", # precision/variance terms
             "alpha.star", "eps.star", # identifiable intercept and random effects
             "int_Beta", "Diff_Beta", "diff_Beta", # monitored main and two-way treatment effects
@@ -139,10 +127,10 @@ coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
 
 # plot chains
-mcmcplot(coda.out, parms = c("deviance", "psi", "beta",
+mcmcplot(coda.out, parms = c("deviance", "rho", "beta",
                              "alpha.star",  "eps.star", 
                              "sig", "sig.eps"))
-traplot(coda.out, parms = "psi")
+traplot(coda.out, parms = "rho")
 caterplot(coda.out, parms = "eps.star", reorder = FALSE)
 caterplot(coda.out, parms = "beta", reorder = FALSE)
 caterplot(coda.out, parms = "Diff_Beta", reorder = FALSE)
@@ -160,7 +148,7 @@ gel
 # If not converged, restart model from final iterations
 # newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(1, 3, 5:7, 9:10))
+# saved.state <- removevars(newinits, variables = c(1, 3, 5:67, 69:70))
 # saved.state[[1]]
 # save(saved.state, file = "inits/inits.Rdata")
 
@@ -168,7 +156,7 @@ save(coda.out, file = "coda/coda.Rdata")
 
 
 # Model fit
-params <- c("y.discrete.rep", "y.d.rep", "y.c.rep") #monitor replicated data
+params <- c("y.0.rep", "y.c.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
 save(coda.rep, file = "coda/coda_rep.Rdata")
