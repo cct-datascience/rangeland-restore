@@ -1,4 +1,4 @@
-# BRTE cover modeled as zero-or-1 inflated beta
+# BRTE cover modeled as zero inflated beta
 # cover proportions collected on 1x1 m quadrats
 
 library(rjags)

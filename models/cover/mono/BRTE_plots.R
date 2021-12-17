@@ -212,27 +212,18 @@ dev.off()
 
 # Replicated data summary and fit
 sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
-dis.rep <- sum.rep[grep("y.d.rep", row.names(sum.rep)),]
+z.rep <- sum.rep[grep("y.0.rep", row.names(sum.rep)),]
 cont.rep <- sum.rep[grep("y.c.rep", row.names(sum.rep)),]
 
-#align
-y.temp <- with(dat, ifelse(BRTE == 1 | BRTE == 0, BRTE, NA))
-y.discrete <- ifelse(is.na(y.temp), 0, 1)
-which.dis <- which(y.discrete == 1)
-which.cont <- which(y.discrete == 0)
 
+# No need to align, all plots had cover
 
-fit <- rbind.data.frame(cbind(dat[which.dis, ],
-                              mean = dis.rep$mean,
-                              median = dis.rep$median,
-                              lower = dis.rep$pc2.5,
-                              upper = dis.rep$pc97.5),
-                        cbind(dat[which.cont, ],
-                              mean = cont.rep$mean,
-                              median = cont.rep$median,
-                              lower = cont.rep$pc2.5,
-                              upper = cont.rep$pc97.5)
-)
+fit <- data.frame(dat,
+                  mean = cont.rep$mean,
+                  median = cont.rep$median,
+                  lower = cont.rep$pc2.5,
+                  upper = cont.rep$pc97.5)
+
 
 fit.model <- lm(mean ~ BRTE, data = fit)
 summary(fit.model)
