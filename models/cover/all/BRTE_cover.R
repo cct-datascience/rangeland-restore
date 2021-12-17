@@ -95,10 +95,6 @@ initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Su
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
-for(i in 1:3){
-  initslist[[i]]$rho <- initslist[[i]]$psi
-}
-
 # model
 jm <- jags.model(file = "BRTE_cover_zib.jags",
                  inits = initslist,
