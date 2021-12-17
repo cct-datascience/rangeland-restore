@@ -27,9 +27,15 @@ dat <- cover_all %>%
 str(dat)
 
 # check data for patterns
-summary(dat$forbs)
+summary(dat$forbs); hist(dat$forbs, breaks = 30)
 
 ggplot(dat, aes(x = grazing, y = forbs)) +
+  geom_point() +
+  facet_wrap(~fuelbreak)
+
+dat %>%
+  filter(forbs == 0) %>%
+  ggplot(aes(x = grazing, y = forbs)) +
   geom_point() +
   facet_wrap(~fuelbreak)
 
@@ -37,19 +43,13 @@ ggplot(dat, aes(x = grazing, y = forbs)) +
 X <- model.matrix( ~ grazing * fuelbreak, data = dat) 
 colnames(X)
 
-# split the data into discrete and continuous components
-y.temp <- with(dat, ifelse(forbs == 1 | forbs == 0, 
+# split the data into 0 and continuous components
+y.temp <- with(dat, ifelse(forbs == 0, 
                            forbs, NA))
-y.discrete <- ifelse(is.na(y.temp), 0, 1)
-
-# group discrete response + predictors
-y.d <- y.temp[!is.na(y.temp)]
-x.d <- X[y.discrete == 1,]
-n.discrete <- length(y.d)
-block.d <- as.numeric(dat$block)[y.discrete == 1]
+y.0 <- ifelse(is.na(y.temp), 0, 1)
 
 # group continuous response + predictors
-which.cont <- which(y.discrete == 0)
+which.cont <- which(y.0 == 0)
 y.c <- dat$forbs[which.cont]
 x.c <- X[which.cont,]
 n.cont <- length(y.c)
@@ -57,18 +57,7 @@ block.c <- as.numeric(dat$block)[which.cont]
 
 # Assemble model inputs
 datlist <- list(N = nrow(dat),
-                y.discrete = y.discrete,
-                n.discrete = n.discrete,
-                y.d = y.d, 
-                fall = x.d[2],
-                spring = x.d[3],
-                herbicide = x.d[4],
-                greenstrip = x.d[5],
-                fall_herbicide = x.d[6],
-                spring_herbicide = x.d[7],
-                fall_greenstrip = x.d[8],
-                spring_greenstrip = x.d[9],
-                block.d = block.d,
+                y.0 = y.0,
                 n.cont = n.cont,
                 y.c = y.c,
                 fall2 = x.c[,2],
@@ -82,6 +71,7 @@ datlist <- list(N = nrow(dat),
                 block.c = block.c,
                 Nb = length(unique(dat$block)),
                 nL = ncol(X) - 1)
+str(datlist)
 
 # likely intercept value
 base <- dat %>%
@@ -106,7 +96,7 @@ initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Su
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "Forbs_cover_zoib.jags",
+jm <- jags.model(file = "Forbs_cover_zib.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -156,7 +146,7 @@ save(coda.out, file = "coda/coda.Rdata")
 
 
 # Model fit
-params <- c("y.discrete.rep", "y.d.rep", "y.c.rep") #monitor replicated data
+params <- c("y.0.rep", "y.c.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
 save(coda.rep, file = "coda/coda_rep.Rdata")
