@@ -25,7 +25,7 @@ str(dat)
 
 # Load coda and coda.rep
 load(file = "coda/coda.Rdata") # coda.out
-load(file = "coda/coda_rep.Rdata") # coda.rep
+# load(file = "coda/coda_rep.Rdata") # coda.rep
 
 
 # summarize
@@ -202,34 +202,34 @@ plot_grid(fig_2a, fig_2b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
 dev.off()
 
 
-# Replicated data summary and fit
-sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
-dis.rep <- sum.rep[grep("y.d.rep", row.names(sum.rep)),]
-cont.rep <- sum.rep[grep("y.c.rep", row.names(sum.rep)),]
-
-#align
-y.temp <- with(dat, ifelse(BRTE == 1 | BRTE == 0, BRTE, NA))
-y.discrete <- ifelse(is.na(y.temp), 0, 1)
-which.dis <- which(y.discrete == 1)
-which.cont <- which(y.discrete == 0)
-
-
-fit <- rbind.data.frame(cbind(dat[which.dis, ],
-                              mean = dis.rep$mean,
-                              median = dis.rep$median,
-                              lower = dis.rep$pc2.5,
-                              upper = dis.rep$pc97.5),
-                        cbind(dat[which.cont, ],
-                              mean = cont.rep$mean,
-                              median = cont.rep$median,
-                              lower = cont.rep$pc2.5,
-                              upper = cont.rep$pc97.5)
-)
-
-fit.model <- lm(mean ~ BRTE, data = fit)
-summary(fit.model)
-
-ggplot(fit, aes(x = BRTE)) +
-  geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
-  geom_errorbar(aes(ymin = lower, ymax = upper)) +
-  geom_point(aes(y = mean))
+# # Replicated data summary and fit
+# sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
+# dis.rep <- sum.rep[grep("y.d.rep", row.names(sum.rep)),]
+# cont.rep <- sum.rep[grep("y.c.rep", row.names(sum.rep)),]
+# 
+# #align
+# y.temp <- with(dat, ifelse(BRTE == 1 | BRTE == 0, BRTE, NA))
+# y.discrete <- ifelse(is.na(y.temp), 0, 1)
+# which.dis <- which(y.discrete == 1)
+# which.cont <- which(y.discrete == 0)
+# 
+# 
+# fit <- rbind.data.frame(cbind(dat[which.dis, ],
+#                               mean = dis.rep$mean,
+#                               median = dis.rep$median,
+#                               lower = dis.rep$pc2.5,
+#                               upper = dis.rep$pc97.5),
+#                         cbind(dat[which.cont, ],
+#                               mean = cont.rep$mean,
+#                               median = cont.rep$median,
+#                               lower = cont.rep$pc2.5,
+#                               upper = cont.rep$pc97.5)
+# )
+# 
+# fit.model <- lm(mean ~ BRTE, data = fit)
+# summary(fit.model)
+# 
+# ggplot(fit, aes(x = BRTE)) +
+#   geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
+#   geom_errorbar(aes(ymin = lower, ymax = upper)) +
+#   geom_point(aes(y = mean))
