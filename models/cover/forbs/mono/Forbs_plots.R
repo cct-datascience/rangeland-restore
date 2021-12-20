@@ -219,11 +219,27 @@ dev.off()
 
 # Replicated data summary and fit
 sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
+z.rep <- sum.rep[grep("y.0.rep", row.names(sum.rep)),]
+cont.rep <- sum.rep[grep("y.c.rep", row.names(sum.rep)),]
 
-fit <- data.frame(dat,
-                  mean = sum.rep$mean,
-                  lower = sum.rep$pc2.5,
-                  upper = sum.rep$pc97.5)
+#align
+y.temp <- with(dat, ifelse(forbs == 1 | forbs == 0, forbs, NA))
+y.0 <- ifelse(is.na(y.temp), 0, 1)
+which.0 <- which(y.0 == 1)
+which.cont <- which(y.0 == 0)
+
+
+fit <- rbind.data.frame(cbind(dat[which.0, ],
+                              mean = z.rep$mean[which.0],
+                              median = z.rep$median[which.0],
+                              lower = z.rep$pc2.5[which.0],
+                              upper = z.rep$pc97.5[which.0]),
+                        cbind(dat[which.cont, ],
+                              mean = cont.rep$mean,
+                              median = cont.rep$median,
+                              lower = cont.rep$pc2.5,
+                              upper = cont.rep$pc97.5)
+)
 
 
 fit.model <- lm(mean ~ forbs, data = fit)
