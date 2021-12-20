@@ -2,6 +2,7 @@
 library(postjags)
 library(ggplot2)
 library(dplyr)
+library(broom.mixed)
 library(cowplot)
 
 # logit and antilogit functions
@@ -28,136 +29,97 @@ load(file = "coda/coda_rep.Rdata") # coda.rep
 
 
 # summarize
-sum.out <- coda.fast(coda.out, OpenBUGS = FALSE)
-sum.out$var <- row.names(sum.out)
-sum.out$sig <- ifelse(sum.out$pc2.5*sum.out$pc97.5 > 0, TRUE, FALSE)
-sum.out$dir <- ifelse(sum.out$sig == FALSE, NA, 
-                      ifelse(sum.out$sig == TRUE & sum.out$mean > 0, "pos", "neg"))
-
-# Check rho
-sum.out[grep("rho", row.names(sum.out)),]
-length(which(dat$native_grass ==0))/nrow(dat)
-# ~42% observations of 0 native grass cover
+sum.out <- tidyMCMC(coda.out, 
+                    conf.int = TRUE,
+                    conf.level = 0.95) %>%
+  mutate(sig = ifelse(conf.low * conf.high > 0, TRUE, FALSE),
+         dir = ifelse(sig == FALSE, NA, 
+                      ifelse(sig == TRUE & estimate > 0, "pos", "neg")))
 
 #### Create output figures
+# All bs
+b.labs <- c("fall", "spring", "herbicide", "greenstrip", 
+            "fall:herbicide", "spring:herbicide", "fall:greenstrip", "spring:greenstrip")
+bs <- filter(sum.out, grepl("^b\\[", term))
+fig1a <- ggplot() +
+  geom_pointrange(data = bs, 
+                  aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high),
+                  size = 0.5) +
+  geom_point(data = subset(bs, sig == TRUE),
+             aes(x = term, y = min(bs$conf.low) - 0.1, col = dir),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous("b terms") +
+  scale_x_discrete(labels = b.labs) +
+  scale_color_manual(values = c("goldenrod", "forestgreen")) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_blank()) +
+  guides(color = "none")
 # All betas
 beta.labs <- c("fall", "spring", "herbicide", "greenstrip", 
                "fall:herbicide", "spring:herbicide", "fall:greenstrip", "spring:greenstrip")
-beta.ind <- grep("beta", row.names(sum.out))
-betas <- sum.out[beta.ind,]
-betas$var <- factor(betas$var, levels = row.names(betas))
-str(betas)
-fig1 <- ggplot() +
+betas <- filter(sum.out, grepl("^beta\\[", term))
+fig1b <- ggplot() +
   geom_pointrange(data = betas, 
-                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high),
                   size = 0.5) +
-  # geom_point(data = subset(betas, sig == TRUE),
-  #            aes(x = var, y = min(pc2.5) - 0.1, col = dir),
-  #            shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(beta))) +
+  scale_y_continuous("Beta terms") +
   scale_x_discrete(labels = beta.labs) +
-  # scale_color_manual(values = c("forestgreen", "purple")) +
+  # scale_color_manual(values = c("goldenrod", "forestgreen")) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
         axis.title.x = element_blank()) +
   guides(color = "none")
 
-jpeg(filename = "plots/fig1_betas2.jpg", 
-     width = 6, 
-     height = 3, 
-     units = "in",
-     res = 600)
-print(fig1)
-dev.off()
+plot_grid(fig1a, fig1b, ncol = 1, labels = letters)
 
 # Random effects
 labs <- c("Block 1", "Block 2", "Block 3")
-prob.eps <- grep("eps.star", row.names(sum.out))
-ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
-  geom_pointrange(aes(ymin = pc2.5, ymax = pc97.5)) +
+prob.eps <- filter(sum.out, grepl("eps.star\\[", term))
+fig2a <- ggplot(prob.eps, aes(x = term, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
   geom_hline(yintercept = 0, color = "red", lty = 2) +
-  scale_x_discrete(labels = labs)
+  theme_bw() +
+  scale_x_discrete(labels = labs) +
+  scale_y_continuous("Random effect") +
+  theme(axis.title.x = element_blank())
 
-# Only main effect betas
-beta.labs2 <- c("fall", "spring", "herbicide", "greenstrip")
-beta.ind <- grep("beta", row.names(sum.out))
-betas <- sum.out[beta.ind[1:length(beta.labs2)],]
-betas$var <- factor(betas$var, levels = row.names(betas))
-str(betas)
-fig_1a <- ggplot() +
-  geom_pointrange(data = betas, 
-                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
+prob.eps.c <- filter(sum.out, grepl("eps.star.c\\[", term))
+fig2b <- ggplot(prob.eps.c, aes(x = term, y = estimate)) +
+  geom_pointrange(aes(ymin = conf.low, ymax = conf.high)) +
+  geom_hline(yintercept = 0, color = "red", lty = 2) +
+  theme_bw() +
+  scale_x_discrete(labels = labs) +
+  scale_y_continuous("Random effect") +
+  theme(axis.title.x = element_blank())
+
+plot_grid(fig2a, fig2b, ncol = 1, labels = letters)
+
+# Calculate total interactions
+# convert to probability of absence (b)
+# convert to % cover (beta)
+
+labs1 <- c("fall", "spring", "herbicide", "greenstrip")
+labs2 <- c("fall:herbicide", "spring:herbicide", 
+           "fall:greenstrip", "spring:greenstrip")
+b_main <- filter(sum.out, grepl("Diff\\_b", term))
+beta_main <- filter(sum.out, grepl("Diff\\_Beta", term))
+b_int <- filter(sum.out, grepl("diff\\_b", term))
+beta_int <- filter(sum.out, grepl("diff\\_Beta", term))
+
+fig_3a <- ggplot() +
+  geom_pointrange(data = b_main, 
+                  aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high),
                   size = 0.5) +
-  # geom_point(data = subset(betas, sig == TRUE),
-  #            aes(x = var, y = min(pc2.5) - 0.1, col = dir),
-  #            shape = 8) +
+  geom_point(data = subset(b_main, sig == TRUE),
+             aes(x = term, y = min(conf.low) - 0.05, col = as.factor(dir)),
+             shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(beta))) +
-  scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
-  coord_flip() +
-  theme_bw(base_size = 14) +
-  theme(axis.title.y = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank()) +
-  guides(color = "none")
-fig_1a
-
-# Calculate interactions
-beta.labs.ints <- c("fall:herbicide", "spring:herbicide", 
-                    "fall:greenstrip", "spring:greenstrip")
-beta.int.ind <- grep("int_Beta", row.names(sum.out))
-beta.ints <- sum.out[beta.int.ind,]
-beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
-str(beta.ints)
-fig_1b <- ggplot() +
-  geom_pointrange(data = beta.ints, 
-                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
-                  size = 0.5) +
-  # geom_point(data = subset(beta.ints, sig == TRUE),
-  #            aes(x = var, y = min(pc2.5) - 0.1, col = dir),
-  #            shape = 8) +
-  geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(sum(beta))) +
-  scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
-  coord_flip() +
-  theme_bw(base_size = 14) +
-  theme(axis.title.y = element_blank(),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank()) +
-  guides(color = "none")
-fig_1b
-
-jpeg(filename = "plots/fig1_betas.jpg", 
-     width = 6, 
-     height = 4, 
-     units = "in",
-     res = 600)
-plot_grid(fig_1a, fig_1b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
-dev.off()
-
-# Convert to % cover differences (main and interaction effects)
-alph <- sum.out[grep("alpha.star", row.names(sum.out)),]
-ilogit(alph[,1:5])
-
-beta.labs2 <- c("fall", "spring", "herbicide", "greenstrip")
-beta.ind <- grep("Diff_Beta", row.names(sum.out))
-betas <- sum.out[beta.ind[1:length(beta.labs2)],]
-betas$var <- factor(betas$var, levels = row.names(betas))
-str(betas)
-fig_2a <- ggplot() +
-  geom_pointrange(data = betas, 
-                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
-                  size = 0.5) +
-  # geom_point(data = subset(betas, sig == TRUE),
-  #            aes(x = var, y = min(pc2.5) - 0.01, col = as.factor(dir)),
-  #            shape = 8) +
-  geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "BRTE proportion cover"))) +
-  scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
-  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
+  scale_x_discrete(limits = rev(b_main$term), labels = rev(labs1)) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -165,79 +127,63 @@ fig_2a <- ggplot() +
         panel.grid.minor = element_blank()) +
   guides(color = "none")
 
-beta.labs.ints <- c("fall:herbicide", "spring:herbicide", 
-                    "fall:greenstrip", "spring:greenstrip")
-beta.int.ind <- grep("diff_Beta", row.names(sum.out))
-beta.ints <- sum.out[beta.int.ind,]
-beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
-str(beta.ints)
-fig_2b <- ggplot() +
-  geom_pointrange(data = beta.ints, 
-                  aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
+fig_3b <- ggplot() +
+  geom_pointrange(data = b_int, 
+                  aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high),
                   size = 0.5) +
-  # geom_point(data = subset(beta.ints, sig == TRUE),
-  #            aes(x = var, y = min(pc2.5) - .01, col = as.factor(dir)),
-  #            shape = 8) +
+  geom_point(data = subset(b_int, sig == TRUE),
+             aes(x = term, y = min(conf.low) - 0.05, col = as.factor(dir)),
+             shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "BRTE proportion cover"))) +
-  scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
-  # scale_color_manual(values = c("goldenrod3", "forestgreen")) +
+  scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
+  scale_x_discrete(limits = rev(b_int$term), labels = rev(labs2)) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
   guides(color = "none")
-fig_2b
 
-jpeg(filename = "plots/fig2_betas.jpg", 
+fig_3c <- ggplot() +
+  geom_pointrange(data = beta_main, 
+                  aes(x = term, y = estimate*100, 
+                      ymin = conf.low*100, 
+                      ymax = conf.high*100),
+                  size = 0.5) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " % cover"))) +
+  scale_x_discrete(limits = rev(beta_main$term), labels = rev(labs1)) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+
+fig_3d <- ggplot() +
+  geom_pointrange(data = beta_int, 
+                  aes(x = term, y = estimate*100, 
+                      ymin = conf.low*100, 
+                      ymax = conf.high*100),
+                  size = 0.5) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " % cover"))) +
+  scale_x_discrete(limits = rev(beta_int$term), labels = rev(labs2)) +
+  scale_color_manual(values = c("forestgreen")) +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+
+
+
+jpeg(filename = "plots/fig_betas.jpg", 
      width = 8, 
      height = 6, 
      units = "in",
      res = 600)
-plot_grid(fig_2a, fig_2b, ncol = 2, rel_widths = c(4, 5), labels = "auto")
+plot_grid(fig_3a, fig_3b, fig_3c, fig_3d, ncol = 2, labels = letters)
 dev.off()
 
-
-# Replicated data summary and fit
-sum.rep <- coda.fast(coda.rep, OpenBUGS = FALSE)
-all.rep <- sum.rep[grep("y.discrete.rep", row.names(sum.rep)),]
-dis.rep <- sum.rep[grep("y.d.rep", row.names(sum.rep)),]
-cont.rep <- sum.rep[grep("y.c.rep", row.names(sum.rep)),]
-
-#align
-y.temp <- with(dat, ifelse(native_grass == 1 | native_grass == 0, native_grass, NA))
-y.discrete <- ifelse(is.na(y.temp), 0, 1)
-which.dis <- which(y.discrete == 1)
-which.cont <- which(y.discrete == 0)
-
-
-fit <- rbind.data.frame(cbind(dat[which.dis, ],
-                              mean = dis.rep$mean,
-                              median = dis.rep$median,
-                              lower = dis.rep$pc2.5,
-                              upper = dis.rep$pc97.5),
-                        cbind(dat[which.cont, ],
-                              mean = cont.rep$mean,
-                              median = cont.rep$median,
-                              lower = cont.rep$pc2.5,
-                              upper = cont.rep$pc97.5)
-)
-
-fit.model <- lm(mean ~ native_grass, data = fit)
-summary(fit.model)
-
-ggplot(fit, aes(x = native_grass)) +
-  geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
-  # geom_errorbar(aes(ymin = lower, ymax = upper)) +
-  geom_point(aes(y = median))
-
-fit %>%
-  filter(native_grass == 0) %>%
-  ggplot(aes(x = native_grass, y = mean)) +
-  geom_point()
-
-fit %>%
-  filter(native_grass != 0) %>%
-  ggplot(aes(x = native_grass, y = mean)) +
-  geom_point()

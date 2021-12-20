@@ -32,16 +32,10 @@ colnames(X)
 # split the data into discrete and continuous components
 y.temp <- with(dat, ifelse(native_grass == 1 | native_grass == 0, 
                            native_grass, NA))
-y.discrete <- ifelse(is.na(y.temp), 0, 1)
-
-# group discrete response + predictors
-y.d <- y.temp[!is.na(y.temp)]
-x.d <- X[y.discrete == 1,]
-n.discrete <- length(y.d)
-block.d <- as.numeric(dat$block)[y.discrete == 1]
+y.0 <- ifelse(is.na(y.temp), 0, 1)
 
 # group continuous response + predictors
-which.cont <- which(y.discrete == 0)
+which.cont <- which(y.0 == 0)
 y.c <- dat$native_grass[which.cont]
 x.c <- X[which.cont,]
 n.cont <- length(y.c)
@@ -49,18 +43,16 @@ block.c <- as.numeric(dat$block)[which.cont]
 
 # Assemble model inputs
 datlist <- list(N = nrow(dat),
-                y.discrete = y.discrete,
-                n.discrete = n.discrete,
-                y.d = y.d, 
-                fall = x.d[,2],
-                spring = x.d[,3],
-                herbicide = x.d[,4],
-                greenstrip = x.d[,5],
-                fall_herbicide = x.d[,6],
-                spring_herbicide = x.d[,7],
-                fall_greenstrip = x.d[,8],
-                spring_greenstrip = x.d[,9],
-                block.d = block.d,
+                y.0 = y.0,
+                fall = X[,2],
+                spring = X[,3],
+                herbicide = X[,4],
+                greenstrip = X[,5],
+                fall_herbicide = X[,6],
+                spring_herbicide = X[,7],
+                fall_greenstrip = X[,8],
+                spring_greenstrip = X[,9],
+                block = as.numeric(dat$block),
                 n.cont = n.cont,
                 y.c = y.c,
                 fall2 = x.c[,2],
@@ -83,11 +75,13 @@ logit(median(base$native_grass))
 
 # generate random initials
 inits <- function(){
-  list(alpha = rnorm(1, 0, 10),
+  list(a = rnorm(1, 0, 10),
+       b = rnorm(ncol(X) - 1, 0, 10),
+       alpha = rnorm(1, 0, 10),
        beta = rnorm(ncol(X) - 1, 0, 10),
        tau = runif(1, 0, 1),
        tau.eps = runif(1, 0, 1),
-       rho = runif(1, 0, 1))
+       tau.eps.c = runif(1, 0, 1))
 }
 initslist <- list(inits(), inits(), inits())
 
@@ -97,8 +91,14 @@ initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Su
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
+for(i in 1:3){
+  initslist[[i]]$a <- rnorm(1, 0, 10)
+  initslist[[i]]$b <- rnorm(ncol(X) - 1, 0, 10)
+  initslist[[i]]$tau.eps.c <- runif(1, 0, 1)
+  initslist[[i]] <- initslist[[i]][-3]
+}
 # model
-jm <- jags.model(file = "Native_cover_zoib.jags",
+jm <- jags.model(file = "Native_cover_zib.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -106,27 +106,33 @@ jm <- jags.model(file = "Native_cover_zoib.jags",
 
 # params to monitor
 params <- c("deviance", # evaluate fit
-            "rho", "alpha", "beta", # parameters
-            "tau", "sig", "tau.eps", "sig.eps", # precision/variance terms
-            "alpha.star", "eps.star", # identifiable intercept and random effects
-            "int_Beta", "Diff_Beta", "diff_Beta", # monitored main and two-way treatment effects
+            "a", "b", "alpha", "beta", # parameters
+            "tau", "sig", # precision/variance terms
+            "tau.eps", "sig.eps", "tau.eps.c", "sig.eps.c", 
+            "a.star", "alpha.star", 
+            "eps.star", "eps.star.c", # identifiable intercept and random effects
+            "Diff_b", "diff_b", "Diff_Beta", "diff_Beta", # monitored main and two-way treatment effects
             "m.ungrazed.control", "m.ungrazed.herbicide", "m.ungrazed.greenstrip",
             "m.fall.control", "m.fall.herbicide", "m.fall.greenstrip",
-            "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip") 
+            "m.spring.control", "m.spring.herbicide", "m.spring.greenstrip",
+            "rho.ungrazed.control", "rho.ungrazed.herbicide", "rho.ungrazed.greenstrip",
+            "rho.fall.control", "rho.fall.herbicide", "rho.fall.greenstrip",
+            "rho.spring.control", "rho.spring.herbicide", "rho.spring.greenstrip") 
            
 
 coda.out <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
 
 # plot chains
-mcmcplot(coda.out, parms = c("deviance", "rho", "beta",
-                             "alpha.star",  "eps.star", 
-                             "sig", "sig.eps"))
-traplot(coda.out, parms = c("sig", "sig.eps"))
+mcmcplot(coda.out, parms = c("deviance", "a.star", "b", "beta",
+                             "alpha.star",  "eps.star", "eps.star.c",
+                             "sig", "sig.eps", "sig.eps.c"))
+traplot(coda.out, parms = c("sig", "sig.eps", "sig.eps.c"))
 caterplot(coda.out, parms = "eps.star", reorder = FALSE)
+caterplot(coda.out, regex = "b\\[", reorder = FALSE)
 caterplot(coda.out, parms = "beta", reorder = FALSE)
 caterplot(coda.out, parms = "Diff_Beta", reorder = FALSE)
-caterplot(coda.out, parms = "diff_Beta", reorder = FALSE)
+caterplot(coda.out, regex = "diff_b\\[", reorder = FALSE)
 caterplot(coda.out, regex = "m\\.", reorder = FALSE)
 
 # dic samples
@@ -140,7 +146,7 @@ gel
 # If not converged, restart model from final iterations
 # newinits <-  initfind(coda.out)
 # newinits[[1]]
-# saved.state <- removevars(newinits, variables = c(2, 4, 6:7))
+# saved.state <- removevars(newinits, variables = c(1, 3, 5, 8:31))
 # saved.state[[1]]
 # save(saved.state, file = "inits/inits.Rdata")
 
@@ -148,7 +154,7 @@ save(coda.out, file = "coda/coda.Rdata")
 
 
 # Model fit
-params <- c("y.discrete.rep", "y.d.rep", "y.c.rep") #monitor replicated data
+params <- c("y.0.rep", "y.c.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
 save(coda.rep, file = "coda/coda_rep.Rdata")
