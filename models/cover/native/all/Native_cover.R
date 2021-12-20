@@ -91,12 +91,6 @@ initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Su
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
-for(i in 1:3){
-  initslist[[i]]$a <- rnorm(1, 0, 10)
-  initslist[[i]]$b <- rnorm(ncol(X) - 1, 0, 10)
-  initslist[[i]]$tau.eps.c <- runif(1, 0, 1)
-  initslist[[i]] <- initslist[[i]][-3]
-}
 # model
 jm <- jags.model(file = "Native_cover_zib.jags",
                  inits = initslist,
