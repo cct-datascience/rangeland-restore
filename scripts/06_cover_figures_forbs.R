@@ -68,6 +68,11 @@ jpeg(filename = "../plots/Fig8_forbs_cover_all.jpg",
 print(fig8)
 dev.off()
 
+# Is greenstrip marginally significant?
+all <- do.call(rbind, coda.out)
+which(colnames(all) == "Diff_Beta[4]")
+ttest <- ifelse(all[,4] < 0, 0, 1)
+mean(ttest)
 
 ### GREENSTRIP
 # read in data
