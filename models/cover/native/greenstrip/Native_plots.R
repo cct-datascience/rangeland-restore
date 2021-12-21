@@ -28,11 +28,15 @@ str(dat)
 load(file = "coda/coda.Rdata") # coda.out
 load(file = "coda/coda_rep.Rdata") # coda.rep
 
-
+traplot(coda.out, regex = "^m\\.")
+traplot(coda.out, regex = "^rho\\.")
+caterplot(coda.out, regex = "^m\\.")
+traplot(coda.out, regex = "^rho\\.")
 # summarize
 sum.out <- tidyMCMC(coda.out, 
                     conf.int = TRUE,
-                    conf.level = 0.95) %>%
+                    conf.level = 0.95,
+                    conf.method = c("HPDinterval")) %>%
   mutate(sig = ifelse(conf.low * conf.high > 0, TRUE, FALSE),
          dir = ifelse(sig == FALSE, NA, 
                       ifelse(sig == TRUE & estimate > 0, "pos", "neg")))
