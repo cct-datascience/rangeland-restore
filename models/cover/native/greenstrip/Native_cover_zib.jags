@@ -1,0 +1,178 @@
+# two-way ANOVA for zero-inflated beta cover model
+model{
+  
+  for(i in 1:N){ # loop through all observations
+    #likelihood for rho, mixture parameter, indicating proportion of zero observations
+    y.0[i] ~ dbern(rho[i])
+    # replicated data
+    y.0.rep[i] ~ dbern(rho[i])
+    
+    # linear model of absence
+    logit(rho[i]) <- a + b[1]*mono[i] + b[2]*high[i] + b[3]*coated[i] + 
+    b[4]*fall[i] + b[5]*spring[i] + b[6]*mono_high[i] + b[7]*mono_coated[i] +
+    b[8]*mono_fall[i] + b[9]*mono_spring[i] + b[10]*high_coated[i] + 
+    b[11]*high_fall[i] + b[12]*high_spring[i] + b[13]*coated_fall[i] +
+    b[14]*coated_spring[i] + 
+    eps[block[i]]
+  }
+  
+
+  for(i in 1:n.cont){ # loop through continuous (0,1) observations
+  # likelihood for mu, tau (beta parameters)
+    y.c[i] ~ dbeta(p[i], q[i])
+    # replicated data
+    y.c.rep[i] ~ dbeta(p[i], q[i])
+    
+    # reparameterization to mean and precision
+    p[i] <- mu[i] * tau
+    q[i] <- (1 - mu[i]) * tau
+    
+    # linear model of cover if present
+    logit(mu[i]) <- alpha + beta[1]*mono2[i] + beta[2]*high2[i] + beta[3]*coated2[i] + 
+    beta[4]*fall2[i] + beta[5]*spring2[i] + beta[6]*mono_high2[i] + beta[7]*mono_coated2[i] +
+    beta[8]*mono_fall2[i] + beta[9]*mono_spring2[i] + beta[10]*high_coated2[i] + 
+    beta[11]*high_fall2[i] + beta[12]*high_spring2[i] + beta[13]*coated_fall2[i] +
+    beta[14]*coated_spring2[i] +
+    eps[block.c[i]]
+  } 
+    
+  # Identifiable intercept, post sweeping random effect means into intercept
+  a.star <- a + mean(eps[])
+  alpha.star <- alpha + mean(eps.c[])
+  
+  # Relatively non-informative priors
+  
+  # random effects of block
+  for(b in 1:Nb){ # number of blocks
+    eps[b] ~ dnorm(0, tau.eps)
+    eps.c[b] ~ dnorm(0, tau.eps.c)
+    
+    # Identifiable random effects - post-sweeping of mean REs by block
+    eps.star[b] <- eps[b] - mean(eps[])
+    eps.star.c[b] <- eps.c[b] - mean(eps.c[])
+  }
+  
+  
+  # Block level precisions with folded T priors
+  tau.eps ~ dt(0, 10, 2)T(0, )
+  tau.eps.c ~ dt(0, 10, 2)T(0, )
+  
+  # Coefficient root notes
+  a ~ dnorm(0, 0.0001)
+  alpha ~ dnorm(0, 0.0001)
+  
+  for(l in 1:nL){ # Number of treatment offsets
+    b[l] ~ dnorm(0, 0.0001)
+    beta[l] ~ dnorm(0, 0.0001)
+  }
+  
+  # General priors
+  tau ~ dt(0, 10, 2)T(0, )
+  
+  # Convert tau to sig for monitoring
+  sig <- pow(tau, -0.5)
+  sig.eps <- pow(tau.eps, -0.5)
+  sig.eps.c <- pow(tau.eps.c, -0.5)
+
+  # Calculations to monitor, only two-way combinations
+  # Unscaled differences relative to reference level
+  Diff_b[1] <- ilogit(a.star + b[1]) - ilogit(a.star) # mono
+  Diff_b[2] <- ilogit(a.star + b[2]) - ilogit(a.star) # high
+  Diff_b[3] <- ilogit(a.star + b[3]) - ilogit(a.star) # coated
+  Diff_b[4] <- ilogit(a.star + b[4]) - ilogit(a.star) # fall
+  Diff_b[5] <- ilogit(a.star + b[5]) - ilogit(a.star) # spring
+
+  diff_b[1] <- ilogit(a.star + b[1] + b[2] + b[6]) - ilogit(a.star) # mono:high
+  diff_b[2] <- ilogit(a.star + b[1] + b[3] + b[7]) - ilogit(alpha.star) # mono:coated
+  diff_b[3] <- ilogit(a.star + b[1] + b[4] + b[8]) - ilogit(a.star) # mono:fall
+  diff_b[4] <- ilogit(a.star + b[1] + b[5] + b[9]) - ilogit(a.star) # mono:spring
+  diff_b[5] <- ilogit(a.star + b[2] + b[3] + b[10]) - ilogit(a.star) # high:coated
+  diff_b[6] <- ilogit(a.star + b[2] + b[4] + b[11]) - ilogit(a.star) # high:fall
+  diff_b[7] <- ilogit(a.star + b[2] + b[5] + b[12]) - ilogit(a.star) # high:spring
+  diff_b[8] <- ilogit(a.star + b[3] + b[4] + b[13]) - ilogit(a.star) # coated:fall
+  diff_b[9] <- ilogit(a.star + b[3] + b[5] + b[14]) - ilogit(a.star) # coated:spring  
+  
+  Diff_Beta[1] <- ilogit(alpha.star + beta[1]) - ilogit(alpha.star) # mono
+  Diff_Beta[2] <- ilogit(alpha.star + beta[2]) - ilogit(alpha.star) # high
+  Diff_Beta[3] <- ilogit(alpha.star + beta[3]) - ilogit(alpha.star) # coated
+  Diff_Beta[4] <- ilogit(alpha.star + beta[4]) - ilogit(alpha.star) # fall
+  Diff_Beta[5] <- ilogit(alpha.star + beta[5]) - ilogit(alpha.star) # spring
+
+  diff_Beta[1] <- ilogit(alpha.star + beta[1] + beta[2] + beta[6]) - ilogit(alpha.star) # mono:high
+  diff_Beta[2] <- ilogit(alpha.star + beta[1] + beta[3] + beta[7]) - ilogit(alpha.star) # mono:coated
+  diff_Beta[3] <- ilogit(alpha.star + beta[1] + beta[4] + beta[8]) - ilogit(alpha.star) # mono:fall
+  diff_Beta[4] <- ilogit(alpha.star + beta[1] + beta[5] + beta[9]) - ilogit(alpha.star) # mono:spring
+  diff_Beta[5] <- ilogit(alpha.star + beta[2] + beta[3] + beta[10]) - ilogit(alpha.star) # high:coated
+  diff_Beta[6] <- ilogit(alpha.star + beta[2] + beta[4] + beta[11]) - ilogit(alpha.star) # high:fall
+  diff_Beta[7] <- ilogit(alpha.star + beta[2] + beta[5] + beta[12]) - ilogit(alpha.star) # high:spring
+  diff_Beta[8] <- ilogit(alpha.star + beta[3] + beta[4] + beta[13]) - ilogit(alpha.star) # coated:fall
+  diff_Beta[9] <- ilogit(alpha.star + beta[3] + beta[5] + beta[14]) - ilogit(alpha.star) # coated:spring  
+  
+  
+  # Monitor the mean of probability of absence
+  rho.mix.low.uncoated.ungrazed <- ilogit(a.star)  
+  rho.mix.low.uncoated.fall <- ilogit(a.star + b[4])  
+  rho.mix.low.uncoated.spring <- ilogit(a.star + b[5])  
+  
+  rho.mix.low.coated.ungrazed <- ilogit(a.star + b[3])  
+  rho.mix.low.coated.fall <- ilogit(a.star + b[3] + b[4] + b[13])  
+  rho.mix.low.coated.spring <- ilogit(a.star + b[3] + b[5] + b[14])  
+  
+  rho.mix.high.uncoated.ungrazed <- ilogit(a.star + b[2])  
+  rho.mix.high.uncoated.fall <- ilogit(a.star + b[4] + b[2] + b[11])  
+  rho.mix.high.uncoated.spring <- ilogit(a.star + b[5] + b[2] + b[12])  
+  
+  rho.mix.high.coated.ungrazed <- ilogit(a.star + b[3] + b[2] + b[10])  
+  rho.mix.high.coated.fall <- ilogit(a.star + b[3] + b[4] + b[13] + b[2] + b[11] + b[10])  
+  rho.mix.high.coated.spring <- ilogit(a.star + b[3] + b[5] + b[14] + b[2] + b[12] + b[10]) 
+  
+  rho.mono.low.uncoated.ungrazed <- ilogit(a.star + b[1])  
+  rho.mono.low.uncoated.fall <- ilogit(a.star + b[4] + b[1] + b[8])  
+  rho.mono.low.uncoated.spring <- ilogit(a.star + b[5] + b[1] + b[9])  
+  
+  rho.mono.low.coated.ungrazed <- ilogit(a.star + b[3] + b[1] + b[7])  
+  rho.mono.low.coated.fall <- ilogit(a.star + b[3] + b[4] + b[13] + b[1] + b[8] + b[7])  
+  rho.mono.low.coated.spring <- ilogit(a.star + b[3] + b[5] + b[14] + b[1] + b[9] + b[7])  
+  
+  rho.mono.high.uncoated.ungrazed <- ilogit(a.star + b[2] + b[1] + b[6])  
+  rho.mono.high.uncoated.fall <- ilogit(a.star + b[4] + b[2] + b[11] + b[1] + b[6] + b[8])  
+  rho.mono.high.uncoated.spring <- ilogit(a.star + b[5] + b[2] + b[12] + b[1] + b[6] + b[9])  
+  
+  rho.mono.high.coated.ungrazed <- ilogit(a.star + b[3] + b[2] + b[10] + b[1] + b[6] + b[7])  
+  rho.mono.high.coated.fall <- ilogit(a.star + b[3] + b[4] + b[13] + b[2] + b[11] + b[10] + b[1] + b[6] + b[7] + b[8])  
+  rho.mono.high.coated.spring <- ilogit(a.star + b[3] + b[5] + b[14] + b[2] + b[12] + b[10] + b[1] + b[6] + b[7] + b[9]) 
+  
+  
+  # Monitor the mean of cover if present
+  m.mix.low.uncoated.ungrazed <- ilogit(alpha.star)*(1-rho.mix.low.uncoated.ungrazed)  
+  m.mix.low.uncoated.fall <- ilogit(alpha.star + beta[4])*(1-rho.mix.low.uncoated.fall)  
+  m.mix.low.uncoated.spring <- ilogit(alpha.star + beta[5])*(1-rho.mix.low.uncoated.spring)  
+  
+  m.mix.low.coated.ungrazed <- ilogit(alpha.star + beta[3])*(1-rho.mix.low.coated.ungrazed)  
+  m.mix.low.coated.fall <- ilogit(alpha.star + beta[3] + beta[4] + beta[13])*(1-rho.mix.low.coated.fall)  
+  m.mix.low.coated.spring <- ilogit(alpha.star + beta[3] + beta[5] + beta[14])*(1-rho.mix.low.coated.spring)  
+  
+  m.mix.high.uncoated.ungrazed <- ilogit(alpha.star + beta[2])*(1-rho.mix.high.uncoated.ungrazed)  
+  m.mix.high.uncoated.fall <- ilogit(alpha.star + beta[4] + beta[2] + beta[11])*(1-rho.mix.high.uncoated.fall)  
+  m.mix.high.uncoated.spring <- ilogit(alpha.star + beta[5] + beta[2] + beta[12])*(1-rho.mix.high.uncoated.spring)  
+  
+  m.mix.high.coated.ungrazed <- ilogit(alpha.star + beta[3] + beta[2] + beta[10])*(1-rho.mix.high.coated.ungrazed)  
+  m.mix.high.coated.fall <- ilogit(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10])*(1-rho.mix.high.coated.fall)  
+  m.mix.high.coated.spring <- ilogit(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10])*(1-rho.mix.high.coated.spring) 
+  
+  m.mono.low.uncoated.ungrazed <- ilogit(alpha.star + beta[1])*(1-rho.mono.low.uncoated.ungrazed)  
+  m.mono.low.uncoated.fall <- ilogit(alpha.star + beta[4] + beta[1] + beta[8])*(1-rho.mono.low.uncoated.fall)  
+  m.mono.low.uncoated.spring <- ilogit(alpha.star + beta[5] + beta[1] + beta[9])*(1-rho.mono.low.uncoated.spring)  
+  
+  m.mono.low.coated.ungrazed <- ilogit(alpha.star + beta[3] + beta[1] + beta[7])*(1-rho.mono.low.coated.ungrazed)  
+  m.mono.low.coated.fall <- ilogit(alpha.star + beta[3] + beta[4] + beta[13] + beta[1] + beta[8] + beta[7])*(1-rho.mono.low.coated.fall)  
+  m.mono.low.coated.spring <- ilogit(alpha.star + beta[3] + beta[5] + beta[14] + beta[1] + beta[9] + beta[7])*(1-rho.mono.low.coated.spring)  
+  
+  m.mono.high.uncoated.ungrazed <- ilogit(alpha.star + beta[2] + beta[1] + beta[6])*(1-rho.mono.high.uncoated.ungrazed)  
+  m.mono.high.uncoated.fall <- ilogit(alpha.star + beta[4] + beta[2] + beta[11] + beta[1] + beta[6] + beta[8])*(1-rho.mono.high.uncoated.fall)  
+  m.mono.high.uncoated.spring <- ilogit(alpha.star + beta[5] + beta[2] + beta[12] + beta[1] + beta[6] + beta[9])*(1-rho.mono.high.uncoated.spring)  
+  
+  m.mono.high.coated.ungrazed <- ilogit(alpha.star + beta[3] + beta[2] + beta[10] + beta[1] + beta[6] + beta[7])*(1-rho.mono.high.coated.ungrazed)  
+  m.mono.high.coated.fall <- ilogit(alpha.star + beta[3] + beta[4] + beta[13] + beta[2] + beta[11] + beta[10] + beta[1] + beta[6] + beta[7] + beta [8])*(1-rho.mono.high.coated.fall)  
+  m.mono.high.coated.spring <- ilogit(alpha.star + beta[3] + beta[5] + beta[14] + beta[2] + beta[12] + beta[10] + beta[1] + beta[6] + beta[7] + beta[9])*(1-rho.mono.high.coated.spring) 
+}
