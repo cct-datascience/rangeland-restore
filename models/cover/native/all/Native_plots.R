@@ -31,7 +31,8 @@ load(file = "coda/coda_rep.Rdata") # coda.rep
 # summarize
 sum.out <- tidyMCMC(coda.out, 
                     conf.int = TRUE,
-                    conf.level = 0.95) %>%
+                    conf.level = 0.95,
+                    conf.method = "HPDinterval") %>%
   mutate(sig = ifelse(conf.low * conf.high > 0, TRUE, FALSE),
          dir = ifelse(sig == FALSE, NA, 
                       ifelse(sig == TRUE & estimate > 0, "pos", "neg")))
