@@ -28,10 +28,6 @@ str(dat)
 load(file = "coda/coda.Rdata") # coda.out
 load(file = "coda/coda_rep.Rdata") # coda.rep
 
-traplot(coda.out, regex = "^m\\.")
-traplot(coda.out, regex = "^rho\\.")
-caterplot(coda.out, regex = "^m\\.")
-traplot(coda.out, regex = "^rho\\.")
 # summarize
 sum.out <- tidyMCMC(coda.out, 
                     conf.int = TRUE,
@@ -123,13 +119,14 @@ fig_3a <- ggplot() +
   geom_pointrange(data = b_main, 
                   aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high),
                   size = 0.5) +
-  geom_point(data = subset(b_main, sig == TRUE),
+  geom_point(data = b_main,
              aes(x = term, y = min(conf.low) - 0.05, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
   scale_x_discrete(limits = rev(b_main$term), labels = rev(labs1)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -141,13 +138,14 @@ fig_3b <- ggplot() +
   geom_pointrange(data = b_int, 
                   aes(x = term, y = estimate, ymin = conf.low, ymax = conf.high),
                   size = 0.5) +
-  geom_point(data = subset(b_int, sig == TRUE),
+  geom_point(data = b_int,
              aes(x = term, y = min(conf.low) - 0.05, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
   scale_x_discrete(limits = rev(b_int$term), labels = rev(labs2)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),

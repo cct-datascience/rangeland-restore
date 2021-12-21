@@ -34,7 +34,8 @@ load(file = "coda/coda_rep.Rdata") # coda.rep
 # summarize
 sum.out <- tidyMCMC(coda.out, 
                     conf.int = TRUE,
-                    conf.level = 0.95) %>%
+                    conf.level = 0.95, 
+                    conf.method = "HPDinterval") %>%
   mutate(sig = ifelse(conf.low * conf.high > 0, TRUE, FALSE),
          dir = ifelse(sig == FALSE, NA, 
                       ifelse(sig == TRUE & estimate > 0, "pos", "neg")))
@@ -133,7 +134,7 @@ fig_3a <- ggplot() +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
   scale_x_discrete(limits = rev(b_main$term), labels = rev(labs1)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("goldenrod")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -151,7 +152,7 @@ fig_3b <- ggplot() +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
   scale_x_discrete(limits = rev(b_int$term), labels = rev(labs2)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("goldenrod")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
@@ -183,7 +184,7 @@ fig_3d <- ggplot() +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, " % cover"))) +
   scale_x_discrete(limits = rev(beta_int$term), labels = rev(labs2)) +
-  scale_color_manual(values = c("forestgreen")) +
+  scale_color_manual(values = c("goldenrod")) +
   coord_flip() +
   theme_bw(base_size = 14) +
   theme(axis.title.y = element_blank(),
