@@ -50,7 +50,8 @@ fig5 <- ggplot() +
                   shape = 15,
                   size = 0.75,
                   position = position_dodge(width = 0.5)) +
-  scale_y_continuous(expression(paste("BRTE cover"))) +
+  scale_x_discrete(labels = c("control", "herbicide", "seeding")) +
+  scale_y_continuous(expression(paste("Cheatgrass cover"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
   theme(panel.grid.major = element_blank(),
@@ -130,7 +131,7 @@ fig6 <- ggplot() +
                   size = 0.5,
                   position = position_dodge(width = 0.5)) +
   facet_grid(rows = vars(seed_rate), cols = vars(seed_coat)) +
-  scale_y_continuous(expression(paste("BRTE cover"))) +
+  scale_y_continuous(expression(paste("Cheatgrass cover"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
   theme(panel.grid.major = element_blank(),
@@ -209,7 +210,7 @@ fig7 <- ggplot() +
                   size = 0.5,
                   position = position_dodge(width = 0.5)) +
   facet_grid(rows = vars(seed_rate), cols = vars(seed_coat)) +
-  scale_y_continuous(expression(paste("BRTE cover"))) +
+  scale_y_continuous(expression(paste("Cheatgrass cover"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
   theme(panel.grid.major = element_blank(),
