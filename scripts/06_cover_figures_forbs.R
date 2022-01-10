@@ -51,6 +51,7 @@ fig8 <- ggplot() +
                   shape = 15,
                   size = 0.75,
                   position = position_dodge(width = 0.5)) +
+  scale_x_discrete(labels = c("control", "herbicide", "seeding")) +
   scale_y_continuous(expression(paste("Forbs cover"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
