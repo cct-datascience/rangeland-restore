@@ -51,6 +51,7 @@ fig1 <- ggplot() +
                   shape = 15,
                   size = 0.75,
              position = position_dodge(width = 0.5)) +
+  scale_x_discrete(labels = c("cheatgrass", "forbs", "grass")) +
   scale_y_continuous(expression(paste("Biomass (g ", m^-2, ")"))) +
   scale_color_canva(palette = "Surf and turf") +
   theme_bw(12) +
