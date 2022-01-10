@@ -102,9 +102,9 @@ plot_grid(fig2a, fig2b, ncol = 1, labels = letters)
 # convert to probability of absence (b)
 # convert to % cover (beta)
 
-labs1 <- c("fall", "spring", "herbicide", "greenstrip")
+labs1 <- c("fall", "spring", "herbicide", "seeding")
 labs2 <- c("fall:herbicide", "spring:herbicide", 
-           "fall:greenstrip", "spring:greenstrip")
+           "fall:seeding", "spring:seeding")
 b_main <- filter(sum.out, grepl("Diff\\_b", term))
 beta_main <- filter(sum.out, grepl("Diff\\_Beta", term))
 b_int <- filter(sum.out, grepl("diff\\_b", term))
@@ -118,7 +118,7 @@ fig_3a <- ggplot() +
              aes(x = term, y = min(conf.low) - 0.05, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
+  scale_y_continuous(expression(paste(Delta, " prop. absence"))) +
   scale_x_discrete(limits = rev(b_main$term), labels = rev(labs1)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
@@ -136,7 +136,7 @@ fig_3b <- ggplot() +
              aes(x = term, y = min(conf.low) - 0.05, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "Probability of absence"))) +
+  scale_y_continuous(expression(paste(Delta, " prop. absence"))) +
   scale_x_discrete(limits = rev(b_int$term), labels = rev(labs2)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
@@ -148,12 +148,12 @@ fig_3b <- ggplot() +
 
 fig_3c <- ggplot() +
   geom_pointrange(data = beta_main, 
-                  aes(x = term, y = estimate*100, 
-                      ymin = conf.low*100, 
-                      ymax = conf.high*100),
+                  aes(x = term, y = estimate, 
+                      ymin = conf.low, 
+                      ymax = conf.high),
                   size = 0.5) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, " % cover"))) +
+  scale_y_continuous(expression(paste(Delta, " prop. cover"))) +
   scale_x_discrete(limits = rev(beta_main$term), labels = rev(labs1)) +
   coord_flip() +
   theme_bw(base_size = 14) +
@@ -163,12 +163,12 @@ fig_3c <- ggplot() +
 
 fig_3d <- ggplot() +
   geom_pointrange(data = beta_int, 
-                  aes(x = term, y = estimate*100, 
-                      ymin = conf.low*100, 
-                      ymax = conf.high*100),
+                  aes(x = term, y = estimate, 
+                      ymin = conf.low, 
+                      ymax = conf.high),
                   size = 0.5) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, " % cover"))) +
+  scale_y_continuous(expression(paste(Delta, " prop. cover"))) +
   scale_x_discrete(limits = rev(beta_int$term), labels = rev(labs2)) +
   scale_color_manual(values = c("forestgreen")) +
   coord_flip() +
