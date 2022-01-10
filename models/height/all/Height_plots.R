@@ -64,7 +64,7 @@ ggplot(sum.out[prob.eps,], aes(x = var, y = mean)) +
   scale_x_discrete(labels = labs)
 
 # Only main effect betas
-beta.labs2 <- c("fall", "spring", "herbicide", "greenstrip")
+beta.labs2 <- c("fall", "spring", "herbicide", "seeding")
 beta.ind <- grep("beta", row.names(sum.out))
 betas <- sum.out[beta.ind[1:length(beta.labs2)],]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -74,7 +74,7 @@ fig_1a <- ggplot() +
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
   geom_point(data = subset(betas, sig == TRUE),
-             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+             aes(x = var, y = min(pc2.5) - 0.5, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, " height (cm)"))) +
@@ -90,7 +90,7 @@ fig_1a
 
 # Calculate interactions
 beta.labs.ints <- c("fall:herbicide", "spring:herbicide", 
-                    "fall:greenstrip", "spring:greenstrip")
+                    "fall:seeding", "spring:seeding")
 beta.int.ind <- grep("int_Beta", row.names(sum.out))
 beta.ints <- sum.out[beta.int.ind,]
 beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
@@ -100,7 +100,7 @@ fig_1b <- ggplot() +
                   aes(x = var, y = mean, ymin = pc2.5, ymax = pc97.5),
                   size = 0.5) +
   geom_point(data = subset(beta.ints, sig == TRUE),
-             aes(x = var, y = min(pc2.5) - 0.1, col = dir),
+             aes(x = var, y = min(pc2.5) - 0.5, col = dir),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, " height (cm)"))) +
