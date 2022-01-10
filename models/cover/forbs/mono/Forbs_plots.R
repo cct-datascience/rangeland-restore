@@ -167,7 +167,7 @@ fig_2a <- ggplot() +
              aes(x = var, y = min(pc2.5) - 0.01, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "Forbs proportion cover"))) +
+  scale_y_continuous(expression(paste(Delta, " forbs prop. cover"))) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
   scale_color_manual(values = c("forestgreen"),
                      na.value = "transparent") +
@@ -196,7 +196,7 @@ fig_2b <- ggplot() +
              aes(x = var, y = min(pc2.5) - .01, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "Forbs proportion cover"))) +
+  scale_y_continuous(expression(paste(Delta, " forbs prop. cover"))) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("forestgreen"),
                      na.value = "transparent") +
