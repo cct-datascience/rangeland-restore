@@ -34,7 +34,8 @@ fig1a <- ggplot() +
   #            shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste("Biomass (g ", m^-2, ")"))) +
-  scale_x_discrete(limits = rev(levels(alphas$var)), labels = rev(alpha.labs)) +
+  scale_x_discrete(limits = rev(levels(alphas$var)),
+                   labels = c("grass", "forbs", "cheatgrass")) +
   # scale_color_manual(values = c("forestgreen", "purple")) +
   coord_flip() +
   theme_bw(base_size = 14) + 
@@ -69,7 +70,8 @@ fig1b <- ggplot() +
              shape = 8,
              position = position_dodge(width = 0.5)) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_x_discrete(limits = rev(c("BRTE", "forbs", "grass"))) +
+  scale_x_discrete(limits = rev(c("BRTE", "forbs", "grass")),
+                   labels = c("grass", "forbs", "cheatgrass")) +
   scale_y_continuous(expression(paste(Delta, "Biomass (g ", m^-2, ")"))) +
   scale_color_manual(values = c("goldenrod3", gray(0, alpha = 0), "forestgreen")) +
   scale_shape_manual(values = c(16, 17), 
@@ -87,7 +89,7 @@ fig1b <- ggplot() +
 fig1b
 
 # Plot covariance
-rho.labs <- c("BRTE-forbs", "BRTE-grass", "forbs-grass")
+rho.labs <- c("cheatgrass-forbs", "cheatgrass-grass", "forbs-grass")
 rhos <- sum.out[grep("Rho", row.names(sum.out)),]
 rhos$var <- factor(rhos$var, levels = row.names(rhos))
 fig1c <- ggplot() +
