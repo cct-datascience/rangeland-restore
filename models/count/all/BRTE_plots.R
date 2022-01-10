@@ -128,7 +128,7 @@ exp(alph[1,1])*100
 exp(alph[1,4])*100
 exp(alph[1,5])*100
 
-beta.labs2 <- c("fall", "spring", "herbicide", "greenstrip")
+beta.labs2 <- c("fall", "spring", "herbicide", "seeding")
 beta.ind <- grep("Diff_Beta", row.names(sum.out))
 betas <- sum.out[beta.ind[1:length(beta.labs2)],]
 betas$var <- factor(betas$var, levels = row.names(betas))
@@ -141,7 +141,7 @@ fig_2a <- ggplot() +
              aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "BRTE ", m^-2)),
+  scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2)),
                      breaks = seq(-3000, 1000, 1000)) +
   scale_x_discrete(limits = rev(levels(betas$var)), labels = rev(beta.labs2)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
@@ -153,7 +153,7 @@ fig_2a <- ggplot() +
   guides(color = "none")
 
 beta.labs.ints <- c("fall:herbicide", "spring:herbicide", 
-                    "fall:greenstrip", "spring:greenstrip")
+                    "fall:seeding", "spring:seeding")
 beta.int.ind <- grep("diff_Beta", row.names(sum.out))
 beta.ints <- sum.out[beta.int.ind,]
 beta.ints$var <- factor(beta.ints$var, levels = row.names(beta.ints))
@@ -166,7 +166,7 @@ fig_2b <- ggplot() +
              aes(x = var, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, "BRTE ", m^-2)),
+  scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2)),
                      breaks = seq(-3000, 0, 1000)) +
   scale_x_discrete(limits = rev(levels(beta.ints$var)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
