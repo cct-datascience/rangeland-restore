@@ -1,5 +1,7 @@
 # Post-fire effects of rangeland restoration treatments on an exotic annual grass (*Bromus tectorum*)
 
+Authors: Elise. S. Gornish, Jessica S. Guo, Lauren M. Porensky, Barry L. Perryman, Elizabeth A. Leger
+
 ### Project summary
 Restoration of rangeland vegetation faces twin challenges of fire and invasion, which alter ecosystem functioning and provisioning services. Recent efforts to break the feedback between fire and invasion include restoring native plants, particularly slow-growing perennial grasses to reduce fuel loads, compete with invasive species, and tolerate grazing (Porensky et al. 2018). To assess the efficacy of such treatments, a split-split plot design of restoration (monoculture vs. mixes, seed coating, two kinds of controls) was implemented following herbicide applications in April 2014 and 2015. These treatments were crossed with episodic disturbance in the form of seasonal grazing (fall 2015 to spring 2017) and burning (July 2017). Our objective is to determine whether targeted grazing and native plant reseeding treatments can have enduring effects on exotic annual grass invasion following fire. What are the enduring effects of: 1) Grazing treatments on the biomass of plant functional groups? 2) Grazing and fuelbreak treatments on cheatgrass (*Bromus tectorum*, BRTE) count? 3) Grazing and fuelbreak treatments on cover of cheatgrass, forbs, and native grasses? 4) Grazing and fuelbreak treatments on average plant height?
 
@@ -149,7 +151,17 @@ For datasets 2-4, the data were further subdivided and three different ANOVA mod
       - `plots/` contains plots of model results as .jpg files  
   
 
-`raw_data/` contains 2 csv files from Lauren Porensky describing the biomass and cover/count data. 
+`raw_data/` from [Lauren Porensky](https://www.ars.usda.gov/plains-area/fort-collins-co/center-for-agricultural-resources-research/rangeland-resources-systems-research/people/lauren-porensky/):
+  - `2019_Greenstrips_Biomass.csv` contains 54 observations of the biomass of 3 functional groups (BRTE, forbs, native grass) at the non-seeded, grazed plots. 
+  - `2019_Greenstrips_Cover_and_Densities.csv` contains 460 observations of BRTE count, cover of multiple functional groups, and average plant height across all treatment combinations. 
 
-`scripts/` contains R scripts.
+`scripts/` contains R scripts for organizing, plotting, and analyzing simple statistics:
   - `01_organize.R` organizes the `raw_data/` files into `cleaned_data/` files
+  - `02_biomass_figures.R` plots raw data and modeled posteriors for biomass
+  - `03_count_figures.R` plots raw data and modeled posteriors for BRTE count
+  - `04_cover_figures_BRTE.R` plots raw data and modeled posteriors for BRTE cover
+  - `05_cover_stats.R` calculates a sample statistics of cover data
+  - `06_cover_figures_forbs.R` plots raw data and modeled posteriors for forb cover
+  - `07_cover_figures_native.R` plots raw data and modeled posteriors for native grass cover
+  - `08_height_figures.R` plots raw data and modeled posteriors for average plant height
+  
