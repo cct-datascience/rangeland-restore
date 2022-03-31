@@ -13,14 +13,20 @@ In contrast to the challenges of transforming plant abundance data to satisfy co
 3) Plot-level BRTE, forbs, and native grass cover were modeled as a zero-inflated beta distribution. Plots were nested within the random-effect of block.
 4) Average plant height was modeled with a normal likelihood. Plots were nested within the random-effect of block.
 
-For datasets 2-4, the data were further subdivided and three different ANOVA models were run (see table below). Main effects and all two-way interactions were included. 
+For datasets 2-4, the data were subdivided and investigated at three hierarchical levels. 
+
+I) At the 'all' level, all observations were included and assessed for the effects of fuelbreak treatment and grazing. 
+II) At the `greenstrip` level, all observations in seeded plots were assessed for the effects of grazing, spatial arrangement, seeding rate, and seed coating. 
+III) At the `mono` level, all observations in monoculture seeded plots were assessed for the effects of grazing, species, seeding rate, and seed coating. 
+
+Each level of reference-offset ANOVA model included main effects and two-way interactions. See table below; bolding indicates reference level for each factor. 
 
 | Models      | Factor | N   | Levels |
 | ---        |  ---   |     --- |      --- |
 | I      | fuelbreak       | 3   | **Control**, herbicide, greenstrip |
 | I, II, III      | grazing       | 3   | **Ungrazed**, fall, spring |
 | II      | spatial       | 2   | **Monoculture**, mixture |
-| II, III      | seedrate       | 2   | **Low**, high |
+| II, III      | seed rate       | 2   | **Low**, high |
 | II, III      | seed coat       | 2   | **Uncoated**, coated |
 | III    | species       | 5   | **ELTR**, POSE, POFE, VUMI, ELEL |
 
@@ -30,9 +36,9 @@ For datasets 2-4, the data were further subdivided and three different ANOVA mod
   - `count_all.Rdata` 460 observations of BRTE count among all plots
   - `count_greenstrip.Rdata` 316 observations of BRTE count among seeding plots
   - `count_mono.Rdata` 220 observations of BRTE count among monoculture seeding plots
-  - `cover_all.Rdata` 453 observations of cover across 3 functional groups among all plots
-  - `cover_greenstrip.Rdata` 310 observations of cover across 3 functional groups among seeding plots
-  - `cover_mono.Rdata` 214 observations of cover across 3 functional groups among monoculture seeding plots
+  - `cover_all.Rdata` 453 observations of cover and height across 3 functional groups among all plots
+  - `cover_greenstrip.Rdata` 310 observations of cover and height across 3 functional groups among seeding plots
+  - `cover_mono.Rdata` 214 observations of cover and height across 3 functional groups among monoculture seeding plots
 
 `initial_models/` contains exploratory Bayesian models for biomass and count data
 
