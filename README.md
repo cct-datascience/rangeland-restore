@@ -44,7 +44,7 @@ Each level of reference-offset ANOVA model included main effects and two-way int
 
 `initial_models/` contains exploratory Bayesian models for biomass and count data
 
-`models/` contains 4 subfolders for each data type. In most cases, multiple model forms were explored. Here, only the final JAGS model file is reported. 
+`models/` contains 4 subfolders for each data type. In most cases, multiple model forms were explored; only the final JAGS model file is listed below. 
   - `biomass/` contains 1 model:
     - `all/`
       - `BRTE_biomass.R` runs the JAGS model
