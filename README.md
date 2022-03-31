@@ -3,7 +3,7 @@
 Authors: Elise. S. Gornish, Jessica S. Guo, Lauren M. Porensky, Barry L. Perryman, Elizabeth A. Leger
 
 ### Project summary
-Restoration of rangeland vegetation faces twin challenges of fire and invasion, which alter ecosystem functioning and provisioning services. Recent efforts to break the feedback between fire and invasion include restoring native plants, particularly slow-growing perennial grasses to reduce fuel loads, compete with invasive species, and tolerate grazing (Porensky et al. 2018). To assess the efficacy of such treatments, a split-split plot design of restoration (monoculture vs. mixes, seed coating, two kinds of controls) was implemented following herbicide applications in April 2014 and 2015. These treatments were crossed with episodic disturbance in the form of seasonal grazing (fall 2015 to spring 2017) and burning (July 2017). Our objective is to determine whether targeted grazing and native plant reseeding treatments can have enduring effects on exotic annual grass invasion following fire. What are the enduring effects of: 1) Grazing treatments on the biomass of plant functional groups? 2) Grazing and fuelbreak treatments on cheatgrass (*Bromus tectorum*, BRTE) count? 3) Grazing and fuelbreak treatments on cover of cheatgrass, forbs, and native grasses? 4) Grazing and fuelbreak treatments on average plant height?
+Restoration of rangeland vegetation faces twin challenges of fire and invasion, which alter ecosystem functioning and provisioning services. Recent efforts to break the feedback between fire and invasion include restoring native plants, particularly slow-growing perennial grasses to reduce fuel loads, compete with invasive species, and tolerate grazing ([Porensky et al. 2018](https://www.ars.usda.gov/ARSUserFiles/49263/29.%20Porensky_etal_2018_Greenstrips.pdf)). To assess the efficacy of such treatments, a split-split plot design of restoration (monoculture vs. mixes, seed coating, two kinds of controls) was implemented following herbicide applications in April 2014 and 2015. These treatments were crossed with episodic disturbance in the form of seasonal grazing (fall 2015 to spring 2017) and burning (July 2017). Our objective is to determine whether targeted grazing and native plant reseeding treatments can have enduring effects on exotic annual grass invasion following fire. What are the enduring effects of: 1) Grazing treatments on the biomass of plant functional groups? 2) Grazing and fuelbreak treatments on cheatgrass (*Bromus tectorum*, BRTE) count? 3) Grazing and fuelbreak treatments on cover of cheatgrass, forbs, and native grasses? 4) Grazing and fuelbreak treatments on average plant height?
 
 ### Approach
 
@@ -15,7 +15,7 @@ In contrast to the challenges of transforming plant abundance data to satisfy co
 
 For datasets 2-4, the data were subdivided and investigated at three hierarchical levels. 
 
-I) At the 'all' level, all observations were included and assessed for the effects of fuelbreak treatment and grazing. 
+I) At the `all` level, all observations were included and assessed for the effects of fuelbreak treatment and grazing. 
 
 II) At the `greenstrip` level, all observations in seeded plots were assessed for the effects of grazing, spatial arrangement, seeding rate, and seed coating. 
 
@@ -44,7 +44,7 @@ Each level of reference-offset ANOVA model included main effects and two-way int
 
 `initial_models/` contains exploratory Bayesian models for biomass and count data
 
-`models/` contains 4 subfolders for each data type:
+`models/` contains 4 subfolders for each data type. In most cases, multiple model forms were explored. Here, only the final JAGS model file is reported. 
   - `biomass/` contains 1 model:
     - `all/`
       - `BRTE_biomass.R` runs the JAGS model
