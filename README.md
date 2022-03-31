@@ -25,11 +25,18 @@ For datasets 2-4, the data were further subdivided and three different ANOVA mod
 | III    | species       | 5   | **ELTR**, POSE, POFE, VUMI, ELEL |
 
 ### Repository description
-`cleaned_data/` contains 7 output csv files from `scripts/01_organize.R`, including 1 biomass file and 3 files for the 3 levels of count and cover data
+`cleaned_data/` contains 7 .Rdata dataframes produced from `raw_data/` using `scripts/01_organize.R`:
+  - `biomass.Rdata` 54 observations of biomass across 3 functional groups
+  - `count_all.Rdata` 460 observations of BRTE count among all plots
+  - `count_greenstrip.Rdata` 316 observations of BRTE count among seeding plots
+  - `count_mono.Rdata` 220 observations of BRTE count among monoculture seeding plots
+  - `cover_all.Rdata` 453 observations of cover across 3 functional groups among all plots
+  - `cover_greenstrip.Rdata` 310 observations of cover across 3 functional groups among seeding plots
+  - `cover_mono.Rdata` 214 observations of cover across 3 functional groups among monoculture seeding plots
 
 `initial_models/` contains exploratory Bayesian models for biomass and count data
 
-`models/` contains 3 subfolders for each data type:
+`models/` contains 4 subfolders for each data type:
   - `biomass/` contains 1 model:
     - `all/`
       - `BRTE_biomass.R` runs the JAGS model
@@ -60,7 +67,7 @@ For datasets 2-4, the data were further subdivided and three different ANOVA mod
       - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
       - `inits/` contains initials to run the JAGS model as .Rdata files 
       - `plots/` contains plots of model results as .jpg files
-  - `cover/` contains 3 subfolders, each containing 3 sets of models:
+  - `cover/` contains 3 subfolders for each functionl group, each containing 3 models:
     - `BRTE/`
       - `all/`
         - `BRTE_cover.R` runs the JAGS model
