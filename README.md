@@ -16,7 +16,9 @@ In contrast to the challenges of transforming plant abundance data to satisfy co
 For datasets 2-4, the data were subdivided and investigated at three hierarchical levels. 
 
 I) At the 'all' level, all observations were included and assessed for the effects of fuelbreak treatment and grazing. 
+
 II) At the `greenstrip` level, all observations in seeded plots were assessed for the effects of grazing, spatial arrangement, seeding rate, and seed coating. 
+
 III) At the `mono` level, all observations in monoculture seeded plots were assessed for the effects of grazing, species, seeding rate, and seed coating. 
 
 Each level of reference-offset ANOVA model included main effects and two-way interactions. See table below; bolding indicates reference level for each factor. 
