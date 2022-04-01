@@ -38,18 +38,42 @@ Each level of reference-offset ANOVA model included main effects and two-way int
 
 ### Data 
 
-`raw_data/` from [Lauren Porensky](https://www.ars.usda.gov/plains-area/fort-collins-co/center-for-agricultural-resources-research/rangeland-resources-systems-research/people/lauren-porensky/):
+`raw_data/` originated by [Lauren Porensky](https://www.ars.usda.gov/plains-area/fort-collins-co/center-for-agricultural-resources-research/rangeland-resources-systems-research/people/lauren-porensky/):
   - `2019_Greenstrips_Biomass.csv` contains 54 observations of the biomass of 3 functional groups (BRTE, forbs, native grass) at the non-seeded, grazed plots. 
   - `2019_Greenstrips_Cover_and_Densities.csv` contains 460 observations of BRTE count, cover of multiple functional groups, and average plant height across all treatment combinations. 
   
-`cleaned_data/` contains 7 .Rdata dataframes produced from `raw_data/` using `scripts/01_organize.R`:
+`cleaned_data/` contains 7 tabular dataframes (.Rdata) produced from `raw_data/` using `scripts/01_organize.R`:
   - `biomass.Rdata` 54 observations of biomass across 3 functional groups
+    - 'block', 'paddock, 'grazing', and 'control_id' are covariates
+    - 'BRTE_abs', 'forbs_abs', 'grass_abs', and 'standingdead_abs' are the absolute dry biomass (g) per quadrat
+    - Remaining columns are calculated total and relative biomass values
   - `count_all.Rdata` 460 observations of BRTE count among all plots
+    - 'block', 'paddock, 'grazing', and 'fuelbreak' are covariates
+    - 'BRTE' is the count of cheatgrass stems
+    - 'quadrat' is the area ($cm^2$) used for counting cheatgrass stems
   - `count_greenstrip.Rdata` 316 observations of BRTE count among seeding plots
+    - 'block', 'paddock, 'grazing', 'spatial', 'seed_rate', 'seed_coat' are covariates
+    - 'BRTE' is the count of cheatgrass stems
+    - 'quadrat' is the area ($cm^2$) used for counting cheatgrass stems
   - `count_mono.Rdata` 220 observations of BRTE count among monoculture seeding plots
+    - 'block', 'paddock, 'grazing', 'species', 'seed_rate', 'seed_coat' are covariates
+    - 'BRTE' is the count of cheatgrass stems
+    - 'quadrat' is the area ($cm^2$) used for counting cheatgrass stems
   - `cover_all.Rdata` 453 observations of cover and height across 3 functional groups among all plots
+    - 'block', 'paddock, 'grazing', and 'fuelbreak' are covariates
+    - 'BRTE', 'intro_forbs', 'native_grass', 'native_forbs', 'bryo', 'litter', 'rock', and 'bare' are the cover (%) of each class
+    - 'height' is average plant height (cm)
+    - 'totveg_all' and 'totveg_live' are calculated total cover across all or living classes
   - `cover_greenstrip.Rdata` 310 observations of cover and height across 3 functional groups among seeding plots
+    - 'block', 'paddock, 'grazing', 'spatial', 'seed_rate', and 'seed_coat' are covariates
+    - 'BRTE', 'intro_forbs', 'native_grass', 'native_forbs', 'bryo', 'litter', 'rock', and 'bare' are the cover (%) of each class
+    - 'height' is average plant height (cm)
+    - 'totveg_all' and 'totveg_live' are calculated total cover across all or living classes
   - `cover_mono.Rdata` 214 observations of cover and height across 3 functional groups among monoculture seeding plots
+  - 'block', 'paddock, 'grazing', 'species', 'seed_rate', and 'seed_coat' are covariates
+    - 'BRTE', 'intro_forbs', 'native_grass', 'native_forbs', 'bryo', 'litter', 'rock', and 'bare' are the cover (%) of each class
+    - 'height' is average plant height (cm)
+    - 'totveg_all' and 'totveg_live' are calculated total cover across all or living classes
   
   
 #### Models
@@ -57,9 +81,9 @@ Each level of reference-offset ANOVA model included main effects and two-way int
 `initial_models/` contains exploratory Bayesian models for biomass and count data
 
 `models/` contains a nested file structure:
-  - `biomass/` contains 1 model:
+  - `biomass/`
     - `all/`
-  - `count/` contains 3 models:
+  - `count/`
     - `all/`
     - `greenstrip/`
     - `mono/`
@@ -76,17 +100,18 @@ Each level of reference-offset ANOVA model included main effects and two-way int
       - `all/`
       - `greenstrip/`
       - `mono/`
-  - `height/` contains 3 models:
+  - `height/`
     - `all/`
     - `greenstrip/`
     - `mono/`
 
 For each of the above folders, there are:
-- 2 .R files to run the model code and to plot the model output
-- at least 1 .jags file that encodes the Bayesian model
-- `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-- `inits/` contains initials to run the JAGS model as .Rdata files
-- `plots/` contains plots of model results as .jpg files
+- A control script (.R) to run the model code 
+- At least one model file (.jags) that encodes the Bayesian model
+- A plotting script (.R) to visualize model output
+- `coda/` with posterior chains (.Rdata) for modeled parameters and replicated data
+- `inits/` with initial values (.Rdata) to start the JAGS model
+- `plots/` with figures (.jpg) of model results
 
 ### Scripts and plots
 
