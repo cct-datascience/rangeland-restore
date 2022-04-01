@@ -4,10 +4,10 @@ Authors: Elise. S. Gornish, Jessica S. Guo, Lauren M. Porensky, Barry L. Perryma
 
 For further questions, please contact [Elise](mailto:egornish@arizona.edu) about the manuscript, [Jessica](mailto:jessicaguo@email.arizona.edu) about the analyses, and [Lauren](mailto:lauren.porensky@usda.gov) about the data. 
 
-### Project summary
+## Project summary
 Restoration of rangeland vegetation faces twin challenges of fire and invasion, which alter ecosystem functioning and provisioning services. Recent efforts to break the feedback between fire and invasion include restoring native plants, particularly slow-growing perennial grasses to reduce fuel loads, compete with invasive species, and tolerate grazing ([Porensky et al. 2018](#1)). To assess the efficacy of such treatments, a split-split plot design of restoration (monoculture vs. mixes, seed coating, two kinds of controls) was implemented following herbicide applications in April 2014 and 2015. These treatments were crossed with episodic disturbance in the form of seasonal grazing (fall 2015 to spring 2017) and burning (July 2017). Our objective is to determine whether targeted grazing and native plant reseeding treatments can have enduring effects on exotic annual grass invasion following fire. What are the enduring effects of: 1) Grazing treatments on the biomass of plant functional groups? 2) Grazing and fuelbreak treatments on cheatgrass (*Bromus tectorum*, BRTE) count? 3) Grazing and fuelbreak treatments on cover of cheatgrass, forbs, and native grasses? 4) Grazing and fuelbreak treatments on average plant height?
 
-### Approach
+## Approach
 
 In contrast to the challenges of transforming plant abundance data to satisfy conditions for frequentist analysis ([Damgaard 2009](#2)), Bayesian approaches allow for flexible specification of appropriate distributions, including mixture distributions that give rise to zero-inflated data ([Dagne 2004](#3)). Local factors of plant growth and limited dispersal can also lead to overdispersion, which can be accounted for with hierarchical random effects ([Dagne 2004](#3)). Here, we conduct four sets of hierarchical Bayesian ANOVA model that account for biomass, count, cover, and height data:
 1) The plot-level biomass of BRTE, forbs, and native grasses were modeled with a multivariate log-normal likelihood with the fixed effect of grazing. Plots were nested within the random-effect of block. 
@@ -34,7 +34,7 @@ Each level of reference-offset ANOVA model included main effects and two-way int
 | II, III      | seed coat       | 2   | **Uncoated**, coated |
 | III    | species       | 5   | **ELTR**, POSE, POFE, VUMI, ELEL |
 
-### Repository description
+## Repository description
 
 ### Data 
 
@@ -78,7 +78,7 @@ Each level of reference-offset ANOVA model included main effects and two-way int
     - 'totveg_all' and 'totveg_live' are calculated total cover across all or living classes
   
   
-#### Models
+### Models
 
 `initial_models/` contains exploratory Bayesian models for biomass and count data
 
@@ -129,7 +129,7 @@ For each of the above folders, there are:
 
 `plots/` contains the figures (.jpg)  output from `scripts/` plotting scripts
 
-### Citations
+## Citations
 <a id="1">[1]</a> 
 Porensky, LM, Perryman, BL, Williamson, MA, Madsen, MD, Leger, EA. (2018). Combining active restoration and targeted grazing to establish native plants and reduce fuel loads in invaded ecosystems. Ecol Evol. 8: 12533-12546. https://doi.org/10.1002/ece3.4642
 
