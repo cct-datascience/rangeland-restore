@@ -7,7 +7,7 @@ Restoration of rangeland vegetation faces twin challenges of fire and invasion, 
 
 ### Approach
 
-In contrast to the challenges of transforming plant abundance data to satisfy conditions for frequentist analysis ([Damgaard 2009](https://doi.org/10.1016/j.ecoinf.2009.02.002)), Bayesian approaches allow for flexible specification of appropriate distributions, including mixture distributions that give rise to zero-inflated data ([Dagne 2004](https://doi.org/10.1002/bimj.200310077)). Local factors of plant growth and limited dispersal can also lead to overdispersion, which can be accounted for with hierarchical random effects ([Dagne 2004](https://doi.org/10.1002/bimj.200310077)). Here, we conduct four sets of hierarchical Bayesian ANOVA model that account for biomass, count, cover, and height data:
+In contrast to the challenges of transforming plant abundance data to satisfy conditions for frequentist analysis ([Damgaard 2009](#2)), Bayesian approaches allow for flexible specification of appropriate distributions, including mixture distributions that give rise to zero-inflated data ([Dagne 2004](https://doi.org/10.1002/bimj.200310077)). Local factors of plant growth and limited dispersal can also lead to overdispersion, which can be accounted for with hierarchical random effects ([Dagne 2004](https://doi.org/10.1002/bimj.200310077)). Here, we conduct four sets of hierarchical Bayesian ANOVA model that account for biomass, count, cover, and height data:
 1) The plot-level biomass of BRTE, forbs, and native grasses were modeled with a multivariate log-normal likelihood with the fixed effect of grazing. Plots were nested within the random-effect of block. 
 2) Plot-level BRTE counts were modeled as a Poisson distribution with quadrat area as a covariate. Plots were nested within the random-effect of block. 
 3) Plot-level BRTE, forbs, and native grass cover were modeled as a zero-inflated beta distribution ([Bayes & Valdivieso 2016](https://doi.org/10.1080/02664763.2015.1120711)). Plots were nested within the random-effect of block.
@@ -183,3 +183,7 @@ Each level of reference-offset ANOVA model included main effects and two-way int
 ### Citations
 <a id="1">[1]</a> 
 Porensky, LM, Perryman, BL, Williamson, MA, Madsen, MD, Leger, EA. Combining active restoration and targeted grazing to establish native plants and reduce fuel loads in invaded ecosystems. Ecol Evol. 2018; 8: 12533- 12546. https://doi.org/10.1002/ece3.4642
+
+<a id="2">[2]</a> 
+Damgaard, Christian. On the distribution of plant abundance data. Ecol Inform. 2009; 4(2): 76-82. 
+https://doi.org/10.1016/j.ecoinf.2009.02.002
