@@ -46,7 +46,9 @@ Each level of reference-offset ANOVA model included main effects and two-way int
   - `biomass.Rdata` 54 observations of biomass across 3 functional groups
     - 'block', 'paddock, 'grazing', and 'control_id' are covariates
     - 'BRTE_abs', 'forbs_abs', 'grass_abs', and 'standingdead_abs' are the absolute dry biomass (g) per quadrat
-    - Remaining columns are calculated total and relative biomass values
+    - 'id' is unique identifier for each observation
+    - 'totveg' and 'liveveg' are the total biomass for all and for living classes
+    - 'BRTE_rel_tot' and 'BRTE_rel_live' are the relative proportion of BRTE biomass with respect to total and living biomass 
   - `count_all.Rdata` 460 observations of BRTE count among all plots
     - 'block', 'paddock, 'grazing', and 'fuelbreak' are covariates
     - 'BRTE' is the count of cheatgrass stems
@@ -125,7 +127,7 @@ For each of the above folders, there are:
   - `07_cover_figures_native.R` plots raw data and modeled posteriors for native grass cover
   - `08_height_figures.R` plots raw data and modeled posteriors for average plant height
 
-`plots/` contains the .jpg  output from `scripts/` figures files
+`plots/` contains the figures (.jpg)  output from `scripts/` plotting scripts
 
 ### Citations
 <a id="1">[1]</a> 

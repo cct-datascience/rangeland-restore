@@ -1,0 +1,41 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Postfire effects of rangeland restoration
+  treatments in a dryland system
+message: >-
+  If you reuse this dataset or analysis, please cite
+  it as below.
+type: dataset
+authors:
+  - given-names: Jessica
+    family-names: Guo
+    name-particle: S
+    email: jessicaguo@email.arizona.edu
+    affiliation: University of Arizona
+    orcid: 'https://orcid.org/0000-0002-9566-9182'
+  - given-names: Elise
+    name-particle: S
+    family-names: Gornish
+    email: egornish@arizona.edu
+    affiliation: University of Arizona
+    orcid: 'https://orcid.org/0000-0002-2055-4874'
+  - given-names: Lauren
+    name-particle: M
+    family-names: Porensky
+    email: lauren.porensky@usda.gov
+    affiliation: USDA ARS
+    orcid: 'https://orcid.org/0000-0001-6883-2442'
+  - given-names: Barry
+    name-particle: L
+    family-names: Perryman
+    email: perryman@unr.edu
+    affiliation: University of Nevada-Reno
+  - given-names: Elizabeth
+    name-particle: A
+    family-names: Leger
+    affiliation: University of Nevada-Reno
+    email: ealeger@gmail.com
+    orcid: 'https://orcid.org/0000-0003-0308-9496'
