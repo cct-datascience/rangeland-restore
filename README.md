@@ -2,6 +2,8 @@
 
 Authors: Elise. S. Gornish, Jessica S. Guo, Lauren M. Porensky, Barry L. Perryman, Elizabeth A. Leger
 
+For further questions, please contact [Elise](mailto:egornish@arizona.edu) about the manuscript, [Jessica](mailto:jessicaguo@email.arizona.edu) about the analyses, and [Lauren](mailto:lauren.porensky@usda.gov) about the data. 
+
 ### Project summary
 Restoration of rangeland vegetation faces twin challenges of fire and invasion, which alter ecosystem functioning and provisioning services. Recent efforts to break the feedback between fire and invasion include restoring native plants, particularly slow-growing perennial grasses to reduce fuel loads, compete with invasive species, and tolerate grazing ([Porensky et al. 2018](#1)). To assess the efficacy of such treatments, a split-split plot design of restoration (monoculture vs. mixes, seed coating, two kinds of controls) was implemented following herbicide applications in April 2014 and 2015. These treatments were crossed with episodic disturbance in the form of seasonal grazing (fall 2015 to spring 2017) and burning (July 2017). Our objective is to determine whether targeted grazing and native plant reseeding treatments can have enduring effects on exotic annual grass invasion following fire. What are the enduring effects of: 1) Grazing treatments on the biomass of plant functional groups? 2) Grazing and fuelbreak treatments on cheatgrass (*Bromus tectorum*, BRTE) count? 3) Grazing and fuelbreak treatments on cover of cheatgrass, forbs, and native grasses? 4) Grazing and fuelbreak treatments on average plant height?
 
@@ -191,4 +193,4 @@ Damgaard, C. (2019). On the distribution of plant abundance data. Ecol Inform. 4
 Dagne, GA. (2004). Hierarchical Bayesian analysis of correlated zero-inflated count data. Biom J. 46: 653-663. https://doi.org/10.1002/bimj.200310077
 
 <a id="4">[4]</a> 
-Bayes, CL, Valdivieso, L. (2016) A beta inflated mean regression model for fractional response variables. J Appl Stat. 43(10): 1814-1830. https://doi.org/10.1080/02664763.2015.1120711
+Bayes, CL, Valdivieso, L. (2016). A beta inflated mean regression model for fractional response variables. J Appl Stat. 43(10): 1814-1830. https://doi.org/10.1080/02664763.2015.1120711
