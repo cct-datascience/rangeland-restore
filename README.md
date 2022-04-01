@@ -35,6 +35,13 @@ Each level of reference-offset ANOVA model included main effects and two-way int
 | III    | species       | 5   | **ELTR**, POSE, POFE, VUMI, ELEL |
 
 ### Repository description
+
+### Data 
+
+`raw_data/` from [Lauren Porensky](https://www.ars.usda.gov/plains-area/fort-collins-co/center-for-agricultural-resources-research/rangeland-resources-systems-research/people/lauren-porensky/):
+  - `2019_Greenstrips_Biomass.csv` contains 54 observations of the biomass of 3 functional groups (BRTE, forbs, native grass) at the non-seeded, grazed plots. 
+  - `2019_Greenstrips_Cover_and_Densities.csv` contains 460 observations of BRTE count, cover of multiple functional groups, and average plant height across all treatment combinations. 
+  
 `cleaned_data/` contains 7 .Rdata dataframes produced from `raw_data/` using `scripts/01_organize.R`:
   - `biomass.Rdata` 54 observations of biomass across 3 functional groups
   - `count_all.Rdata` 460 observations of BRTE count among all plots
@@ -43,134 +50,45 @@ Each level of reference-offset ANOVA model included main effects and two-way int
   - `cover_all.Rdata` 453 observations of cover and height across 3 functional groups among all plots
   - `cover_greenstrip.Rdata` 310 observations of cover and height across 3 functional groups among seeding plots
   - `cover_mono.Rdata` 214 observations of cover and height across 3 functional groups among monoculture seeding plots
+  
+  
+#### Models
 
 `initial_models/` contains exploratory Bayesian models for biomass and count data
 
-`models/` contains 4 subfolders for each data type. In most cases, multiple model forms were explored; only the final JAGS model file is listed below. 
+`models/` contains a nested file structure:
   - `biomass/` contains 1 model:
     - `all/`
-      - `BRTE_biomass.R` runs the JAGS model
-      - `BRTE_biomass_mvnorm.jags` codes the multivariate log-normal model
-      - `BRTE_plots.R` calculates and plots modeled output
-      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits/` contains initials to run the JAGS model as .Rdata files 
-      - `plots/` contains plots of model results as .jpg files
   - `count/` contains 3 models:
     - `all/`
-      - `BRTE_counts.R` runs the JAGS model
-      - `BRTE_counts_Poisson.jags` codes the Poisson model
-      - `BRTE_plots.R` calculates and plots modeled output
-      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits/` contains initials to run the JAGS model as .Rdata files 
-      - `plots/` contains plots of model results as .jpg files
     - `greenstrip/`
-      - `BRTE_counts.R` runs the JAGS model
-      - `BRTE_counts_Poisson.jags` codes the Poisson model
-      - `BRTE_plots.R` calculates and plots modeled output
-      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits/` contains initials to run the JAGS model as .Rdata files 
-      - `plots/` contains plots of model results as .jpg files
     - `mono/`
-      - `BRTE_counts.R` runs the JAGS model
-      - `BRTE_counts_Poisson.jags` codes the Poisson model
-      - `BRTE_plots.R` calculates and plots modeled output
-      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits/` contains initials to run the JAGS model as .Rdata files 
-      - `plots/` contains plots of model results as .jpg files
-  - `cover/` contains 3 subfolders for each functionl group, each containing 3 models:
+  - `cover/` 
     - `BRTE/`
       - `all/`
-        - `BRTE_cover.R` runs the JAGS model
-        - `BRTE_cover_zib.jags` codes the zero-inflated beta model
-        - `BRTE_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
       - `greenstrip/`
-        - `BRTE_cover.R` runs the JAGS model
-        - `BRTE_cover_zib.jags` codes the zero-inflated beta model
-        - `BRTE_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
       - `mono/`
-        - `BRTE_cover.R` runs the JAGS model
-        - `BRTE_cover_zib.jags` codes the zero-inflated beta model
-        - `BRTE_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
     - `forbs/`
       - `all/`
-        - `Forbs_cover.R` runs the JAGS model
-        - `Forbs_cover_zib.jags` codes the zero-inflated beta model
-        - `Forbs_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
       - `greenstrip/`
-        - `Forbs_cover.R` runs the JAGS model
-        - `Forbs_cover_zib.jags` codes the zero-inflated beta model
-        - `Forbs_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
       - `mono/`
-        - `Forbs_cover.R` runs the JAGS model
-        - `Forbs_cover_zib.jags` codes the zero-inflated beta model
-        - `Forbs_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
     - `native/`
       - `all/`
-        - `Native_cover.R` runs the JAGS model
-        - `Native_cover_zib.jags` codes the zero-inflated beta model
-        - `Native_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
       - `greenstrip/`
-        - `Native_cover.R` runs the JAGS model
-        - `Native_cover_zib.jags` codes the zero-inflated beta model
-        - `Native_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files
       - `mono/`
-        - `Native_cover.R` runs the JAGS model
-        - `Native_cover_zib.jags` codes the zero-inflated beta model
-        - `Native_plots.R` calculates and plots modeled output
-        - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-        - `inits/` contains initials to run the JAGS model as .Rdata files 
-        - `plots/` contains plots of model results as .jpg files        
   - `height/` contains 3 models:
     - `all/`
-      - `Avg_heights.R` runs the JAGS model
-      - `Avg_heights_norm.jags` codes the normal model
-      - `Heights_plots.R` calculates and plots modeled output
-      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits/` contains initials to run the JAGS model as .Rdata files 
-      - `plots/` contains plots of model results as .jpg files        
     - `greenstrip/`
-      - `Avg_heights.R` runs the JAGS model
-      - `Avg_heights_norm.jags` codes the normal model
-      - `Heights_plots.R` calculates and plots modeled output
-      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits/` contains initials to run the JAGS model as .Rdata files 
-      - `plots/` contains plots of model results as .jpg files  
     - `mono/`
-      - `Avg_heights.R` runs the JAGS model
-      - `Avg_heights_norm.jags` codes the normal model
-      - `Heights_plots.R` calculates and plots modeled output
-      - `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
-      - `inits/` contains initials to run the JAGS model as .Rdata files 
-      - `plots/` contains plots of model results as .jpg files  
-  
 
-`raw_data/` from [Lauren Porensky](https://www.ars.usda.gov/plains-area/fort-collins-co/center-for-agricultural-resources-research/rangeland-resources-systems-research/people/lauren-porensky/):
-  - `2019_Greenstrips_Biomass.csv` contains 54 observations of the biomass of 3 functional groups (BRTE, forbs, native grass) at the non-seeded, grazed plots. 
-  - `2019_Greenstrips_Cover_and_Densities.csv` contains 460 observations of BRTE count, cover of multiple functional groups, and average plant height across all treatment combinations. 
+For each of the above folders, there are:
+- 2 .R files to run the model code and to plot the model output
+- at least 1 .jags file that encodes the Bayesian model
+- `coda/` contains posterior chains for parameters and replicated data, as .Rdata files 
+- `inits/` contains initials to run the JAGS model as .Rdata files
+- `plots/` contains plots of model results as .jpg files
+
+### Scripts and plots
 
 `scripts/` contains R scripts for organizing, plotting, and analyzing simple statistics:
   - `01_organize.R` organizes the `raw_data/` files into `cleaned_data/` files
@@ -181,6 +99,8 @@ Each level of reference-offset ANOVA model included main effects and two-way int
   - `06_cover_figures_forbs.R` plots raw data and modeled posteriors for forb cover
   - `07_cover_figures_native.R` plots raw data and modeled posteriors for native grass cover
   - `08_height_figures.R` plots raw data and modeled posteriors for average plant height
+
+`plots/` contains the .jpg  output from `scripts/` figures files
 
 ### Citations
 <a id="1">[1]</a> 
