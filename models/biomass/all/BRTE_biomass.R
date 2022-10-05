@@ -9,7 +9,7 @@ library(ggplot2)
 library(dplyr)
 
 # Read in data
-load("../../../cleaned_data/biomass.Rdata") # bio
+load("cleaned_data/biomass.Rdata") # bio
 dat <- bio
 str(dat)
 
@@ -82,13 +82,13 @@ initslist <- list(inits(), inits(), inits())
 
 
 # Or, use previous starting values + set seed
-load("inits/inits.Rdata")# saved.state, second element is inits
+load("models/biomass/all/inits/inits.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_biomass_mvnorm.jags",
+jm <- jags.model(file = "models/biomass/all/BRTE_biomass_mvnorm.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -128,12 +128,12 @@ gel
 # newinits[[1]]
 # saved.state <- removevars(newinits, variables = c(1:3, 5, 7, 9))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits.Rdata")
+# save(saved.state, file = "models/biomass/all/inits/inits.Rdata")
 
-save(coda.out, file = "coda/coda.Rdata")
+save(coda.out, file = "models/biomass/all/coda/coda.Rdata")
 
 # Model fit
 params <- c("biomass.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
-save(coda.rep, file = "coda/coda_rep.Rdata")
+save(coda.rep, file = "models/biomass/all/coda/coda_rep.Rdata")

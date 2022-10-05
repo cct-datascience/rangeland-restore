@@ -6,12 +6,12 @@ library(cowplot)
 library(forcats)
 
 # Read in raw data
-load("../../../cleaned_data/biomass.Rdata") # bio
+load("cleaned_data/biomass.Rdata") # bio
 dat <- bio
 
 # Load coda and coda.rep
-load(file = "coda/coda.Rdata") # coda.out
-load(file = "coda/coda_rep.Rdata") # coda.rep
+load(file = "models/biomass/all/coda/coda.Rdata") # coda.out
+load(file = "models/biomass/all/coda/coda_rep.Rdata") # coda.rep
 
 
 # summarize
@@ -111,7 +111,7 @@ fig1c <- ggplot() +
   guides(color = "none")
 fig1c
 
-jpeg(filename = "plots/fig1_alphabeta.jpg", 
+jpeg(filename = "models/biomass/all/plots/fig1_alphabeta.jpg", 
      width = 6, 
      height = 8, 
      units = "in",
