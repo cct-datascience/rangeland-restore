@@ -89,11 +89,11 @@ fig3b <- ggplot() +
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2)),
-                     breaks = seq(-3000, 1000, 1000)) +
+                     breaks = seq(-4000, 0, 2000)) +
   scale_x_discrete(limits = rev(levels(betas$param)), labels = rev(beta.labs2)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -116,11 +116,11 @@ fig3c <- ggplot() +
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
   scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2)),
-                     breaks = seq(-3000, 0, 1000)) +
+                     breaks = seq(-4000, 0, 2000)) +
   scale_x_discrete(limits = rev(levels(beta.ints$param)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -226,12 +226,13 @@ fig4b <- ggplot() +
              aes(x = param, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2))) +
+  scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2)),
+                     breaks = seq(0, 4000, 2000)) +
   scale_x_discrete(limits = rev(levels(betas$param)), labels = rev(beta.labs2)) +
   scale_color_manual(values = c("forestgreen"), 
                      na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -253,12 +254,13 @@ fig4c <- ggplot() +
              aes(x = param, y = min(pc2.5*100) - 100, col = as.factor(dir)),
              shape = 8) +
   geom_hline(yintercept = 0, lty = 2) +
-  scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2))) +
+  scale_y_continuous(expression(paste(Delta, " cheatgrass ", m^-2)),
+                     breaks = seq(0, 4000, 2000)) +
   scale_x_discrete(limits = rev(levels(beta.ints$param)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("forestgreen"),
                      na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -370,7 +372,7 @@ figS3b <- ggplot() +
   scale_color_manual(values = c("forestgreen"),
                      na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -399,7 +401,7 @@ figS3c <- ggplot() +
   scale_color_manual(values = c("forestgreen"),
                      na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
