@@ -23,7 +23,7 @@ load(file = "models/cover/BRTE/all/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
-sum_out <- broom.mixed::tidyMCMC(coda.out, conf.int = TRUE, 
+sum_out <- tidyMCMC(coda.out, conf.int = TRUE, 
                                  conf.level = 0.95) %>% 
   rename(param = term, mean = estimate, sd = std.error, 
          pc2.5 = conf.low, pc97.5 = conf.high) %>% 
@@ -155,7 +155,7 @@ load(file = "models/cover/BRTE/greenstrip/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
-sum_out <- broom.mixed::tidyMCMC(coda.out, conf.int = TRUE, 
+sum_out <- tidyMCMC(coda.out, conf.int = TRUE, 
                                  conf.level = 0.95) %>% 
   rename(param = term, mean = estimate, sd = std.error, 
          pc2.5 = conf.low, pc97.5 = conf.high) %>% 
@@ -290,7 +290,7 @@ load(file = "models/cover/BRTE/mono/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
-sum_out <- broom.mixed::tidyMCMC(coda.out, conf.int = TRUE, 
+sum_out <- tidyMCMC(coda.out, conf.int = TRUE, 
                                  conf.level = 0.95) %>% 
   rename(param = term, mean = estimate, sd = std.error, 
          pc2.5 = conf.low, pc97.5 = conf.high) %>% 
