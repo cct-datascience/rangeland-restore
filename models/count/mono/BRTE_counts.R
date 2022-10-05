@@ -11,7 +11,7 @@ library(ggplot2)
 library(dplyr)
 
 # Read in data
-load("../../../cleaned_data/count_mono.Rdata") # count_mono
+load("cleaned_data/count_mono.Rdata") # count_mono
 
 # Organize: remove largest quadrat and relevel species based on fig. 6b from Porensky et al. 2018
 dat <- count_mono %>%
@@ -98,13 +98,13 @@ inits <- function(){
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("inits/inits_OLRE.Rdata")# saved.state, second element is inits
+load("models/counts/mono/inits/inits_OLRE.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Marsaglia-Multicarry"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_PoissonOLRE.jags",
+jm <- jags.model(file = "models/counts/mono/BRTE_counts_PoissonOLRE.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -151,12 +151,12 @@ gel
 # newinits[[1]]
 # saved.state <- removevars(newinits, variables = c(1:2, 4, 6:70))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits_OLRE.Rdata")
+# save(saved.state, file = "models/counts/mono/inits/inits_OLRE.Rdata")
 
-save(coda.out, file = "coda/coda_OLRE.Rdata")
+save(coda.out, file = "models/counts/mono/coda/coda_OLRE.Rdata")
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 150000, thin = 50)
-save(coda.rep, file = "coda/coda_OLRE_rep.Rdata")
+save(coda.rep, file = "models/counts/mono/coda/coda_OLRE_rep.Rdata")

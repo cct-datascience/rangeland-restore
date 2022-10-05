@@ -151,7 +151,7 @@ gel
 # newinits[[1]]
 # saved.state <- removevars(newinits, variables = c(1:2, 4, 6:34))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits_OLRE.Rdata")
+# save(saved.state, file = "models/counts/greenstrip/inits/inits_OLRE.Rdata")
 
 save(coda.out, file = "models/counts/greenstrip/coda/coda_OLRE.Rdata")
 

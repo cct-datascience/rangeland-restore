@@ -5,15 +5,15 @@ library(dplyr)
 library(cowplot)
 
 # Read in data
-load("../../../cleaned_data/count_mono.Rdata") # count_mono
+load("cleaned_data/count_mono.Rdata") # count_mono
 dat <- count_mono %>%
   filter(quadrat < 10000) %>%
   mutate(species = factor(species, levels = c("ELTR", "POSE", "POFE", "VUMI", "ELEL"))) %>%
   arrange(block)
 
 # Load posterior chains
-load(file = "coda/coda_OLRE.Rdata")
-load(file = "coda/coda_OLRE_rep.Rdata")
+load(file = "models/counts/mono/coda/coda_OLRE.Rdata")
+load(file = "models/counts/mono/coda/coda_OLRE_rep.Rdata")
 
 # summarize
 sum.out <- coda.fast(coda.out, OpenBUGS = FALSE)
@@ -50,7 +50,7 @@ fig1 <- ggplot() +
         axis.title.x = element_blank()) +
   guides(color = "none")
 
-jpeg(filename = "plots/fig1_betas2.jpg", 
+jpeg(filename = "models/counts/mono/plots/fig1_betas2.jpg", 
      width = 6, 
      height = 3, 
      units = "in",
@@ -121,7 +121,7 @@ fig_1b <- ggplot() +
   guides(color = "none")
 fig_1b
 
-jpeg(filename = "plots/fig1_betas.jpg", 
+jpeg(filename = "models/counts/mono/plots/fig1_betas.jpg", 
      width = 6, 
      height = 6, 
      units = "in",
@@ -188,7 +188,7 @@ fig_2b <- ggplot() +
   guides(color = "none")
 fig_2b
 
-jpeg(filename = "plots/fig2_betas.jpg", 
+jpeg(filename = "models/counts/mono/plots/fig2_betas.jpg", 
      width = 8, 
      height = 6, 
      units = "in",

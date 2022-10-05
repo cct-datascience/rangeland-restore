@@ -130,13 +130,13 @@ gel
 # newinits[[1]]
 # saved.state <- removevars(newinits, variables = c(1:2, 4, 6:19))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits_OLRE.Rdata")
+# save(saved.state, file = "models/counts/all/inits/inits_OLRE.Rdata")
 
-save(coda.out, file = "coda/coda_OLRE.Rdata")
+save(coda.out, file = "models/counts/all/coda/coda_OLRE.Rdata")
 
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 150000, thin = 50)
-save(coda.rep, file = "coda/coda_OLRE_rep.Rdata")
+save(coda.rep, file = "models/counts/all/coda/coda_OLRE_rep.Rdata")
