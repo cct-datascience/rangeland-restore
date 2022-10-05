@@ -16,7 +16,7 @@ ilogit <- function(x){
 }
 
 # read in data
-load("../../../../cleaned_data/cover_all.Rdata") # cover_all
+load("cleaned_data/cover_all.Rdata") # cover_all
 # convert to proportions
 dat <- cover_all %>%
   mutate(BRTE = BRTE/100,
@@ -90,13 +90,13 @@ inits <- function(){
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("inits/inits.Rdata")# saved.state, second element is inits
+load("models/cover/forbs/all/inits/inits.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "Forbs_cover_zib.jags",
+jm <- jags.model(file = "models/cover/forbs/all/Forbs_cover_zib.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -140,13 +140,13 @@ gel
 # newinits[[1]]
 # saved.state <- removevars(newinits, variables = c(1, 3, 5:16, 18:19))
 # saved.state[[1]]
-# save(saved.state, file = "inits/inits.Rdata")
+# save(saved.state, file = "models/cover/forbs/all/inits/inits.Rdata")
 
-save(coda.out, file = "coda/coda.Rdata")
+save(coda.out, file = "models/cover/forbs/all/coda/coda.Rdata")
 
 
 # Model fit
 params <- c("y.0.rep", "y.c.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 15000, thin = 5)
-save(coda.rep, file = "coda/coda_rep.Rdata")
+save(coda.rep, file = "models/cover/forbs/all/coda/coda_rep.Rdata")
