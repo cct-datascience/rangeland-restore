@@ -14,7 +14,7 @@ ilogit <- function(x){
 }
 
 # Read in raw data
-load("../../../../cleaned_data/cover_mono.Rdata") # cover_mono
+load("cleaned_data/cover_mono.Rdata") # cover_mono
 # convert to proportions
 dat <- cover_mono %>%
   mutate(BRTE = BRTE/100,
@@ -27,8 +27,8 @@ dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "E
 str(dat)
 
 # Load coda and coda.rep
-load(file = "coda/coda.Rdata") # coda.out
-load(file = "coda/coda_rep.Rdata") # coda.rep
+load(file = "models/cover/native/mono/coda/coda.Rdata") # coda.out
+load(file = "models/cover/native/mono/coda/coda_rep.Rdata") # coda.rep
 
 
 # summarize
@@ -194,7 +194,7 @@ fig_3d <- ggplot() +
 
 
 
-jpeg(filename = "plots/fig_betas.jpg", 
+jpeg(filename = "models/cover/native/mono/plots/fig_betas.jpg", 
      width = 8, 
      height = 8, 
      units = "in",
