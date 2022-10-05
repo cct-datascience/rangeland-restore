@@ -47,7 +47,7 @@ fig1 <- ggplot() +
         axis.title.x = element_blank()) +
   guides(color = "none")
 
-jpeg(filename = "plots/fig1_betas2.jpg", 
+jpeg(filename = "models/count/all/plots/fig1_betas2.jpg", 
      width = 6, 
      height = 3, 
      units = "in",
@@ -114,7 +114,7 @@ fig_1b <- ggplot() +
   guides(color = "none")
 fig_1b
 
-jpeg(filename = "plots/fig1_betas.jpg", 
+jpeg(filename = "models/count/all/plots/fig1_betas.jpg", 
      width = 6, 
      height = 4, 
      units = "in",
@@ -178,7 +178,7 @@ fig_2b <- ggplot() +
   guides(color = "none")
 fig_2b
 
-jpeg(filename = "plots/fig2_betas.jpg", 
+jpeg(filename = "models/count/all/plots/fig2_betas.jpg", 
      width = 8, 
      height = 6, 
      units = "in",
