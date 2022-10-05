@@ -1,13 +1,15 @@
 # Figures script for total forbs cover data at 3 levels
-library(coda)
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(ggthemes)
+library(coda)
+library(broom.mixed)
+library(cowplot)
 
-### ALL
+##### LEVEL I #####
 # read in data
-load("../cleaned_data/cover_all.Rdata") # cover_all
+load("cleaned_data/cover_all.Rdata") # cover_all
 # convert to proportions
 raw_dat <- cover_all %>%
   mutate(BRTE = BRTE/100,
@@ -18,15 +20,17 @@ raw_dat <- cover_all %>%
 str(raw_dat)
 
 # Load coda and coda.rep
-load(file = "../models/cover/forbs/all/coda/coda.Rdata") # coda.out
+load(file = "models/cover/forbs/all/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
-sum_out <- broom.mixed::tidyMCMC(coda.out, conf.int = TRUE, 
+sum_out <- tidyMCMC(coda.out, conf.int = TRUE, 
                                  conf.level = 0.95) %>% 
   rename(param = term, mean = estimate, sd = std.error, 
          pc2.5 = conf.low, pc97.5 = conf.high) %>% 
-  mutate(sig = if_else(pc2.5 * pc97.5 > 0, TRUE, FALSE))
+  mutate(sig = if_else(pc2.5 * pc97.5 > 0, TRUE, FALSE),
+         dir = case_when(sig == TRUE & mean > 0 ~ "pos",
+                         sig == TRUE & mean < 0 ~ "neg"))
 
 # Select and organize group means
 model_dat <- sum_out %>%
@@ -40,7 +44,8 @@ model_dat <- sum_out %>%
          grazing = factor(grazing, levels = c("ungrazed", "fall", "spring")),
          fuelbreak = factor(fuelbreak, levels = c("control", "herbicide", "greenstrip")))
 
-fig8 <- ggplot() +
+# raw + modeled means
+figS5a <- ggplot() +
   geom_point(data = raw_dat, aes(x = fuelbreak, y = forbs, color = grazing),
              position = position_jitterdodge(dodge.width = 0.5, jitter.width = 0.2),
              alpha = 0.2) +
@@ -63,10 +68,67 @@ fig8 <- ggplot() +
         legend.title = element_blank(),
         legend.background = element_rect(fill='transparent'))
 
-jpeg(filename = "../plots/Fig8_forbs_cover_all.jpg",
-     height = 4, width = 6,
+# main effects betas
+beta.labs2 <- c("fall", "spring", "herbicide", "seeding")
+beta.ind <- grep("Diff_Beta", sum_out$param)
+betas <- sum_out[beta.ind[1:length(beta.labs2)],]
+betas$param <- factor(betas$param, levels = betas$param)
+str(betas)
+figS5b <- ggplot() +
+  geom_pointrange(data = betas, 
+                  aes(x = param, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
+  geom_point(data = betas,
+             aes(x = param, y = min(pc2.5) - 0.01, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " forbs prop. cover"))) +
+  scale_x_discrete(limits = rev(levels(betas$param)), labels = rev(beta.labs2)) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+
+
+# interaction betas
+beta.labs.ints <- c("fall:herbicide", "spring:herbicide", 
+                    "fall:seeding", "spring:seeding")
+beta.int.ind <- grep("diff_Beta", sum_out$param)
+beta.ints <- sum_out[beta.int.ind,]
+beta.ints$param <- factor(beta.ints$param, levels = beta.ints$param)
+str(beta.ints)
+figS5c <- ggplot() +
+  geom_pointrange(data = beta.ints, 
+                  aes(x = param, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
+  geom_point(data = beta.ints,
+             aes(x = param, y = min(pc2.5) - .01, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " forbs prop. cover"))) +
+  scale_x_discrete(limits = rev(levels(beta.ints$param)), labels = rev(beta.labs.ints)) +
+  scale_color_manual(values = c("goldenrod3", "forestgreen"),
+                     na.value = "transparent") +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+
+figS5_top <- plot_grid(figS5a, labels = "a")
+figS5_bottom <- plot_grid(figS5b, figS5c, ncol = 2, rel_widths = c(4, 5), labels = c("b", "c"))
+figS5 <- plot_grid(figS5_top, figS5_bottom, ncol = 1)
+
+
+jpeg(filename = "plots/FigS5_forb_cover_level1.jpg",
+     height = 6, width = 6,
      units = "in", res = 600)
-print(fig8)
+print(figS5)
 dev.off()
 
 # Is greenstrip marginally significant?
@@ -75,9 +137,9 @@ which(colnames(all) == "Diff_Beta[4]")
 ttest <- ifelse(all[,4] < 0, 0, 1)
 mean(ttest)
 
-### GREENSTRIP
+##### LEVEL II #####
 # read in data
-load("../cleaned_data/cover_greenstrip.Rdata") # cover_greenstrip
+load("cleaned_data/cover_greenstrip.Rdata") # cover_greenstrip
 # convert to proportions
 raw_dat <- cover_greenstrip %>%
   mutate(BRTE = BRTE/100,
@@ -93,15 +155,17 @@ raw_dat <- cover_greenstrip %>%
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
 # Load coda and coda.rep
-load(file = "../models/cover/forbs/greenstrip/coda/coda.Rdata") # coda.out
+load(file = "models/cover/forbs/greenstrip/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
-sum_out <- broom.mixed::tidyMCMC(coda.out, conf.int = TRUE, 
+sum_out <- tidyMCMC(coda.out, conf.int = TRUE, 
                                  conf.level = 0.95) %>% 
   rename(param = term, mean = estimate, sd = std.error, 
          pc2.5 = conf.low, pc97.5 = conf.high) %>% 
-  mutate(sig = if_else(pc2.5 * pc97.5 > 0, TRUE, FALSE))
+  mutate(sig = if_else(pc2.5 * pc97.5 > 0, TRUE, FALSE),
+         dir = case_when(sig == TRUE & mean > 0 ~ "pos",
+                         sig == TRUE & mean < 0 ~ "neg"))
 
 # Select and organize group means
 model_dat <- sum_out %>%
@@ -120,7 +184,8 @@ model_dat <- sum_out %>%
          seed_rate = factor(seed_rate, levels = c("low", "high")),
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
-fig9 <- ggplot() +
+# raw + modeled means
+figS6a <- ggplot() +
   geom_point(data = raw_dat, aes(x = spatial, y = forbs, color = grazing),
              position = position_jitterdodge(dodge.width = 0.5, jitter.width = 0.2),
              alpha = 0.2) +
@@ -145,10 +210,67 @@ fig9 <- ggplot() +
         strip.background = element_rect(fill = "transparent"),
         legend.key.size = unit(.5, "lines"))
 
-jpeg(filename = "../plots/Fig9_forbs_cover_greenstrip.jpg",
-     height = 4, width = 6,
+# main effects betas
+beta.labs2 <- c("mono", "high", "coated", "fall", "spring")
+beta.ind <- grep("Diff_Beta", sum_out$param)
+betas <- sum_out[beta.ind[1:length(beta.labs2)],]
+betas$param <- factor(betas$param, levels = betas$param)
+str(betas)
+figS6b <- ggplot() +
+  geom_pointrange(data = betas, 
+                  aes(x = param, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
+  geom_point(data = betas,
+             aes(x = param, y = min(pc2.5) - 0.01, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " forbs prop. cover"))) +
+  scale_x_discrete(limits = rev(levels(betas$param)), labels = rev(beta.labs2)) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+
+# interaction betas
+beta.labs.ints <- c("mono:high", "mono:coated", "mono:fall", "mono:spring",
+                    "high:coated", "high:fall", "high:spring", 
+                    "coated:fall", "coated:spring")
+beta.int.ind <- grep("diff_Beta", sum_out$param)
+beta.ints <- sum_out[beta.int.ind,]
+beta.ints$param <- factor(beta.ints$param, levels = beta.ints$param)
+str(beta.ints)
+figS6c <- ggplot() +
+  geom_pointrange(data = beta.ints, 
+                  aes(x = param, y = mean, ymin = pc2.5, ymax = pc97.5),
+                  size = 0.5) +
+  geom_point(data = beta.ints,
+             aes(x = param, y = min(pc2.5) - .01, col = as.factor(dir)),
+             shape = 8) +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_y_continuous(expression(paste(Delta, " forbs prop. cover"))) +
+  scale_x_discrete(limits = rev(levels(beta.ints$param)), labels = rev(beta.labs.ints)) +
+  scale_color_manual(values = c("forestgreen"),
+                     na.value = "transparent") +
+  coord_flip() +
+  theme_bw(base_size = 14) +
+  theme(axis.title.y = element_blank(),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) +
+  guides(color = "none")
+
+figS6_top <- plot_grid(figS6a, labels = "a")
+figS6_bottom <- plot_grid(figS6b, figS6c, ncol = 2, rel_widths = c(4, 5), labels = c("b", "c"))
+figS6 <- plot_grid(figS6_top, figS6_bottom, ncol = 1)
+
+
+jpeg(filename = "plots/FigS6_forbs_cover_level2.jpg",
+     height = 6, width = 6,
      units = "in", res = 600)
-print(fig9)
+print(figS6)
 dev.off()
 
 
@@ -163,10 +285,9 @@ mean(ttest)
 # Both are marginally significant at p < 0.05 
 # and increase the proportion of forbs cover
 
-
-### MONO
+##### LEVEL III #####
 # Read in data
-load("../cleaned_data/cover_mono.Rdata") # cover_mono
+load("cleaned_data/cover_mono.Rdata") # cover_mono
 
 # Organize: remove largest quadrat and relevel species based on fig. 6b from Porensky et al. 2018
 raw_dat <- cover_mono %>%
@@ -183,7 +304,7 @@ raw_dat <- cover_mono %>%
          seed_coat = factor(seed_coat, levels = c("uncoated", "coated")))
 
 # Load coda and coda.rep
-load(file = "../models/cover/forbs/mono/coda/coda.Rdata") # coda.out
+load(file = "models/cover/forbs/mono/coda/coda.Rdata") # coda.out
 
 # Summarize coda
 # Note that tidyMCMC drops the deviance estimate
@@ -238,7 +359,7 @@ fig10 <- ggplot() +
         strip.background = element_rect(fill = "transparent"),
         legend.key.size = unit(.5, "lines"))
 
-jpeg(filename = "../plots/Fig10_forbs_cover_mono.jpg",
+jpeg(filename = "plots/Fig10_forbs_cover_mono.jpg",
      height = 4, width = 6,
      units = "in", res = 600)
 print(fig10)
