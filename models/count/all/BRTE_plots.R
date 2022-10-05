@@ -5,14 +5,14 @@ library(dplyr)
 library(cowplot)
 
 # Read in raw data
-load("../../../cleaned_data/count_all.Rdata") # count_all
+load("cleaned_data/count_all.Rdata") # count_all
 dat <- count_all %>%
   filter(quadrat < 10000) %>%
   arrange(block)
 
 # Load coda and coda.rep
-load(file = "coda/coda_OLRE.Rdata") # coda.out
-load(file = "coda/coda_OLRE_rep.Rdata") # coda.rep
+load(file = "models/count/all/coda/coda_OLRE.Rdata") # coda.out
+load(file = "models/count/all/coda/coda_OLRE_rep.Rdata") # coda.rep
 
 
 # summarize

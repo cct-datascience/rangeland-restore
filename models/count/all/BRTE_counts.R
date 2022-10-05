@@ -9,7 +9,7 @@ library(ggplot2)
 library(dplyr)
 
 # Read in data
-load("../../../cleaned_data/count_all.Rdata") # count_all
+load("cleaned_data/count_all.Rdata") # count_all
 dat <- count_all
 str(dat)
 
@@ -80,13 +80,13 @@ inits <- function(){
 initslist <- list(inits(), inits(), inits())
 
 # Or, use previous starting values + set seed
-load("inits/inits_OLRE.Rdata")# saved.state, second element is inits
+load("models/count/all/inits/inits_OLRE.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Mersenne-Twister"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_PoissonOLRE.jags",
+jm <- jags.model(file = "models/count/all/BRTE_counts_PoissonOLRE.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
