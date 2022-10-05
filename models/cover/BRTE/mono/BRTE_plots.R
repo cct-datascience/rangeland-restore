@@ -13,7 +13,7 @@ ilogit <- function(x){
 }
 
 # read in data
-load("../../../../cleaned_data/cover_mono.Rdata") # cover_mono
+load("cleaned_data/cover_mono.Rdata") # cover_mono
 # convert to proportions
 dat <- cover_mono %>%
   mutate(BRTE = BRTE/100,
@@ -27,8 +27,8 @@ dat$species <- factor(dat$species, levels = c("ELTR", "POSE", "POFE", "VUMI", "E
 str(dat)
 
 # Load coda and coda.rep
-load(file = "coda/coda.Rdata") # coda.out
-load(file = "coda/coda_rep.Rdata") # coda.rep
+load(file = "models/cover/BRTE/mono/coda/coda.Rdata") # coda.out
+load(file = "models/cover/BRTE/mono/coda/coda_rep.Rdata") # coda.rep
 
 
 # summarize
@@ -67,7 +67,7 @@ fig1 <- ggplot() +
         axis.title.x = element_blank()) +
   guides(color = "none")
 
-jpeg(filename = "plots/fig1_betas2.jpg", 
+jpeg(filename = "models/cover/BRTE/mono/plots/fig1_betas2.jpg", 
      width = 6, 
      height = 3, 
      units = "in",
@@ -137,7 +137,7 @@ fig_1b <- ggplot() +
   guides(color = "none")
 fig_1b
 
-jpeg(filename = "plots/fig1_betas.jpg", 
+jpeg(filename = "models/cover/BRTE/mono/plots/fig1_betas.jpg", 
      width = 6, 
      height = 6, 
      units = "in",
@@ -201,7 +201,7 @@ fig_2b <- ggplot() +
   guides(color = "none")
 fig_2b
 
-jpeg(filename = "plots/fig2_betas.jpg", 
+jpeg(filename = "models/cover/BRTE/mono/plots/fig2_betas.jpg", 
      width = 8, 
      height = 6, 
      units = "in",
