@@ -14,7 +14,7 @@ ilogit <- function(x){
 }
 
 # Read in raw data
-load("../../../../cleaned_data/cover_greenstrip.Rdata") # cover_greenstrip
+load("cleaned_data/cover_greenstrip.Rdata") # cover_greenstrip
 # convert to proportions
 dat <- cover_greenstrip %>%
   mutate(BRTE = BRTE/100,
@@ -25,8 +25,8 @@ dat <- cover_greenstrip %>%
 str(dat)
 
 # Load coda and coda.rep
-load(file = "coda/coda.Rdata") # coda.out
-load(file = "coda/coda_rep.Rdata") # coda.rep
+load(file = "models/cover/native/greenstrip/coda/coda.Rdata") # coda.out
+load(file = "models/cover/native/greenstrip/coda/coda_rep.Rdata") # coda.rep
 
 # summarize
 sum.out <- tidyMCMC(coda.out, 
@@ -187,7 +187,7 @@ fig_3d <- ggplot() +
 
 
 
-jpeg(filename = "plots/fig_betas.jpg", 
+jpeg(filename = "models/cover/native/greenstrip/plots/fig_betas.jpg", 
      width = 8, 
      height = 6, 
      units = "in",
