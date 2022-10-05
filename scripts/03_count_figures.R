@@ -78,6 +78,7 @@ fig3a <- ggplot() +
 beta.labs2 <- c("fall", "spring", "herbicide", "seeding")
 beta.ind <- grep("Diff_Beta", sum_out$param)
 betas <- sum_out[beta.ind[1:length(beta.labs2)],]
+betas$param <- factor(betas$param, levels = betas$param)
 str(betas)
 fig3b <- ggplot() +
   geom_pointrange(data = betas, 
@@ -104,6 +105,7 @@ beta.labs.ints <- c("fall:herbicide", "spring:herbicide",
                     "fall:seeding", "spring:seeding")
 beta.int.ind <- grep("diff_Beta", sum_out$param)
 beta.ints <- sum_out[beta.int.ind,]
+beta.ints$param <- factor(beta.ints$param, levels = beta.ints$param)
 str(beta.ints)
 fig3c <- ggplot() +
   geom_pointrange(data = beta.ints, 
@@ -214,6 +216,7 @@ fig4a <- ggplot() +
 beta.labs2 <- c("mono", "high", "coated", "fall", "spring")
 beta.ind <- grep("Diff_Beta", sum_out$param)
 betas <- sum_out[beta.ind[1:length(beta.labs2)],]
+betas$param <- factor(betas$param, levels = betas$param)
 str(betas)
 fig4b <- ggplot() +
   geom_pointrange(data = betas, 
@@ -240,6 +243,7 @@ beta.labs.ints <- c("mono:high", "mono:coated", "mono:fall", "mono:spring",
                     "coated:fall", "coated:spring")
 beta.int.ind <- grep("diff_Beta", sum_out$param)
 beta.ints <- sum_out[beta.int.ind,]
+beta.ints$param <- factor(beta.ints$param, levels = beta.ints$param)
 str(beta.ints)
 fig4c <- ggplot() +
   geom_pointrange(data = beta.ints, 
@@ -351,6 +355,7 @@ figS3a <- ggplot() +
 beta.labs2 <- c("POSE", "POFE", "VUMI", "ELEL", "high", "fall", "spring", "coated")
 beta.ind <- grep("Diff_Beta", sum_out$param)
 betas <- sum_out[beta.ind[1:length(beta.labs2)],]
+betas$param <- factor(betas$param, levels = betas$param)
 str(betas)
 figS3b <- ggplot() +
   geom_pointrange(data = betas, 
@@ -379,6 +384,7 @@ beta.labs.ints <- c("POSE:high", "POFE:high", "VUMI:high", "ELEL:high",
                     "high:fall", "high:spring", "high:coated", "fall:coated", "spring:coated")
 beta.int.ind <- grep("diff_Beta", sum_out$param)
 beta.ints <- sum_out[beta.int.ind,]
+beta.ints$param <- factor(beta.ints$param, levels = beta.ints$param)
 str(beta.ints)
 figS3c <- ggplot() +
   geom_pointrange(data = beta.ints, 
