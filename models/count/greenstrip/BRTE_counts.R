@@ -9,7 +9,7 @@ library(ggplot2)
 library(dplyr)
 
 # Read in data
-load("../../../cleaned_data/count_greenstrip.Rdata") # count_greenstrip
+load("cleaned_data/count_greenstrip.Rdata") # count_greenstrip
 dat <- count_greenstrip
 str(dat)
 
@@ -102,13 +102,13 @@ initslist <- list(inits(), inits(), inits())
 
 
 # Or, use previous starting values + set seed
-load("inits/inits_ORLE.Rdata")# saved.state, second element is inits
+load("models/counts/greenstrip/inits/inits_ORLE.Rdata")# saved.state, second element is inits
 initslist <- list(append(saved.state[[2]][[1]], list(.RNG.name = array("base::Marsaglia-Multicarry"), .RNG.seed = array(13))),
                   append(saved.state[[2]][[2]], list(.RNG.name = array("base::Wichmann-Hill"), .RNG.seed = array(89))),
                   append(saved.state[[2]][[3]], list(.RNG.name = array("base::Super-Duper"), .RNG.seed = array(18))))
 
 # model
-jm <- jags.model(file = "BRTE_counts_PoissonOLRE.jags",
+jm <- jags.model(file = "models/counts/greenstrip/BRTE_counts_PoissonOLRE.jags",
                  inits = initslist,
                  n.chains = 3,
                  data = datlist)
@@ -153,10 +153,10 @@ gel
 # saved.state[[1]]
 # save(saved.state, file = "inits/inits_OLRE.Rdata")
 
-save(coda.out, file = "coda/coda_OLRE.Rdata")
+save(coda.out, file = "models/counts/greenstrip/coda/coda_OLRE.Rdata")
 
 # Model fit
 params <- c("counts.rep") #monitor replicated data
 coda.rep <- coda.samples(jm, variable.names = params,
                          n.iter = 150000, thin = 50)
-save(coda.rep, file = "coda/coda_OLRE_rep.Rdata")
+save(coda.rep, file = "models/counts/greenstrip/coda/coda_OLRE_rep.Rdata")
