@@ -85,7 +85,7 @@ fig5b <- ggplot() +
   scale_x_discrete(limits = rev(levels(betas$param)), labels = rev(beta.labs2)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -110,7 +110,7 @@ fig5c <- ggplot() +
   scale_x_discrete(limits = rev(levels(beta.ints$param)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("goldenrod3", "forestgreen")) +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -225,7 +225,7 @@ fig6b <- ggplot() +
   scale_color_manual(values = c("forestgreen"),
                      na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -251,7 +251,7 @@ fig6c <- ggplot() +
   scale_x_discrete(limits = rev(levels(beta.ints$param)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("forestgreen"),  na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -362,7 +362,7 @@ figS4b <- ggplot() +
   scale_x_discrete(limits = rev(levels(betas$param)), labels = rev(beta.labs2)) +
   scale_color_manual(values = c("forestgreen"), na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
@@ -391,7 +391,7 @@ figS4c <- ggplot() +
   scale_x_discrete(limits = rev(levels(beta.ints$param)), labels = rev(beta.labs.ints)) +
   scale_color_manual(values = c("forestgreen"), na.value = "transparent") +
   coord_flip() +
-  theme_bw(base_size = 14) +
+  theme_bw(base_size = 12) +
   theme(axis.title.y = element_blank(),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank()) +
