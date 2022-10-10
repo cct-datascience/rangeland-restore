@@ -115,7 +115,7 @@ save(out_2019_all, file = "cleaned_data/prism_2019.Rdata")
 # Set directory for prism data
 prism_set_dl_dir("raw_data/prism_ppt")
 get_prism_normals(type = "ppt",
-                  resolution = "800m",
+                  resolution = "4km",
                   mon = 1:12,
                   annual = FALSE,
                   keepZip = FALSE)
@@ -140,7 +140,7 @@ str(out_ppt)
 # Set directory for prism data
 prism_set_dl_dir("raw_data/prism_tmax")
 get_prism_normals(type = "tmax",
-                  resolution = "800m",
+                  resolution = "4km",
                   mon = 1:12,
                   annual = FALSE,
                   keepZip = FALSE)
@@ -165,7 +165,7 @@ str(out_tmax)
 # Set directory for prism data
 prism_set_dl_dir("raw_data/prism_tmin")
 get_prism_normals(type = "tmin",
-                  resolution = "800m",
+                  resolution = "4km",
                   mon = 1:12,
                   annual = FALSE,
                   keepZip = FALSE)
@@ -191,9 +191,9 @@ str(out_tmin)
 
 ##### Combine normals and summarize #####
 out_all <- out_ppt %>%
-  left_join(select(out_tmax, -label)) %>%
-  left_join(select(out_tmin, -label)) %>%
-  select(-label) %>%
+  left_join(dplyr::select(out_tmax, -label)) %>%
+  left_join(dplyr::select(out_tmin, -label)) %>%
+  dplyr::select(-label) %>%
   relocate(month, .after = site) %>%
   group_by(month) %>%
   summarize(ppt = mean(ppt),
@@ -264,6 +264,8 @@ fig1 <- out_df %>%
   geom_line(aes(y = tmax, color = "Tmax", group = 2)) +
   facet_wrap(~type, ncol = 1) +
   scale_y_continuous(name = "Temp (°C)| Precip (mm)") +
+  scale_color_manual(values = c("chocolate3", "cornflowerblue"),
+                     labels = c(~T[max], ~T[min])) +
   theme_bw(base_size = 12) +
   theme(panel.grid = element_blank(),
         axis.title.x = element_blank(),
