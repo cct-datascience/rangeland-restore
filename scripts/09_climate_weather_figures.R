@@ -23,6 +23,11 @@ get_fifth <- function(vec) {
   return(as.numeric(substr(foo, 5, 6)))
 }
 
+get_fifth_year <- function(vec) {
+  foo <- vec[5]
+  return(as.numeric(substr(foo, 1, 4)))
+}
+
 ##### PRISM PPT 2019 #####
 # Resolution is a 4km
 # Set directory for prism data
@@ -279,4 +284,96 @@ ggsave(filename = "plots/Fig1_weather.jpg",
        plot = fig1,
        width = 4,
        height = 6, 
+       dpi = 600)
+
+#### PRISM water year ppt 2014-2019 #####
+# Resolution is a 4km
+# Set directory for prism data
+prism_set_dl_dir("raw_data/prism_wateryear_ppt")
+get_prism_monthlys(type = "ppt",
+                   years = 2013,
+                   mon = 10:12,
+                   keepZip = FALSE)
+                   
+get_prism_monthlys(type = "ppt",
+                   years = 2014:2018,
+                   mon = 1:12,
+                   keepZip = FALSE)
+
+get_prism_monthlys(type = "ppt",
+                   years = 2019,
+                   mon = 1:9,
+                   keepZip = FALSE)
+
+fn <- prism_archive_ls()
+# Stack data frame
+RS_wateryear_ppt <- pd_stack(fn)
+
+# Extract from stack
+out_wateryear_ppt <- extract(RS_wateryear_ppt, df) %>%
+  as.data.frame() %>%
+  mutate(site = c("TS1","TS2")) %>%
+  relocate(site) %>%
+  tidyr::pivot_longer(-site, 
+                      names_to = "label",
+                      values_to = "ppt") 
+
+# add numeric month, year, and water year
+out_wateryear_ppt$month <- unlist(lapply(str_split(out_wateryear_ppt$label, "_"), FUN = get_fifth))
+out_wateryear_ppt$year <- unlist(lapply(str_split(out_wateryear_ppt$label, "_"), FUN = get_fifth_year))
+out_wateryear_ppt$wyear <- rep(rep(2014:2019, each = 12), 2)
+str(out_wateryear_ppt)
+
+# summarize by water year
+out_wateryear_sum <- out_wateryear_ppt %>%
+  group_by(site, wyear) %>%
+  summarize(ann_precip = sum(ppt)) %>%
+  ungroup() %>%
+  group_by(wyear) %>%
+  summarize(ann_precip = mean(ann_precip))
+
+#### PRISM water year ppt normals #####
+prism_set_dl_dir("raw_data/prism_ppt")
+fn <- prism_archive_ls()
+# Stack data frame
+RS_ppt <- pd_stack(fn)
+
+# Extract from stack
+out_ppt <- extract(RS_ppt, df) %>%
+  as.data.frame() %>%
+  mutate(site = c("TS1","TS2")) %>%
+  relocate(site) %>%
+  tidyr::pivot_longer(-site, 
+                      names_to = "label",
+                      values_to = "ppt") 
+
+# add numeric month column
+out_ppt$month <- unlist(lapply(str_split(out_ppt$label, "_"), FUN = get_sixth))
+out_ppt$normal <- "normal"
+str(out_ppt)
+
+# summarize by water year
+out_ppt_sum <- out_ppt %>%
+  group_by(site, normal) %>%
+  summarize(ann_precip = sum(ppt)) %>%
+  ungroup() %>%
+  group_by(normal) %>%
+  summarize(ann_precip = mean(ann_precip))
+
+# Plot water year annual precip + normals
+fig0 <- ggplot(data = out_wateryear_sum,
+       aes(x = wyear, y = ann_precip)) +
+  geom_col() +
+  geom_hline(yintercept = out_ppt_sum$ann_precip,
+             lty = 2) +
+  scale_y_continuous("Water year precipitation (mm)") +
+  scale_x_continuous(breaks = 2014:2019) +
+  theme_bw(base_size = 12) +
+  theme(axis.title.x = element_blank(),
+        panel.grid = element_blank())
+
+ggsave(filename = "plots/FigS0_precip.jpg",
+       plot = fig0,
+       width = 6,
+       height = 3, 
        dpi = 600)
