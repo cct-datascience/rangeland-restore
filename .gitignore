@@ -17,3 +17,6 @@ raw_data/
 
 # Manucsript folder
 ms/
+
+# test script
+scripts/10_posthoc_checks.R
