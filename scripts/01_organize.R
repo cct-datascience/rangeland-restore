@@ -2,8 +2,12 @@
 library(tidyverse)
 library(lubridate)
 
+if(!file.exists("cleaned_data")){
+  dir.create("cleaned_data")
+}
+
 # Read in biomass data
-bio <- read_csv("../raw_data/2019_Greenstrips_Biomass.csv") %>%
+bio <- read_csv("raw_data/2019_Greenstrips_Biomass.csv") %>%
   rename(block = "Block", 
          paddock = "Paddock",
          grazing = "grazing trt",
@@ -25,7 +29,7 @@ bio <- read_csv("../raw_data/2019_Greenstrips_Biomass.csv") %>%
          BRTE_rel_liv = BRTE_abs/liveveg)
 
 # write out as cleaned data 
-save(bio, file = "../cleaned_data/biomass.Rdata")
+save(bio, file = "cleaned_data/biomass.Rdata")
 
 # plot biomass proportions
 # for all treatments combined
@@ -46,7 +50,7 @@ bio %>% pivot_longer(BRTE_abs:standingdead_abs,
 # Read in cover and count data; separate
 
 # Cover data
-cover <- read_csv("../raw_data/2019_Greenstrips_Cover_and_Densities.csv",
+cover <- read_csv("raw_data/2019_Greenstrips_Cover_and_Densities.csv",
                   na = c("na", "n/a"),
                   col_types = "cc?ciccccccccciddddddddddddddiiiiicc__________") %>%
   select(1:28) %>%
@@ -111,12 +115,12 @@ cover_mono <- cover %>%
          bryo:height,
          totveg_all, totveg_live)
 
-save(cover_all, file = "../cleaned_data/cover_all.Rdata")
-save(cover_greenstrip, file = "../cleaned_data/cover_greenstrip.Rdata")
-save(cover_mono, file = "../cleaned_data/cover_mono.Rdata")
+save(cover_all, file = "cleaned_data/cover_all.Rdata")
+save(cover_greenstrip, file = "cleaned_data/cover_greenstrip.Rdata")
+save(cover_mono, file = "cleaned_data/cover_mono.Rdata")
 
 # BRTE count data
-count <- read_csv("../raw_data/2019_Greenstrips_Cover_and_Densities.csv",
+count <- read_csv("raw_data/2019_Greenstrips_Cover_and_Densities.csv",
                   na = c("na", "n/a"),
                   col_types = "cc?ciccccccccciddddddddddddddiiiiicc__________") %>%
   select(1:35) %>%
@@ -166,6 +170,6 @@ count_mono <- count %>%
   select(block, paddock, grazing, species, seed_rate, seed_coat, 
          BRTE, quadrat)
 
-save(count_all, file = "../cleaned_data/count_all.Rdata")
-save(count_greenstrip, file = "../cleaned_data/count_greenstrip.Rdata")
-save(count_mono, file = "../cleaned_data/count_mono.Rdata")
+save(count_all, file = "cleaned_data/count_all.Rdata")
+save(count_greenstrip, file = "cleaned_data/count_greenstrip.Rdata")
+save(count_mono, file = "cleaned_data/count_mono.Rdata")
