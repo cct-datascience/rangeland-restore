@@ -104,28 +104,44 @@ Each level of reference-offset ANOVA model included main effects and all two-way
     -   `greenstrip/`
     -   `mono/`
 -   `cover/`
-  -   `BRTE/`
-    -   `all/`
-    -   `greenstrip/`
-    -   `mono/`
-  -   `forbs/`
-    -   `all/`
-    -   `greenstrip/`
-    -   `mono/`
-  -   `native/`
-    -   `all/`
-    -   `greenstrip/`
-    -   `mono/`
+    -   `BRTE/`
+        -   `all/`
+        -   `greenstrip/`
+        -   `mono/`
+    -   `forbs/`
+        -   `all/`
+        -   `greenstrip/`
+        -   `mono/`
+    -   `native/`
+        -   `all/`
+        -   `greenstrip/`
+        -   `mono/`
 -   `height/`
-  -   `all/`
-  -   `greenstrip/`
-  -   `mono/`
+    -   `all/`
+    -   `greenstrip/`
+    -   `mono/`
 
-For each of the above folders, there are: - A control script (.R) to run the model code - At least one model file (.jags) that encodes the Bayesian model - A plotting script (.R) to visualize model output - `coda/` with posterior chains (.Rdata) for modeled parameters and replicated data - `inits/` with initial values (.Rdata) to start the JAGS model - `plots/` with figures (.jpg) of model results
+For each of the above folders, there are:
+
+-   A control script (.R) to run the model code
+-   At least one model file (.jags) that encodes the Bayesian model
+-   A plotting script (.R) to visualize model output
+-   `coda/` with posterior chains (.Rdata) for modeled parameters and replicated data
+-   `inits/` with initial values (.Rdata) to start the JAGS model
+-   `plots/` with figures (.jpg) of model results
 
 ### Scripts and plots
 
-`scripts/` contains R scripts for organizing, plotting, and analyzing simple statistics: - `01_organize.R` organizes the `raw_data/` files into `cleaned_data/` files - `02_biomass_figures.R` plots raw data, posterior means, and effects for biomass (Fig. 2) - `03_count_figures.R` plots raw data, posterior means, and effects for cheatgrass density (Fig. 3, 4, S3) - `04_cover_figures_BRTE.R` plots raw data, posterior means, and effects for cheatgrass cover (Fig. 5, 6, S4) - `05_cover_stats.R` calculates a sample statistics of cover data - `06_cover_figures_forbs.R` plots raw data, posterior means, and effects for forb cover (Fig. S5, S6) - `07_cover_figures_native.R` plots raw data, posterior means, and effects for native grass cover (Fig. S7, S8, S9) - `08_height_figures.R` plots raw data and modeled posteriors for average plant height - `09_climate_weather_figures.R` downloads and processes PRISM climate data to produce a climate/weather figure (Fig. 1, S1b)
+`scripts/` contains R scripts for organizing, plotting, and analyzing simple statistics:
+
+-   `01_organize.R` organizes the `raw_data/` files into `cleaned_data/` files
+-   `02_biomass_figures.R` plots raw data, posterior means, and effects for biomass (Fig. 2)
+-   `03_count_figures.R` plots raw data, posterior means, and effects for cheatgrass density (Fig. 3, 4, S3)
+-   `04_cover_figures_BRTE.R` plots raw data, posterior means, and effects for cheatgrass cover (Fig. 5, 6, S4)
+-   `05_cover_stats.R` calculates a sample statistics of cover data - `06_cover_figures_forbs.R` plots raw data, posterior means, and effects for forb cover (Fig. S5, S6)
+-   `07_cover_figures_native.R` plots raw data, posterior means, and effects for native grass cover (Fig. S7, S8, S9)
+-   `08_height_figures.R` plots raw data and modeled posteriors for average plant height
+-   `09_climate_weather_figures.R` downloads and processes PRISM climate data to produce a climate/weather figure (Fig. 1, S1b)
 
 `plots/` contains the figures (.jpg) output from `scripts/` plotting scripts
 
