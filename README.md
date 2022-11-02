@@ -1,5 +1,7 @@
 # Pre-fire grazing and herbicide treatments can affect post-fire vegetation in a Great Basin rangeland
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7272546.svg)](https://doi.org/10.5281/zenodo.7272546)
+
 Authors: \*Elise. S. Gornish, \*Jessica S. Guo, Lauren M. Porensky, Barry L. Perryman, Elizabeth A. Leger
 
 \* Co-first authors
